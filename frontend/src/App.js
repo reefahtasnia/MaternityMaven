@@ -16,6 +16,8 @@ import Medical from "./Medical.js";
 import Appointment from "./Appointment.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
+import Shop from "./shop.js";
+import Cart from "./cart.js";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -31,6 +33,7 @@ function App() {
             <Route path="/Calorietracker" element={<CalorieTracker />} />
             <Route path="/Medicalhistory" element={<Medical />} />
             <Route path="/Appointment" element={<Appointment />} />
+            
           </Route>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
@@ -39,6 +42,8 @@ function App() {
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/reset" element={<ResetPassword />} />
+          <Route path="/shop" element={<Shop/>}/>
+          <Route path="/cart" element={<Cart />} />
         </Routes>
       </BrowserRouter>
     </div>
