@@ -1,0 +1,110 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px);
+  width: 100%;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.wrapper {
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0px 10px 25px 0px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+}
+.wrapper h1 {
+  margin-bottom: 20px;
+  font-size: 50px;
+}
+.wrapper .input-box {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+  position: relative;
+}
+.wrapper .input-box input {
+  width: 250px;
+  height: 40px;
+  padding: 10px;
+  font-size: 1.1em;
+  border: none;
+  outline: none;
+  border: 0.5px solid rgb(0, 0, 0);
+  border-radius: 15px;
+}
+.wrapper .input-box input:focus {
+  border: 1px solid rgb(0, 0, 0);
+  box-shadow: 0 0 5px rgb(0, 0, 0);
+}
+.wrapper i {
+  position: absolute;
+  top: 50%;
+  right: 35px;
+  transform: translateY(-50%);
+  font-size: 1.2em;
+  color: rgb(0, 0, 0);
+}
+.wrapper .forgot-pass a {
+  text-decoration: none;
+  color: rgb(0, 17, 255);
+  font-size: 1.1em;
+}
+.wrapper .forgot-pass a:hover {
+  text-decoration: underline;
+}
+.wrapper .forgot-pass a:active {
+  color: rgb(0, 0, 0);
+}
+.wrapper .btn {
+  height: 40px;
+  width: 30%;
+  border: none;
+  outline: none;
+  background-color: rgb(29, 179, 210);
+  color: white;
+  font-weight: 700;
+  font-size: 20px;
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+  margin: 10px;
+  text-transform: uppercase;
+}
+.wrapper .btn:hover {
+  background-color: rgb(172, 248, 255);
+  color: rgb(0, 0, 0);
+  font-weight: 700;
+  font-size: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+.wrapper .btn:active {
+  transform: translate(1px, 1px);
+  border: none;
+  outline: none;
+  border: 1px solid black;
+}
+.wrapper .signup {
+  margin-top: 10px;
+  font-size: 1.1em;
+}
+.wrapper .signup a {
+  text-decoration: none;
+  color: rgb(0, 17, 255);
+}
+.wrapper .signup a:hover {
+  text-decoration: underline;
+}
+.wrapper .signup a:active {
+  color: rgb(0, 0, 0);
+}
