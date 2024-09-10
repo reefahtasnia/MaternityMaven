@@ -9,6 +9,7 @@ const PORT = 3000;
 
 app.use(bodyParser.json());
 app.use(cors());
+// hasnat 
 
 // Oracle DB connection configuration
 const dbConfig = {
