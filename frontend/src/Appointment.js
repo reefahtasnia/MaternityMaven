@@ -12,6 +12,7 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./appointment.css";
 import doctorImage from "./CSS/assets/doctor.jpg";
+import { Link } from "react-router-dom";
 
 function Appointment() {
   const [doctors, setDoctors] = useState([]);
@@ -154,7 +155,9 @@ function Appointment() {
                       <strong>Phone Number:</strong> {doctor[4]}
                       <br />
                     </Card.Text>
-                    <Button variant="primary">Book Appointment</Button>
+                    <Link to="/Bookappointment">
+                      <Button variant="primary">Book Appointment</Button>
+                    </Link>
                   </Col>
                 </Row>
               </Card.Body>

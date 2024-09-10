@@ -14,6 +14,7 @@ import MedicineTracker from "./medicine.js";
 import CalorieTracker from "./calorie.js";
 import Medical from "./Medical.js";
 import Appointment from "./Appointment.js";
+import BookAppointment from "./bookappointment.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -31,6 +32,7 @@ function App() {
             <Route path="/Calorietracker" element={<CalorieTracker />} />
             <Route path="/Medicalhistory" element={<Medical />} />
             <Route path="/Appointment" element={<Appointment />} />
+            <Route path="/Bookappointment" element={<BookAppointment />} />
           </Route>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
