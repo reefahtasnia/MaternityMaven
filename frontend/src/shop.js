@@ -56,6 +56,8 @@ const products = [
   }
 ];
 
+
+
 const Shop = () => {
   const [cart, setCart] = useState([]);
   const [checkboxes, setCheckboxes] = useState({
@@ -68,13 +70,28 @@ const Shop = () => {
 
   const navigate = useNavigate();
 
+  const getUserFromLocalStorage = () => {
+    const userString = localStorage.getItem("user");
+    try {
+      return userString ? JSON.parse(userString) : null;
+    } catch (error) {
+      console.error("Failed to parse user from local storage:", error);
+      return null;
+    }
+  };
+
+  const auth = getUserFromLocalStorage();
+  const userId = auth ? auth.userId : null;
+  console.log("Retrieved userId:", userId); // Debug log the userId
+
   const addToCart = async (product) => {
     try {
-      await axios.post('http://localhost:3001/api/cart', {
+      await axios.post('http://localhost:5000/api/cart', {
         productId: product.id,
         title: product.title,
         price: product.price,
-        quantity: product.quantity
+        quantity: '1',
+        userid: userId 
       });
       setCart([...cart, product]);
       alert("Item added to cart succesfully!");
@@ -187,7 +204,9 @@ const Shop = () => {
                     </button>
                   </div>
                 </form>
-                <Link to="/cart" className="btn btn-primary ml-3">Cart</Link>
+                <Link to="/cart">
+            <button className="btn btn-primary ml-3">Cart</button>
+          </Link>
               </div>
             </div>
             {products.map((product, index) => (

@@ -1007,3 +1007,30 @@ app.get("/api/departments", async (req, res) => {
     }
   }
 });
+
+app.post("/api/cart", async (req, res) => {
+  const { productId, title, price, quantity, userid } = req.body;
+  console.log(userid);  // Ensure this is safe to log
+  console.log(req.body);  // Ensure this is safe to log
+  let conn;
+  try {
+    conn = await connection();
+    const result = await conn.execute(
+      "INSERT INTO cart (productid, user_id, title, price, quantity) VALUES ( :productId, :userid, :title, :price, :quantity)", 
+      { productId, userid, title, price, quantity },
+      { autoCommit: true }
+    );
+    res.status(201).json({ message: "Product added to cart successfully" });
+  } catch (err) {
+    console.error("Error inserting into the cart table:", err);
+    res.status(500).json({ error: "Error inserting into the cart table" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+});

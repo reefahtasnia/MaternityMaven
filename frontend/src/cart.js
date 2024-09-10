@@ -6,13 +6,14 @@ const Cart = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
   useEffect(() => {
     // Fetch the cart data from the backend
     const fetchCartData = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/cart');
-        // Ensure quantity starts from the value in the database, defaulting to 1 if not set
+        const response = await axios.get('http://localhost:5000/api/cart');
         const updatedProducts = response.data.map(product => ({
           ...product,
           quantity: product.quantity || 1
@@ -43,7 +44,7 @@ const Cart = () => {
 
     // Update the quantity in the database
     try {
-      await axios.put(`http://localhost:3001/api/cart/${id}`, { change });
+      await axios.put(`http://localhost:5000/api/cart/${id}`, { change });
     } catch (error) {
       console.error('Error updating cart data:', error);
     }
@@ -52,7 +53,7 @@ const Cart = () => {
   const handleRemove = async (id) => {
     try {
       // Make DELETE request to backend API
-      await axios.delete(`http://localhost:3001/api/cart/${id}`);
+      await axios.delete(`http://localhost:5000/api/cart/${id}`);
       
       // Update local state after successful deletion
       setProducts(prevProducts => prevProducts.filter(product => product.productId !== id));
@@ -62,12 +63,39 @@ const Cart = () => {
     }
   };
 
+  const handleConfirmOrder = () => {
+    setShowModal(true);
+    setButtonsDisabled(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setButtonsDisabled(false);
+  };
+
+  const handleOk = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/order', { cartItems: products });
+      if (response.data.success) {
+        setProducts([]);
+        setShowModal(false);
+        setButtonsDisabled(false);
+        alert(`Order confirmed! Your order ID is ${response.data.orderId}`);
+      } else {
+        alert('Error confirming order');
+      }
+    } catch (error) {
+      console.error('Error confirming order:', error);
+      alert('Error confirming order. Please try again later.');
+    }
+  };
+
   const subtotal = products.reduce((acc, product) => acc + product.price * product.quantity, 0);
-  const shipping = 10;
+  const shipping = 50;
   const total = subtotal + shipping;
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  //if (loading) return <div>Loading...</div>;
+  //if (error) return <div>Error: {error}</div>;
 
   return (
     <div>
@@ -102,23 +130,30 @@ const Cart = () => {
                     <td className="align-middle">Tk {product.price}</td>
                     <td className="align-middle">
                       <div className="input-group quantity mx-auto" style={{ width: '100px' }}>
-                        <div className="input-group-btn">
-                          <button className="btn btn-sm btn-primary btn-minus" onClick={() => handleQuantityChange(product.productId, -1)}>
-                            <i className="fa fa-minus"></i>
-                          </button>
-                        </div>
-                        <input type="text" className="form-control form-control-sm bg-secondary text-center" value={product.quantity} readOnly />
-                        <div className="input-group-btn">
-                          <button className="btn btn-sm btn-primary btn-plus" onClick={() => handleQuantityChange(product.productId, 1)}>
-                            <i className="fa fa-plus"></i>
-                          </button>
-                        </div>
+                        {!showModal && (
+                          <>
+                            <div className="input-group-btn">
+                              <button className="btn btn-sm btn-primary btn-minus" onClick={() => handleQuantityChange(product.productId, -1)} disabled={buttonsDisabled}>
+                                <i className="fa fa-minus"></i> -
+                              </button>
+                            </div>
+                            <input type="text" className="form-control form-control-sm bg-secondary text-center" value={product.quantity} readOnly />
+                            <div className="input-group-btn">
+                              <button className="btn btn-sm btn-primary btn-plus" onClick={() => handleQuantityChange(product.productId, 1)} disabled={buttonsDisabled}>
+                                <i className="fa fa-plus"></i> +
+                              </button>
+                            </div>
+                          </>
+                        )}
+                        {showModal && (
+                          <input type="text" className="form-control form-control-sm bg-secondary text-center" value={product.quantity} readOnly />
+                        )}
                       </div>
                     </td>
                     <td className="align-middle">Tk {product.price * product.quantity}</td>
                     <td className="align-middle">
-                      <button className="btn btn-sm btn-primary" onClick={() => handleRemove(product.productId)}>
-                        <i className="fa fa-times"></i>
+                      <button className="btn btn-sm btn-primary" onClick={() => handleRemove(product.productId)} disabled={buttonsDisabled}>
+                        <i className="fa fa-times"></i> X
                       </button>
                     </td>
                   </tr>
@@ -146,12 +181,44 @@ const Cart = () => {
                   <h5 className="font-weight-bold">Total</h5>
                   <h5 className="font-weight-bold">Tk {total}</h5>
                 </div>
-                <button className="btn btn-block btn-primary my-3 py-3">Confirm Order</button>
+                <button className="btn btn-block btn-primary my-3 py-3" onClick={handleConfirmOrder} disabled={buttonsDisabled}>Confirm Order</button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={handleCloseModal}>&times;</span>
+            <h2>Order Summary</h2>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map(product => (
+                  <tr key={product.productId}>
+                    <td>{product.title}</td>
+                    <td>{product.quantity}</td>
+                    <td>Tk {product.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="summary">
+              <p>Shipping: Tk {shipping}</p>
+              <p>Total: Tk {total}</p>
+            </div>
+            <button className="btn btn-primary" onClick={handleOk}>OK</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
