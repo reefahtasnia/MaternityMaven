@@ -1034,3 +1034,32 @@ app.post("/api/cart", async (req, res) => {
     }
   }
 });
+
+app.get('/api/cart', async (req, res) => {
+  let conn;
+  try {
+    conn = await connection();
+    const result = await conn.execute('SELECT * FROM cart');
+    res.json(result.rows.map(row => ({
+      productId: row[0],
+      title: row[1],
+      price: row[2],
+      quantity: row[4],
+    })));
+    console.log(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Database Error');
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+});
+
+
+
