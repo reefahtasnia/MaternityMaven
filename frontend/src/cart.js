@@ -26,10 +26,6 @@ const Cart = () => {
     // Fetch the cart data from the backend
     const fetchCartData = async () => {
       try {
-        // Retrieve userId from localStorage
-        const storedUser = localStorage.getItem('user');
-        const parsedUser = JSON.parse(storedUser);
-        const userId = parsedUser?.userId; // Get userId from the stored user object
 
         if (!userId) {
           throw new Error('User ID is not available');
@@ -54,31 +50,36 @@ const Cart = () => {
 
 
   const handleQuantityChange = async (id, change) => {
+    if (!userId) {
+      console.error('User ID is not available');
+      return;
+    }
+  
     // Update local state
     setProducts(prevProducts =>
       prevProducts.map(product => {
         if (product.PRODUCTID === id) {
           const newQuantity = product.QUANTITY + change;
-          return { ...product, quantity: newQuantity > 0 ? newQuantity : product.QUANTITY };
+          return { ...product, QUANTITY: newQuantity > 0 ? newQuantity : product.QUANTITY };
         }
         return product;
       })
     );
-
+  
     // Update the quantity in the database
     try {
-      await axios.put(`http://localhost:5000/api/cart/${id}`, { change });
+      await axios.put(`http://localhost:5000/api/cart/${id}`, { change, userId });
     } catch (error) {
       console.error('Error updating cart data:', error);
     }
   };
+  
+  
+  
 
   const handleRemove = async (id) => {
     try {
-      // Retrieve userId from localStorage
-      const storedUser = localStorage.getItem('user');
-      const parsedUser = JSON.parse(storedUser);
-      const userId = parsedUser?.userId;
+
   
       if (!userId) {
         throw new Error('User ID is not available');

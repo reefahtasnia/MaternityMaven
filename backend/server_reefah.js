@@ -1119,24 +1119,30 @@ app.delete('/api/cart/:id', async (req, res) => {
 
 app.put('/api/cart/:id', async (req, res) => {
   const productId = req.params.id;
-  const { change } = req.body;
-  console.log(productId, change);  // Optional logging for debugging
+  const { change, userId } = req.body;  // Expecting both productId and userId in the request
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  console.log('Updating product for user:', { productId, change, userId });
+
   let conn;
 
   try {
     // Establish a connection
     conn = await connection();
 
-    // Execute the update query
+    // Update only the product for the specific user
     const result = await conn.execute(
-      'UPDATE cart SET quantity = quantity + :change WHERE productid = :productId',
-      { change, productId },
+      'UPDATE cart SET quantity = quantity + :change WHERE productid = :productId AND user_id = :userId',
+      { change, productId, userId },  // Pass both productId and userId
       { autoCommit: true }
     );
 
-    // Check if any rows were affected (i.e., if the product exists in the cart)
+    // Check if any rows were affected
     if (result.rowsAffected === 0) {
-      res.status(404).json({ error: 'Product not found in cart' });
+      res.status(404).json({ error: 'Product not found in user\'s cart' });
     } else {
       res.status(200).json({ message: 'Product quantity updated successfully' });
     }
@@ -1153,6 +1159,8 @@ app.put('/api/cart/:id', async (req, res) => {
     }
   }
 });
+
+
 
 
 
