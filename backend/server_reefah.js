@@ -124,20 +124,22 @@ app.post("/api/login", async (req, res) => {
     if (userResults.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
-    const userid = userResults[0][0]; // assuming userid is the first column in the SELECT
+    console.log(userResults[0]);
+    const userid = userResults[0].USERID; // assuming userid is the first column in the SELECT
     console.log(userid);
     const passwordResult = await run_query(
       "SELECT hashed_password FROM passwords WHERE userid = :userid",
       { userid: userid }
     );
-
-    if (passwordResult.length === 0 || !passwordResult[0][0]) {
+    
+    console.log(passwordResult[0]);
+    if (passwordResult.length === 0 || !passwordResult[0].HASHED_PASSWORD) {
       return res
         .status(404)
         .json({ message: "Password not set for this user" });
     }
-    console.log(passwordResult[0][0]);
-    const hashed_password = passwordResult[0][0];
+    const hashed_password = passwordResult[0].HASHED_PASSWORD;
+    console.log(hashed_password);
     const match = await bcrypt.compare(password, hashed_password);
 
     if (match) {

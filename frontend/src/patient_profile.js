@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./CSS/userprofile.css"; // Adjust the path as necessary
-import { FaShoppingCart } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { FaShoppingCart } from "react-icons/fa"; 
 
 const UserProfile = () => {
   const auth = JSON.parse(localStorage.getItem("user"));
@@ -18,14 +17,11 @@ const UserProfile = () => {
   const [district, setDistrict] = useState("");
   const [country, setCountry] = useState("");
   const capitalizeWords = (string) => {
-    return string.toLowerCase().replace(/(?:^|\s)\S/g, function (a) {
-      return a.toUpperCase();
-    });
+    return string.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
   };
   useEffect(() => {
     if (auth && auth.userId) {
       const url = `http://localhost:5000/api/user?userId=${auth.userId}`;
-      console.log(auth.userId);
       fetch(url)
         .then((response) => {
           if (!response.ok) {
@@ -47,14 +43,14 @@ const UserProfile = () => {
 
   const setProfileData = (data) => {
     try {
-      const address = data[8];
-
-      setFullName(capitalizeWords(`${data[1]} ${data[2]}`));
+            const address = data[8];
+  
+      setFullName(capitalizeWords(`${data[1]} ${data[2]}`)); 
       setEmail(data[4].toLowerCase());
       setDob(data[5] ? new Date(data[5]).toISOString().slice(0, 10) : "");
       setPhone(data[7] || "");
       setBloodGroup(data[6] || "");
-
+  
       // Check if the address exists and set each part
       if (address) {
         setStreet(capitalizeWords(address.STREET || ""));
@@ -67,6 +63,7 @@ const UserProfile = () => {
       throw error;
     }
   };
+  
 
   const triggerFileInput = () => {
     document.getElementById("fileInput").click();
@@ -81,15 +78,15 @@ const UserProfile = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-
+  
     const nameParts = fullName.trim().split(" ");
     const firstname = nameParts[0];
-    const lastname = nameParts.slice(1).join(" ");
-
+    const lastname = nameParts.slice(1).join(" "); 
+  
     const updatedUser = {
       userId: auth.userId,
-      firstname,
-      lastname,
+      firstname, 
+      lastname,   
       email,
       dob,
       phone,
@@ -97,11 +94,11 @@ const UserProfile = () => {
       street,
       region,
       district,
-      country,
+      country
     };
-
+  
     console.log("Saving updated user data:", updatedUser);
-
+  
     fetch(`http://localhost:5000/api/user/update`, {
       method: "POST",
       headers: {
@@ -128,7 +125,7 @@ const UserProfile = () => {
         alert("An error occurred during profile update");
       });
   };
-
+  
   return (
     <div className="profile-container">
       <div className="profile-content">
@@ -225,7 +222,7 @@ const UserProfile = () => {
                 onChange={(e) => setBloodGroup(e.target.value)}
               />
             </div>
-
+            
             <div className="profile-detail">
               <label className="profile-detail-label">
                 House No. & Road No.
@@ -263,33 +260,26 @@ const UserProfile = () => {
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
               />
-            </div>
+            </div> 
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Medicine Reminders</h3>
-
+          <button className="profile-section-button">Edit</button>
           <div className="profile-section-content">
             <p>No upcoming reminders.</p>
-            <Link to="/Medicinetracker">
-              <button className="profile-section-button">Edit</button>
-            </Link>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Calories Intake</h3>
-          <Link to="/Calorietracker">
-            <button className="profile-section-button">Edit</button>
-          </Link>
+          <button className="profile-section-button">Edit</button>
           <div className="profile-section-content">
             <p>No data entered.</p>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Medical History</h3>
-          <Link to="/Medicalhistory">
-            <button className="profile-section-button">Edit</button>
-          </Link>
+          <button className="profile-section-button">Edit</button>
           <div className="profile-section-content">
             <p>No known medical conditions.</p>
           </div>
