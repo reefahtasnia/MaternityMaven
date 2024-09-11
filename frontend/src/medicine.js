@@ -2,9 +2,16 @@ import React, { useEffect, useState } from "react";
 import "./medicine.css";
 
 const MedicineTracker = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false); // Changed to handle form visibility
+  const [medicines, setMedicines] = useState([
+    { name: "", dosage: "", time: "" },
+  ]);
+  const [submitted, setSubmitted] = useState(false);
+  const [medicineOptions, setMedicineOptions] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [editIndex, setEditIndex] = useState(null);
 
-  // Safe parsing of the 'user' object from localStorage
   const getUserFromLocalStorage = () => {
     const userString = localStorage.getItem("user");
     try {
@@ -18,16 +25,6 @@ const MedicineTracker = () => {
   const auth = getUserFromLocalStorage();
   const userId = auth ? auth.userId : null;
   console.log("Retrieved userId:", userId); // Debug log the userId
-
-  const [medicines, setMedicines] = useState([
-    { name: "", dosage: "", time: "" },
-  ]);
-
-  const [submitted, setSubmitted] = useState(false);
-  const [medicineOptions, setMedicineOptions] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
-  const [prescriptions, setPrescriptions] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
 
   useEffect(() => {
     console.log("UseEffect retrieved userId:", userId);
@@ -80,18 +77,13 @@ const MedicineTracker = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const payload = {
-      userId: userId,
-      medicines: medicines,
-    };
+    const payload = { userId: userId, medicines: medicines };
     console.log(payload);
 
     try {
       const responsePost = await fetch("http://localhost:5000/medicine", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -100,7 +92,7 @@ const MedicineTracker = () => {
         setPrescriptions([...prescriptions, ...data]);
         setSubmitted(true);
         clearForm();
-        setIsModalOpen(false);
+        setIsFormVisible(false); // Hide form after submission
       } else {
         alert("Error submitting data.");
       }
@@ -123,9 +115,7 @@ const MedicineTracker = () => {
           `http://localhost:5000/medicine/${prescription.id}`,
           {
             method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId }),
           }
         );
@@ -146,7 +136,7 @@ const MedicineTracker = () => {
     }
   };
 
-  const editPrescription = async (index) => {
+  const editPrescription = (index) => {
     const prescription = prescriptions[index];
     setEditIndex(index);
     setMedicines([
@@ -154,17 +144,17 @@ const MedicineTracker = () => {
         name: prescription.name,
         dosage: prescription.dosage,
         time: prescription.time,
-        userid: userId, // Ensure userId is passed in case it's not in the original
+        userid: userId,
       },
     ]);
-    setIsModalOpen(true);
+    setIsFormVisible(true); // Show form when editing
   };
 
   const handleEditSubmit = async (event) => {
     event.preventDefault();
     if (editIndex === null) return;
 
-    const prescription = { ...medicines[0], userId }; // Include userId in the payload
+    const prescription = { ...medicines[0], userId };
     const prescriptionId = prescriptions[editIndex].id;
 
     try {
@@ -172,9 +162,7 @@ const MedicineTracker = () => {
         `http://localhost:5000/medicine/${prescriptionId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(prescription),
         }
       );
@@ -185,7 +173,7 @@ const MedicineTracker = () => {
         );
         setPrescriptions(updatedPrescriptions);
         clearForm();
-        setIsModalOpen(false);
+        setIsFormVisible(false); // Hide form after editing
         setEditIndex(null);
       } else {
         alert("Failed to update the prescription.");
@@ -248,11 +236,6 @@ const MedicineTracker = () => {
             >
               Log In
             </button>
-            <a href="/calorie">
-              <button className="btn2" type="button" id="caloriebtn">
-                Calorie Tracker
-              </button>
-            </a>
           </div>
         </div>
       </nav>
@@ -261,12 +244,102 @@ const MedicineTracker = () => {
         <h1>Medicine Tracker</h1>
         <button
           className="check-availability"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setIsFormVisible(!isFormVisible);
+            clearForm(); // Clear form when opening to add a new prescription
+            setEditIndex(null); // Clear edit index when adding new prescription
+          }}
         >
           +
         </button>
       </div>
 
+      {isFormVisible && (
+        <div className="form-container">
+          <form
+            id="prescription-form"
+            onSubmit={editIndex !== null ? handleEditSubmit : handleSubmit}
+          >
+            <h2>
+              {editIndex !== null ? "Edit Prescription" : "Add Prescription"}
+            </h2>
+            <div className="medicine-list">
+              {medicines.map((medicine, index) => (
+                <div key={index} className="medicine-item">
+                  <div className="form-group">
+                    <label htmlFor={`name-${index}`}>
+                      Name of the medicine:
+                    </label>
+                    <input
+                      type="text"
+                      id={`name-${index}`}
+                      name="name"
+                      value={medicine.name}
+                      onChange={(event) => handleMedicineChange(index, event)}
+                      list={`medicine-suggestions-${index}`}
+                      autoComplete="off"
+                      required
+                    />
+                    <datalist id={`medicine-suggestions-${index}`}>
+                      {suggestions.map((item) => (
+                        <option key={item.id} value={item.name}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </datalist>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor={`dosage-${index}`}>Dosage:</label>
+                    <input
+                      type="text"
+                      id={`dosage-${index}`}
+                      name="dosage"
+                      value={medicine.dosage}
+                      onChange={(event) => handleMedicineChange(index, event)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor={`time-${index}`}>Time:</label>
+                    <input
+                      type="time"
+                      id={`time-${index}`}
+                      name="time"
+                      value={medicine.time}
+                      onChange={(event) => handleMedicineChange(index, event)}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="remove-btn"
+                    onClick={() => handleRemoveMedicine(index)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="add-btn"
+              onClick={handleAddMedicine}
+            >
+              Add Another Medicine
+            </button>
+            <button type="submit" className="submit-btn">
+              {editIndex !== null ? "Save Changes" : "Submit"}
+            </button>
+            <button
+              type="button"
+              className="close-btn"
+              onClick={() => setIsFormVisible(false)}
+            >
+              Close
+            </button>
+          </form>
+        </div>
+      )}
       {prescriptions.length > 0 && (
         <div className="prescriptions-list">
           <h2>Your Prescriptions:</h2>
@@ -295,120 +368,6 @@ const MedicineTracker = () => {
               </button>
             </div>
           ))}
-        </div>
-      )}
-
-      {isModalOpen && (
-        <div>
-          <div
-            className="modal-overlay active"
-            onClick={() => setIsModalOpen(false)}
-          />
-          <div className={`modal ${isModalOpen ? "active" : ""}`}>
-            <form
-              id="prescription-form"
-              onSubmit={editIndex !== null ? handleEditSubmit : handleSubmit}
-            >
-              <h2>
-                {editIndex !== null ? "Edit Prescription" : "Add Prescription"}
-              </h2>
-              <div className="medicine-list">
-                {medicines.map((medicine, index) => (
-                  <div key={index} className="medicine-item">
-                    <div className="form-group">
-                      <label htmlFor={`name-${index}`}>
-                        Name of the medicine:
-                      </label>
-                      <input
-                        type="text"
-                        id={`name-${index}`}
-                        name="name"
-                        value={medicine.name}
-                        onChange={(event) => handleMedicineChange(index, event)}
-                        list={`medicine-suggestions-${index}`}
-                        autoComplete="off"
-                        required
-                      />
-                      <datalist id={`medicine-suggestions-${index}`}>
-                        {suggestions.map((item) => (
-                          <option key={item.id} value={item.name}>
-                            {item.name}
-                          </option>
-                        ))}
-                      </datalist>
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor={`dosage-${index}`}>Dosage:</label>
-                      <input
-                        type="text"
-                        id={`dosage-${index}`}
-                        name="dosage"
-                        value={medicine.dosage}
-                        onChange={(event) => handleMedicineChange(index, event)}
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor={`time-${index}`}>Time:</label>
-                      <input
-                        type="time"
-                        id={`time-${index}`}
-                        name="time"
-                        value={medicine.time}
-                        onChange={(event) => handleMedicineChange(index, event)}
-                        required
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="remove-btn"
-                      onClick={() => handleRemoveMedicine(index)}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="add-btn"
-                onClick={handleAddMedicine}
-              >
-                Add Another Medicine
-              </button>
-              <button type="submit" className="submit-btn">
-                {editIndex !== null ? "Save Changes" : "Submit"}
-              </button>
-              <button
-                type="button"
-                className="close-btn"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Close
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {submitted && (
-        <div id="popup" className="popup">
-          <div className="popup-content">
-            <span id="closePopupBtn" className="close" onClick={closePopup}>
-              &times;
-            </span>
-            <p className="popup-text">
-              Thank you for adding your prescription. Please keep an eye on your
-              mail inbox for further details.
-            </p>
-            <button
-              id="redirectBtn"
-              className="check-availability"
-              onClick={closePopup}
-            >
-              Done
-            </button>
-          </div>
         </div>
       )}
     </div>
