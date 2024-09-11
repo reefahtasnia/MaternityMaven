@@ -651,12 +651,10 @@ app.post("/medicine", async (req, res) => {
       });
 
       if (medicineCodeResult.length === 0) {
-        console.log(`No medicine code found for ${medicine.name}`);
+        alert(`No medicine code found for ${medicine.name}`);
         continue; // Skip this iteration if no medicine code is found
       }
-
-      const medicineCode = medicineCodeResult[0][0]; // Assuming medicine_code is the first column
-
+      const medicineCode = medicineCodeResult[0].MEDICINE_CODE; 
       // Insert into medicinetracker with the fetched medicine_code and user_id
       const insertQuery = `
         INSERT INTO medicinetracker (medicine_code, user_id, name, dosage, time)

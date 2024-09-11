@@ -1,8 +1,22 @@
 select * from users;
 select * from passwords;
 select * from Medical_History;
+select * from medicine;
 select * from orders;
 select * from cart;
+select * from medicine;
+select * from MEDICINETRACKER;
+
+drop TRIGGER medicine_trigger;
+
+CREATE OR REPLACE TRIGGER medicine_trigger
+BEFORE INSERT ON medicinetracker
+FOR EACH ROW
+BEGIN
+    SELECT medicine_seq.NEXTVAL INTO :new.id FROM dual;
+END;
+
+ALTER TRIGGER C##ZAFIRA.MEDICINE_TRIGGER COMPILE;
 
 INSERT INTO medicine (medicine_code, medicine_name) VALUES (1, 'Paracetamol');
 INSERT INTO medicine (medicine_code, medicine_name) VALUES (2, 'Ibuprofen');

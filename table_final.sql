@@ -96,6 +96,9 @@ BEGIN
     SELECT medicine_seq.NEXTVAL INTO :new.id FROM dual;
 END;
 //
+--beshi error dile ei duita // baad diye run korish. Amar eitay error dichilo.
+ALTER TRIGGER C##ZAFIRA.MEDICINE_TRIGGER COMPILE; 
+--change made by reefah up
 CREATE TABLE Appointment (
     appointment_id INT PRIMARY KEY,
     BMDC_no INT,
