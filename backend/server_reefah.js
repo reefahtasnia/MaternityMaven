@@ -9,6 +9,9 @@ import oracledb from "oracledb";
 
 dotenv.config();
 
+oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+
+
 const app = express();
 const PORT = 5000;
 const saltRounds = 10;
@@ -1035,31 +1038,184 @@ app.post("/api/cart", async (req, res) => {
   }
 });
 
-app.get('/api/cart', async (req, res) => {
+app.get('/api/cart2', async (req, res) => {
   let conn;
   try {
+    // Establish the connection to Oracle DB
     conn = await connection();
-    const result = await conn.execute('SELECT * FROM cart');
-    res.json(result.rows.map(row => ({
-      productId: row[0],
-      title: row[1],
-      price: row[2],
-      quantity: row[4],
-    })));
-    console.log(result);
+
+    // Execute the query to fetch all items from the cart
+    const result = await conn.execute('SELECT * FROM cart', [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+    // Log the result to check the data structure
+    console.log("Final Result: ", result.rows);
+
+    // Send the result.rows directly as the response
+    res.status(200).json(result.rows);  // Use .json() to send it as JSON
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching cart data:", err);
     res.status(500).send('Database Error');
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();  // Close the connection
+      } catch (err) {
+        console.error('Error closing connection:', err);
+      }
+    }
+  }
+});
+
+
+app.delete('/api/cart/:id', async (req, res) => {
+  const productId = req.params.id;
+  console.log(productId);  // Optional, for debugging
+  let conn;
+
+  try {
+    // Establish a connection
+    conn = await connection();
+
+    // Execute the delete query
+    const result = await conn.execute(
+      'DELETE FROM cart WHERE productid = :productId',
+      { productId },
+      { autoCommit: true }
+    );
+
+    res.status(200).json({ message: 'Product removed from cart successfully' });
+  } catch (err) {
+    console.error('Error removing product from the cart table:', err);
+    res.status(500).json({ error: 'Error removing product from the cart table' });
   } finally {
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        console.error(err);
+        console.error('Error closing the connection:', err);
       }
     }
   }
 });
+
+app.put('/api/cart/:id', async (req, res) => {
+  const productId = req.params.id;
+  const { change } = req.body;
+  console.log(productId, change);  // Optional logging for debugging
+  let conn;
+
+  try {
+    // Establish a connection
+    conn = await connection();
+
+    // Execute the update query
+    const result = await conn.execute(
+      'UPDATE cart SET quantity = quantity + :change WHERE productid = :productId',
+      { change, productId },
+      { autoCommit: true }
+    );
+
+    // Check if any rows were affected (i.e., if the product exists in the cart)
+    if (result.rowsAffected === 0) {
+      res.status(404).json({ error: 'Product not found in cart' });
+    } else {
+      res.status(200).json({ message: 'Product quantity updated successfully' });
+    }
+  } catch (err) {
+    console.error('Error updating product quantity:', err);
+    res.status(500).json({ error: 'Error updating product quantity' });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error('Error closing the connection:', err);
+      }
+    }
+  }
+});
+
+
+
+async function generateUniqueOrderId(connection) {
+  const min = 100000;
+  const max = 999999;
+  let unique = false;
+  let orderId;
+
+  while (!unique) {
+      orderId = Math.floor(Math.random() * (max - min + 1)) + min;
+
+      const result = await connection.execute(
+          'SELECT count(*) FROM orders WHERE order_id = :orderId',
+          { orderId },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      if (result.rows[0]['COUNT(*)'] === 0) {
+          unique = true;
+      }
+  }
+  return orderId;
+}
+
+app.post('/api/order', async (req, res) => {
+  const { cartItems, userId } = req.body;
+  console.log("cartItems:", cartItems);  // Log cart items
+  console.log("userId:", userId); 
+  
+  let conn;
+  console.log(cartItems, userId);  // Optional logging for debugging
+
+  try {
+    // Establish a connection
+    conn = await connection();
+
+    // Generate a unique Order ID
+    const orderId = await generateUniqueOrderId(conn);
+    console.log("orderid:", orderId);
+
+    // Insert each item from the cart into the orders table
+    for (const item of cartItems) {
+      await conn.execute(
+        'INSERT INTO orders (user_id, order_id, productid, title, price, quantity) VALUES (:userId, :orderId, :productId, :title, :price, :quantity)',
+        { userId, orderId, productId: item.productId, title: item.title, price: item.price, quantity: item.quantity },
+        { autoCommit: false }  // Commit will be done later
+      );
+    }
+
+    // Commit the transaction
+    await conn.commit();
+
+    // Truncate the cart table
+    await conn.execute('TRUNCATE TABLE cart', [], { autoCommit: true });
+
+    // Respond with success and the generated order ID
+    res.json({ success: true, orderId, message: 'Order placed successfully' });
+  } catch (error) {
+    console.error('Error placing order:', error);
+
+    // Rollback the transaction in case of any errors
+    if (conn) {
+      try {
+        await conn.rollback();
+      } catch (rollbackError) {
+        console.error('Error rolling back transaction:', rollbackError);
+      }
+    }
+
+    res.status(500).json({ success: false, error: 'Failed to place order' });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error('Error closing connection:', err);
+      }
+    }
+  }
+});
+
 
 
 

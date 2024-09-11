@@ -6,22 +6,19 @@ const Cart = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
   useEffect(() => {
     // Fetch the cart data from the backend
     const fetchCartData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/cart');
-        const updatedProducts = response.data.map(product => ({
-          ...product,
-          quantity: product.quantity || 1
-        }));
-        setProducts(updatedProducts);
+        const response = await axios.get('http://localhost:5000/api/cart2');
+	   const data = await response.data;
+	   console.log("Cart data: ",data);
+	   setProducts(data);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching cart data:', error);
+        console.error('Error fetching cart data:', error);	
         setError('Error fetching cart data. Please try again later.');
         setLoading(false);
       }
@@ -63,23 +60,29 @@ const Cart = () => {
     }
   };
 
-  const handleConfirmOrder = () => {
-    setShowModal(true);
-    setButtonsDisabled(true);
-  };
+  //const navigate = useNavigate();
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setButtonsDisabled(false);
-  };
-
-  const handleOk = async () => {
+  const getUserFromLocalStorage = () => {
+    const userString = localStorage.getItem("user");
     try {
-      const response = await axios.post('http://localhost:5000/api/order', { cartItems: products });
+      return userString ? JSON.parse(userString) : null;
+    } catch (error) {
+      console.error("Failed to parse user from local storage:", error);
+      return null;
+    }
+  };
+
+  const auth = getUserFromLocalStorage();
+  const userId = auth ? auth.userId : null;
+  console.log("Retrieved userId:", userId); // Debug log the userId
+
+  const handleConfirmOrder = async () => {
+    setButtonsDisabled(true);
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/order', { cartItems: products,  userId: userId });
       if (response.data.success) {
         setProducts([]);
-        setShowModal(false);
-        setButtonsDisabled(false);
         alert(`Order confirmed! Your order ID is ${response.data.orderId}`);
       } else {
         alert('Error confirming order');
@@ -88,6 +91,8 @@ const Cart = () => {
       console.error('Error confirming order:', error);
       alert('Error confirming order. Please try again later.');
     }
+
+    setButtonsDisabled(false);
   };
 
   const subtotal = products.reduce((acc, product) => acc + product.price * product.quantity, 0);
@@ -125,34 +130,27 @@ const Cart = () => {
               </thead>
               <tbody className="align-middle">
                 {products.map(product => (
-                  <tr key={product.productId}>
-                    <td className="align-middle">{product.title}</td>
-                    <td className="align-middle">Tk {product.price}</td>
+                  <tr key={product.PRODUCTID}>
+                    <td className="align-middle">{product.TITLE}</td>
+                    <td className="align-middle">Tk {product.PRICE}</td>
                     <td className="align-middle">
                       <div className="input-group quantity mx-auto" style={{ width: '100px' }}>
-                        {!showModal && (
-                          <>
-                            <div className="input-group-btn">
-                              <button className="btn btn-sm btn-primary btn-minus" onClick={() => handleQuantityChange(product.productId, -1)} disabled={buttonsDisabled}>
-                                <i className="fa fa-minus"></i> -
-                              </button>
-                            </div>
-                            <input type="text" className="form-control form-control-sm bg-secondary text-center" value={product.quantity} readOnly />
-                            <div className="input-group-btn">
-                              <button className="btn btn-sm btn-primary btn-plus" onClick={() => handleQuantityChange(product.productId, 1)} disabled={buttonsDisabled}>
-                                <i className="fa fa-plus"></i> +
-                              </button>
-                            </div>
-                          </>
-                        )}
-                        {showModal && (
-                          <input type="text" className="form-control form-control-sm bg-secondary text-center" value={product.quantity} readOnly />
-                        )}
+                        <div className="input-group-btn">
+                          <button className="btn btn-sm btn-primary btn-minus" onClick={() => handleQuantityChange(product.PRODUCTID, -1)} disabled={buttonsDisabled}>
+                            <i className="fa fa-minus"></i> -
+                          </button>
+                        </div>
+                        <input type="text" className="form-control form-control-sm bg-secondary text-center" value={product.QUANTITY} readOnly />
+                        <div className="input-group-btn">
+                          <button className="btn btn-sm btn-primary btn-plus" onClick={() => handleQuantityChange(product.PRODUCTID, 1)} disabled={buttonsDisabled}>
+                            <i className="fa fa-plus"></i> +
+                          </button>
+                        </div>
                       </div>
                     </td>
-                    <td className="align-middle">Tk {product.price * product.quantity}</td>
+                    <td className="align-middle">Tk {product.PRICE * product.QUANTITY}</td>
                     <td className="align-middle">
-                      <button className="btn btn-sm btn-primary" onClick={() => handleRemove(product.productId)} disabled={buttonsDisabled}>
+                      <button className="btn btn-sm btn-primary" onClick={() => handleRemove(product.PRODUCTID)} disabled={buttonsDisabled}>
                         <i className="fa fa-times"></i> X
                       </button>
                     </td>
@@ -187,38 +185,6 @@ const Cart = () => {
           </div>
         </div>
       </div>
-
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={handleCloseModal}>&times;</span>
-            <h2>Order Summary</h2>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map(product => (
-                  <tr key={product.productId}>
-                    <td>{product.title}</td>
-                    <td>{product.quantity}</td>
-                    <td>Tk {product.price}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="summary">
-              <p>Shipping: Tk {shipping}</p>
-              <p>Total: Tk {total}</p>
-            </div>
-            <button className="btn btn-primary" onClick={handleOk}>OK</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
