@@ -121,3 +121,26 @@
   outline: none; /* Remove default focus outline */
   box-shadow: 0 0 10px rgba(233, 30, 99, 0.5); /* Pink focus shadow */
 }
+.suggestions-container {
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  position: absolute;
+  background: white;
+  width: calc(100% - 20px); /* Adjust as needed */
+  list-style: none;
+  padding-left: 0;
+  z-index: 10;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 5px; /* Spacing below the input */
+}
+
+.suggestions-container p {
+  padding: 8px 10px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.suggestions-container p:hover {
+  background-color: #f0f0f0;
+}

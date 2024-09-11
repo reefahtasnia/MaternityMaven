@@ -12,7 +12,6 @@ dotenv.config();
 oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 //trying to change
 
-
 const app = express();
 const PORT = 5000;
 const saltRounds = 10;
@@ -132,7 +131,7 @@ app.post("/api/login", async (req, res) => {
       "SELECT hashed_password FROM passwords WHERE userid = :userid",
       { userid: userid }
     );
-    
+
     console.log(passwordResult[0]);
     if (passwordResult.length === 0 || !passwordResult[0].HASHED_PASSWORD) {
       return res
@@ -654,7 +653,7 @@ app.post("/medicine", async (req, res) => {
         alert(`No medicine code found for ${medicine.name}`);
         continue; // Skip this iteration if no medicine code is found
       }
-      const medicineCode = medicineCodeResult[0].MEDICINE_CODE; 
+      const medicineCode = medicineCodeResult[0].MEDICINE_CODE;
       // Insert into medicinetracker with the fetched medicine_code and user_id
       const insertQuery = `
         INSERT INTO medicinetracker (medicine_code, user_id, name, dosage, time)
@@ -854,19 +853,21 @@ app.get("/api/medical-history/count-operations", async (req, res) => {
   }
 });
 
-
 // Endpoint to fetch medical history
-app.get('/api/medical-history', async (req, res) => {
+app.get("/api/medical-history", async (req, res) => {
   const { userid } = req.query;
   console.log(userid);
   let conn;
   try {
     conn = await connection();
-    const result = await conn.execute('SELECT * FROM medical_history WHERE user_id = :userid', [userid]);
+    const result = await conn.execute(
+      "SELECT * FROM medical_history WHERE user_id = :userid",
+      [userid]
+    );
     res.json(result.rows || []);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error fetching data');
+    res.status(500).send("Error fetching data");
   } finally {
     if (conn) {
       try {
@@ -877,7 +878,6 @@ app.get('/api/medical-history', async (req, res) => {
     }
   }
 });
-
 
 // Endpoint to add medical history
 app.post("/api/medical-history", async (req, res) => {
@@ -1021,13 +1021,13 @@ app.get("/api/departments", async (req, res) => {
 
 app.post("/api/cart", async (req, res) => {
   const { productId, title, price, quantity, userid } = req.body;
-  console.log(userid);  // Ensure this is safe to log
-  console.log(req.body);  // Ensure this is safe to log
+  console.log(userid); // Ensure this is safe to log
+  console.log(req.body); // Ensure this is safe to log
   let conn;
   try {
     conn = await connection();
     const result = await conn.execute(
-      "INSERT INTO cart (productid, user_id, title, price, quantity) VALUES ( :productId, :userid, :title, :price, :quantity)", 
+      "INSERT INTO cart (productid, user_id, title, price, quantity) VALUES ( :productId, :userid, :title, :price, :quantity)",
       { productId, userid, title, price, quantity },
       { autoCommit: true }
     );
@@ -1046,14 +1046,14 @@ app.post("/api/cart", async (req, res) => {
   }
 });
 
-app.get('/api/cart2', async (req, res) => {
+app.get("/api/cart2", async (req, res) => {
   let conn;
   try {
     // Extract userId from the query parameters and convert it to a number if necessary
-    const userId = parseInt(req.query.userId, 10);  // Parse userId as an integer
+    const userId = parseInt(req.query.userId, 10); // Parse userId as an integer
 
     if (isNaN(userId)) {
-      return res.status(400).send('Valid userId is required');
+      return res.status(400).send("Valid userId is required");
     }
 
     // Establish the connection to Oracle DB
@@ -1061,8 +1061,8 @@ app.get('/api/cart2', async (req, res) => {
 
     // Execute the query to fetch all items from the cart for the given userId
     const result = await conn.execute(
-      'SELECT * FROM cart WHERE user_id = :userId',
-      { userId },  // Bind the userId variable
+      "SELECT * FROM cart WHERE user_id = :userId",
+      { userId }, // Bind the userId variable
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
 
@@ -1070,28 +1070,26 @@ app.get('/api/cart2', async (req, res) => {
     console.log("Final Result: ", result.rows);
 
     // Send the result.rows directly as the response
-    res.status(200).json(result.rows);  // Use .json() to send it as JSON
+    res.status(200).json(result.rows); // Use .json() to send it as JSON
   } catch (err) {
     console.error("Error fetching cart data:", err);
-    res.status(500).send('Database Error');
+    res.status(500).send("Database Error");
   } finally {
     if (conn) {
       try {
-        await conn.close();  // Close the connection
+        await conn.close(); // Close the connection
       } catch (err) {
-        console.error('Error closing connection:', err);
+        console.error("Error closing connection:", err);
       }
     }
   }
 });
 
-
-
-app.delete('/api/cart/:id', async (req, res) => {
+app.delete("/api/cart/:id", async (req, res) => {
   const productId = req.params.id;
-  const userId = req.query.userId;  // Access userId from query parameters
+  const userId = req.query.userId; // Access userId from query parameters
 
-  console.log('Received productId:', productId, 'and userId:', userId);  // Debug log
+  console.log("Received productId:", productId, "and userId:", userId); // Debug log
 
   let conn;
 
@@ -1101,36 +1099,37 @@ app.delete('/api/cart/:id', async (req, res) => {
 
     // Execute the delete query using both productId and userId
     const result = await conn.execute(
-      'DELETE FROM cart WHERE productid = :productId AND user_id = :userId',
+      "DELETE FROM cart WHERE productid = :productId AND user_id = :userId",
       { productId, userId },
       { autoCommit: true }
     );
 
-    res.status(200).json({ message: 'Product removed from cart successfully' });
+    res.status(200).json({ message: "Product removed from cart successfully" });
   } catch (err) {
-    console.error('Error removing product from the cart table:', err);
-    res.status(500).json({ error: 'Error removing product from the cart table' });
+    console.error("Error removing product from the cart table:", err);
+    res
+      .status(500)
+      .json({ error: "Error removing product from the cart table" });
   } finally {
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        console.error('Error closing the connection:', err);
+        console.error("Error closing the connection:", err);
       }
     }
   }
 });
 
-
-app.put('/api/cart/:id', async (req, res) => {
+app.put("/api/cart/:id", async (req, res) => {
   const productId = req.params.id;
-  const { change, userId } = req.body;  // Expecting both productId and userId in the request
+  const { change, userId } = req.body; // Expecting both productId and userId in the request
 
   if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
+    return res.status(400).json({ error: "User ID is required" });
   }
 
-  console.log('Updating product for user:', { productId, change, userId });
+  console.log("Updating product for user:", { productId, change, userId });
 
   let conn;
 
@@ -1140,34 +1139,32 @@ app.put('/api/cart/:id', async (req, res) => {
 
     // Update only the product for the specific user
     const result = await conn.execute(
-      'UPDATE cart SET quantity = quantity + :change WHERE productid = :productId AND user_id = :userId',
-      { change, productId, userId },  // Pass both productId and userId
+      "UPDATE cart SET quantity = quantity + :change WHERE productid = :productId AND user_id = :userId",
+      { change, productId, userId }, // Pass both productId and userId
       { autoCommit: true }
     );
 
     // Check if any rows were affected
     if (result.rowsAffected === 0) {
-      res.status(404).json({ error: 'Product not found in user\'s cart' });
+      res.status(404).json({ error: "Product not found in user's cart" });
     } else {
-      res.status(200).json({ message: 'Product quantity updated successfully' });
+      res
+        .status(200)
+        .json({ message: "Product quantity updated successfully" });
     }
   } catch (err) {
-    console.error('Error updating product quantity:', err);
-    res.status(500).json({ error: 'Error updating product quantity' });
+    console.error("Error updating product quantity:", err);
+    res.status(500).json({ error: "Error updating product quantity" });
   } finally {
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        console.error('Error closing the connection:', err);
+        console.error("Error closing the connection:", err);
       }
     }
   }
 });
-
-
-
-
 
 async function generateUniqueOrderId(connection) {
   const min = 100000;
@@ -1176,28 +1173,28 @@ async function generateUniqueOrderId(connection) {
   let orderId;
 
   while (!unique) {
-      orderId = Math.floor(Math.random() * (max - min + 1)) + min;
+    orderId = Math.floor(Math.random() * (max - min + 1)) + min;
 
-      const result = await connection.execute(
-          'SELECT count(*) FROM orders WHERE order_id = :orderId',
-          { orderId },
-          { outFormat: oracledb.OUT_FORMAT_OBJECT }
-      );
+    const result = await connection.execute(
+      "SELECT count(*) FROM orders WHERE order_id = :orderId",
+      { orderId },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
 
-      if (result.rows[0]['COUNT(*)'] === 0) {
-          unique = true;
-      }
+    if (result.rows[0]["COUNT(*)"] === 0) {
+      unique = true;
+    }
   }
   return orderId;
 }
 
-app.post('/api/order', async (req, res) => {
+app.post("/api/order", async (req, res) => {
   const { cartItems, userId } = req.body;
-  console.log("cartItems:", cartItems);  // Log cart items
-  console.log("userId:", userId); 
-  
+  console.log("cartItems:", cartItems); // Log cart items
+  console.log("userId:", userId);
+
   let conn;
-  console.log(cartItems, userId);  // Optional logging for debugging
+  console.log(cartItems, userId); // Optional logging for debugging
 
   try {
     // Establish a connection
@@ -1210,9 +1207,16 @@ app.post('/api/order', async (req, res) => {
     // Insert each item from the cart into the orders table
     for (const item of cartItems) {
       await conn.execute(
-        'INSERT INTO orders (user_id, order_id, productid, title, price, quantity) VALUES (:userId, :orderId, :productId, :title, :price, :quantity)',
-        { userId, orderId, productId: item.PRODUCTID, title: item.TITLE, price: item.PRICE, quantity: item.QUANTITY },
-        { autoCommit: false }  // Commit will be done later
+        "INSERT INTO orders (user_id, order_id, productid, title, price, quantity) VALUES (:userId, :orderId, :productId, :title, :price, :quantity)",
+        {
+          userId,
+          orderId,
+          productId: item.PRODUCTID,
+          title: item.TITLE,
+          price: item.PRICE,
+          quantity: item.QUANTITY,
+        },
+        { autoCommit: false } // Commit will be done later
       );
     }
 
@@ -1221,38 +1225,71 @@ app.post('/api/order', async (req, res) => {
 
     // Truncate the cart table
     await conn.execute(
-  'DELETE FROM cart WHERE user_id = :userId',
-  { userId: userId },  // Pass the bind variable properly
-  { autoCommit: true }
-);
-
+      "DELETE FROM cart WHERE user_id = :userId",
+      { userId: userId }, // Pass the bind variable properly
+      { autoCommit: true }
+    );
 
     // Respond with success and the generated order ID
-    res.json({ success: true, orderId, message: 'Order placed successfully' });
+    res.json({ success: true, orderId, message: "Order placed successfully" });
   } catch (error) {
-    console.error('Error placing order:', error);
+    console.error("Error placing order:", error);
 
     // Rollback the transaction in case of any errors
     if (conn) {
       try {
         await conn.rollback();
       } catch (rollbackError) {
-        console.error('Error rolling back transaction:', rollbackError);
+        console.error("Error rolling back transaction:", rollbackError);
       }
     }
 
-    res.status(500).json({ success: false, error: 'Failed to place order' });
+    res.status(500).json({ success: false, error: "Failed to place order" });
   } finally {
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        console.error('Error closing connection:', err);
+        console.error("Error closing connection:", err);
       }
     }
   }
 });
+//Endpoint for searching fooditems
+app.get("/search-food-items", async (req, res) => {
+  const { query } = req.query;
+  let conn;
+  try {
+    conn = await connection();
 
+    const result = await conn.execute(
+      `
+      SELECT 
+        f.food_name, 
+        f.nutrition_details.calories
+      FROM foodlist f 
+      WHERE LOWER(f.food_name) LIKE LOWER(:query)
+      `,
+      { query: `%${query}%` } // Use named bind parameters for clarity and security
+    );
 
+    // Format the result to ensure it returns an array of objects with proper keys
+    const formattedResult = result.rows.map(row => ({
+      food_name: row[0],
+      calories: row[1]
+    }));
 
-
+    res.json(formattedResult);
+  } catch (error) {
+    console.error("Error fetching food items:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing the connection:", err);
+      }
+    }
+  }
+});
