@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "./calorie.css";
+import "./CSS/calorie.css";
 const CalorieTracker = () => {
   const [date, setDate] = useState("");
   const [foodItem, setFoodItem] = useState("");
@@ -137,65 +137,67 @@ const CalorieTracker = () => {
   };
 
   return (
-    <div className="container">
-      <h1>Calorie Counter</h1>
-      <form id="calorie-form" onSubmit={handleSubmit}>
-        <label htmlFor="date">Date:</label>
-        <input
-          type="date"
-          id="date"
-          name="date"
-          value={date}
-          onChange={(e) => {
-            setDate(e.target.value);
-            updateCalorieDisplay(e.target.value);
-          }}
-          required
-        />
+    <div className="calorie-tracker">
+      <div className="container">
+        <h1>Calorie Counter</h1>
+        <form id="calorie-form" onSubmit={handleSubmit}>
+          <label htmlFor="date">Date:</label>
+          <input
+            type="date"
+            id="date"
+            name="date"
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+              updateCalorieDisplay(e.target.value);
+            }}
+            required
+          />
 
-        <label htmlFor="food-item">Food Item:</label>
-        <input
-          type="text"
-          id="food-item"
-          name="food-item"
-          value={foodItem}
-          onChange={handleInputChange}
-          required
-          list="food-suggestions"
-          autoComplete="off"
-        />
-        <datalist id="food-suggestions">
-          {suggestions.map((item) => (
-            <option key={item[0]} value={item[0]}>
-              {item[0]} ({item[1]} calories)
-            </option>
+          <label htmlFor="food-item">Food Item:</label>
+          <input
+            type="text"
+            id="food-item"
+            name="food-item"
+            value={foodItem}
+            onChange={handleInputChange}
+            required
+            list="food-suggestions"
+            autoComplete="off"
+          />
+          <datalist id="food-suggestions">
+            {suggestions.map((item) => (
+              <option key={item[0]} value={item[0]}>
+                {item[0]} ({item[1]} calories)
+              </option>
+            ))}
+          </datalist>
+
+          <label htmlFor="servings">Servings:</label>
+          <input
+            type="number"
+            id="servings"
+            name="servings"
+            value={servings}
+            onChange={(e) => setServings(Number(e.target.value))}
+            required
+          />
+
+          <button type="submit">Add</button>
+        </form>
+        <h2>
+          Total Calories on <span id="current-date">{date}</span>:{" "}
+          <span id="total-calories">{totalCalories}</span>
+        </h2>
+        <ul id="food-list">
+          {foodList.map((entry, index) => (
+            <li key={index}>
+              {`${entry[1]}: ${entry[2]} calories`}{" "}
+              <button onClick={() => handleDelete(entry[1])}>✖</button>
+            </li>
           ))}
-        </datalist>
-
-        <label htmlFor="servings">Servings:</label>
-        <input
-          type="number"
-          id="servings"
-          name="servings"
-          value={servings}
-          onChange={(e) => setServings(Number(e.target.value))}
-          required
-        />
-
-        <button type="submit">Add</button>
-      </form>
-      <h2>
-        Total Calories on <span id="current-date">{date}</span>:{" "}
-        <span id="total-calories">{totalCalories}</span>
-      </h2>
-      <ul id="food-list">
-        {foodList.map((entry, index) => (
-          <li key={index}>
-            {`${entry[1]}: ${entry[2]} calories`}{" "}
-            <button onClick={() => handleDelete(entry[1])}>✖</button>
-          </li>
-        ))}
-      </ul>
+        </ul>
+      </div>
     </div>
   );
 };

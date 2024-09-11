@@ -164,5 +164,26 @@ CREATE TABLE Feedback (
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (doctor_id) REFERENCES Doctor(BMDC_no)
 );
+
+CREATE TABLE cart (
+  productid NUMBER,
+  user_id NUMBER,
+  title VARCHAR2(255),
+  price NUMBER,
+  image VARCHAR2(255),
+  quantity NUMBER,
+  PRIMARY KEY (productid, user_id)
+);
+CREATE TABLE orders (
+  user_id NUMBER,
+  order_id VARCHAR2(255),
+  productid NUMBER,
+  title VARCHAR2(255),
+  price NUMBER,
+  image VARCHAR2(255),
+  quantity NUMBER
+
+);
+
 commit;
 
