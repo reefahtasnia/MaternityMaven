@@ -24,6 +24,7 @@ const Medical = () => {
 
   const fetchOperationCount = async () => {
     try {
+      // push korsi
       const response = await axios.get(
         "http://localhost:5000/api/medical-history/count-operations"
       );
