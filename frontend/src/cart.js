@@ -8,24 +8,50 @@ const Cart = () => {
   const [error, setError] = useState(null);
   const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
+  const getUserFromLocalStorage = () => {
+    const userString = localStorage.getItem("user");
+    try {
+      return userString ? JSON.parse(userString) : null;
+    } catch (error) {
+      console.error("Failed to parse user from local storage:", error);
+      return null;
+    }
+  };
+
+  const auth = getUserFromLocalStorage();
+  const userId = auth ? auth.userId : null;
+  console.log("Retrieved userId:", userId); // Debug log the userId
+
   useEffect(() => {
     // Fetch the cart data from the backend
     const fetchCartData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/cart2');
-	   const data = await response.data;
-	   console.log("Cart data: ",data);
-	   setProducts(data);
-        setLoading(false);
+        // Retrieve userId from localStorage
+        const storedUser = localStorage.getItem('user');
+        const parsedUser = JSON.parse(storedUser);
+        const userId = parsedUser?.userId; // Get userId from the stored user object
+
+        if (!userId) {
+          throw new Error('User ID is not available');
+        }
+
+        // Make the request with userId as a query parameter
+        const response = await axios.get(`http://localhost:5000/api/cart2?userId=${userId}`);
+        const data = await response.data;
+        
+        console.log("Cart data: ", data);
+        setProducts(data); // Update the state with the fetched products
+        setLoading(false); // Mark loading as finished
       } catch (error) {
         console.error('Error fetching cart data:', error);	
         setError('Error fetching cart data. Please try again later.');
-        setLoading(false);
+        setLoading(false); // Mark loading as finished
       }
     };
 
-    fetchCartData();
+    fetchCartData(); // Trigger the fetch
   }, []);
+
 
   const handleQuantityChange = async (id, change) => {
     // Update local state
@@ -49,8 +75,17 @@ const Cart = () => {
 
   const handleRemove = async (id) => {
     try {
-      // Make DELETE request to backend API
-      await axios.delete(`http://localhost:5000/api/cart/${id}`);
+      // Retrieve userId from localStorage
+      const storedUser = localStorage.getItem('user');
+      const parsedUser = JSON.parse(storedUser);
+      const userId = parsedUser?.userId;
+  
+      if (!userId) {
+        throw new Error('User ID is not available');
+      }
+  
+      // Pass userId as a query parameter in the DELETE request
+      await axios.delete(`http://localhost:5000/api/cart/${id}?userId=${userId}`);
       
       // Update local state after successful deletion
       setProducts(prevProducts => prevProducts.filter(product => product.PRODUCTID !== id));
@@ -59,22 +94,11 @@ const Cart = () => {
       setError('Error removing product from cart. Please try again later.');
     }
   };
+  
 
   //const navigate = useNavigate();
 
-  const getUserFromLocalStorage = () => {
-    const userString = localStorage.getItem("user");
-    try {
-      return userString ? JSON.parse(userString) : null;
-    } catch (error) {
-      console.error("Failed to parse user from local storage:", error);
-      return null;
-    }
-  };
 
-  const auth = getUserFromLocalStorage();
-  const userId = auth ? auth.userId : null;
-  console.log("Retrieved userId:", userId); // Debug log the userId
 
   const handleConfirmOrder = async () => {
     setButtonsDisabled(true);
