@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./CSS/userprofile.css"; // Adjust the path as necessary
 import { FaShoppingCart } from "react-icons/fa"; 
+import { useHistory } from "react-router-dom";
 
 const UserProfile = () => {
   const auth = JSON.parse(localStorage.getItem("user"));
@@ -32,6 +33,7 @@ const UserProfile = () => {
         .then((data) => {
           console.log("Fetched user data:", data);
           localStorage.setItem("userdata", JSON.stringify(data));
+          console.log("User data stored in local storage"+localStorage.getItem("userdata")); 
           setProfileData(data);
         })
         .catch((error) => {
@@ -43,27 +45,24 @@ const UserProfile = () => {
 
   const setProfileData = (data) => {
     try {
-            const address = data[8];
+      // Assuming `ADDRESS` is null, handle address gracefully if it's present later
+      const address = data.ADDRESS || {}; 
   
-      setFullName(capitalizeWords(`${data[1]} ${data[2]}`)); 
-      setEmail(data[4].toLowerCase());
-      setDob(data[5] ? new Date(data[5]).toISOString().slice(0, 10) : "");
-      setPhone(data[7] || "");
-      setBloodGroup(data[6] || "");
+      setFullName(capitalizeWords(`${data.FIRSTNAME || ""} ${data.LASTNAME || ""}`)); 
+      setEmail(data.EMAIL ? data.EMAIL.toLowerCase() : ""); 
+      setDob(data.DATE_OF_BIRTH ? new Date(data.DATE_OF_BIRTH).toISOString().slice(0, 10) : ""); 
+      setPhone(data.PHONE_NUMBER || ""); 
+      setBloodGroup(data.BLOOD_GROUP || "");
   
-      // Check if the address exists and set each part
-      if (address) {
-        setStreet(capitalizeWords(address.STREET || ""));
-        setRegion(capitalizeWords(address.REGION || ""));
-        setDistrict(capitalizeWords(address.DISTRICT || ""));
-        setCountry(capitalizeWords(address.COUNTRY || ""));
-      }
+      // If `ADDRESS` is null, these fields will be set to empty
+      setStreet(capitalizeWords(address.STREET || ""));
+      setRegion(capitalizeWords(address.REGION || ""));
+      setDistrict(capitalizeWords(address.DISTRICT || ""));
+      setCountry(capitalizeWords(address.COUNTRY || ""));
     } catch (error) {
       console.error("Error setting profile data:", error);
-      throw error;
     }
   };
-  
 
   const triggerFileInput = () => {
     document.getElementById("fileInput").click();
@@ -265,28 +264,28 @@ const UserProfile = () => {
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Medicine Reminders</h3>
-          <button className="profile-section-button">Edit</button>
+          <button className="profile-section-button" onClick={() => window.location.href = '/Medicinetracker'}>Edit</button>
           <div className="profile-section-content">
             <p>No upcoming reminders.</p>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Calories Intake</h3>
-          <button className="profile-section-button">Edit</button>
+          <button className="profile-section-button" onClick={() => window.location.href = '/Calorietracker'}>Edit</button>
           <div className="profile-section-content">
             <p>No data entered.</p>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Medical History</h3>
-          <button className="profile-section-button">Edit</button>
+          <button className="profile-section-button" onClick={() => window.location.href = '/Medicalhistory'}>Edit</button>
           <div className="profile-section-content">
             <p>No known medical conditions.</p>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Upcoming Appointments</h3>
-          <button className="profile-section-button">Add</button>
+          <button className="profile-section-button" onClick={() => window.location.href = '/Appointment'}>Add</button>
           <div className="profile-section-content">
             <p>No upcoming appointments.</p>
           </div>

@@ -164,4 +164,5 @@ CREATE TABLE Feedback (
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (doctor_id) REFERENCES Doctor(BMDC_no)
 );
+commit;
 
