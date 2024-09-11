@@ -1179,7 +1179,7 @@ app.post('/api/order', async (req, res) => {
     for (const item of cartItems) {
       await conn.execute(
         'INSERT INTO orders (user_id, order_id, productid, title, price, quantity) VALUES (:userId, :orderId, :productId, :title, :price, :quantity)',
-        { userId, orderId, productId: item.productId, title: item.title, price: item.price, quantity: item.quantity },
+        { userId, orderId, productId: item.PRODUCTID, title: item.TITLE, price: item.PRICE, quantity: item.QUANTITY },
         { autoCommit: false }  // Commit will be done later
       );
     }

@@ -31,9 +31,9 @@ const Cart = () => {
     // Update local state
     setProducts(prevProducts =>
       prevProducts.map(product => {
-        if (product.productId === id) {
-          const newQuantity = product.quantity + change;
-          return { ...product, quantity: newQuantity > 0 ? newQuantity : product.quantity };
+        if (product.PRODUCTID === id) {
+          const newQuantity = product.QUANTITY + change;
+          return { ...product, quantity: newQuantity > 0 ? newQuantity : product.QUANTITY };
         }
         return product;
       })
@@ -53,7 +53,7 @@ const Cart = () => {
       await axios.delete(`http://localhost:5000/api/cart/${id}`);
       
       // Update local state after successful deletion
-      setProducts(prevProducts => prevProducts.filter(product => product.productId !== id));
+      setProducts(prevProducts => prevProducts.filter(product => product.PRODUCTID !== id));
     } catch (error) {
       console.error('Error removing product from cart:', error);
       setError('Error removing product from cart. Please try again later.');
@@ -95,7 +95,7 @@ const Cart = () => {
     setButtonsDisabled(false);
   };
 
-  const subtotal = products.reduce((acc, product) => acc + product.price * product.quantity, 0);
+  const subtotal = products.reduce((acc, product) => acc + product.PRICE * product.QUANTITY, 0);
   const shipping = 50;
   const total = subtotal + shipping;
 
