@@ -826,16 +826,22 @@ app.delete("/medicine/:id", async (req, res) => {
 });
 
 // Endpoint to count total operations for a user
+// Endpoint to count total operations for a user
 app.get("/api/medical-history/count-operations", async (req, res) => {
+  const { userid } = req.query;
   let conn;
   try {
     conn = await connection();
     const result = await conn.execute(
       `SELECT COUNT(*) AS operation_count 
        FROM Medical_History 
-       WHERE LOWER(treatment) LIKE '%operation%'`
+       WHERE LOWER(treatment) LIKE '%operation%' 
+       AND USER_ID = :userid`,
+      [userid]
     );
-    res.json(result.rows[0][0]); // Assuming result.rows[0][0] contains the count
+    console.log(result);
+    // Wrap the count in an object with the 'OPERATION_COUNT' key
+    res.json({ rows: [{ OPERATION_COUNT: result.rows[0][0] }] });
   } catch (err) {
     console.error("Error fetching operation count:", err);
     res.status(500).send("Error fetching operation count");
@@ -849,20 +855,20 @@ app.get("/api/medical-history/count-operations", async (req, res) => {
     }
   }
 });
+
+
 // Endpoint to fetch medical history
-app.get("/api/medical-history", async (req, res) => {
+app.get('/api/medical-history', async (req, res) => {
   const { userid } = req.query;
+  console.log(userid);
   let conn;
   try {
     conn = await connection();
-    const result = await conn.execute(
-      "SELECT * FROM Medical_History WHERE user_id = :userid",
-      [userid]
-    );
+    const result = await conn.execute('SELECT * FROM medical_history WHERE user_id = :userid', [userid]);
     res.json(result.rows || []);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error fetching data");
+    res.status(500).send('Error fetching data');
   } finally {
     if (conn) {
       try {
@@ -873,6 +879,7 @@ app.get("/api/medical-history", async (req, res) => {
     }
   }
 });
+
 
 // Endpoint to add medical history
 app.post("/api/medical-history", async (req, res) => {
