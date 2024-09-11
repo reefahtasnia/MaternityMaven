@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import "./bookAppointment.css";
-
+import "./CSS/bookAppointment.css";
+//book appointment.css CSS folder e move korsi - reefah
 const BookAppointment = () => {
   const { email } = useParams();
   const [appointmentDetails, setAppointmentDetails] = useState({

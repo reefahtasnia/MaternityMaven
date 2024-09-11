@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./medical.css";
+import "./CSS/medical.css";
 
 const Medical = () => {
   const auth = JSON.parse(localStorage.getItem("user"));
@@ -24,16 +24,23 @@ const Medical = () => {
       const response = await axios.get(
         `http://localhost:5000/api/medical-history/count-operations?userid=${auth.userId}`
       );
-      console.log('Operation count API response:', response.data);
-  
+      console.log("Operation count API response:", response.data);
+
       // Check if response.data.rows is an array and has at least one item
-      if (response.data && Array.isArray(response.data.rows) && response.data.rows.length > 0) {
+      if (
+        response.data &&
+        Array.isArray(response.data.rows) &&
+        response.data.rows.length > 0
+      ) {
         const operationCount = response.data.rows[0]?.OPERATION_COUNT;
-  
-        if (typeof operationCount === 'number') {
+
+        if (typeof operationCount === "number") {
           setOperationCount(operationCount);
         } else {
-          console.error("Unexpected format of OPERATION_COUNT:", response.data.rows[0]);
+          console.error(
+            "Unexpected format of OPERATION_COUNT:",
+            response.data.rows[0]
+          );
         }
       } else {
         console.error("No rows found in the response:", response.data);
@@ -42,7 +49,7 @@ const Medical = () => {
       console.error("Error fetching operation count", error);
     }
   }, [auth.userId]);
-  
+
   // useCallback to memoize the fetchFullHistory function to prevent re-creation on every render
   const fetchFullHistory = useCallback(async () => {
     try {
@@ -57,15 +64,12 @@ const Medical = () => {
     }
   }, [auth.userId]);
 
-  
   useEffect(() => {
     if (auth.userId) {
       fetchOperationCount();
       fetchFullHistory();
     }
   }, [auth.userId, fetchOperationCount, fetchFullHistory]);
-  
-  
 
   const handleAddRow = () => {
     setMedicalHistory([...medicalHistory, { ...initialRow }]);
@@ -89,7 +93,10 @@ const Medical = () => {
 
     if (filledRows.length > 0) {
       try {
-        await axios.post("http://localhost:5000/api/medical-history", filledRows);
+        await axios.post(
+          "http://localhost:5000/api/medical-history",
+          filledRows
+        );
         setMedicalHistory([initialRow]);
         fetchOperationCount();
       } catch (error) {
@@ -102,20 +109,20 @@ const Medical = () => {
 
   const handleDelete = async () => {
     const rowsToDelete = selectedRows.map((index) => ({
-      userid: fullHistory[index].USER_ID,    // Correct property access
+      userid: fullHistory[index].USER_ID, // Correct property access
       year: fullHistory[index].YEAR,
       incident: fullHistory[index].INCIDENT,
       treatment: fullHistory[index].TREATMENT,
     }));
-  
+
     if (rowsToDelete.length > 0) {
       try {
         await axios.post("http://localhost:5000/api/medical-history/delete", {
           rows: rowsToDelete,
         });
-        fetchFullHistory();  // Refresh the history after deletion
-        fetchOperationCount();  // Refresh the operation count
-        setSelectedRows([]);  // Clear selected rows
+        fetchFullHistory(); // Refresh the history after deletion
+        fetchOperationCount(); // Refresh the operation count
+        setSelectedRows([]); // Clear selected rows
       } catch (error) {
         console.error("Error deleting medical history", error);
       }
@@ -123,7 +130,7 @@ const Medical = () => {
       alert("No rows selected for deletion.");
     }
   };
-  
+
   const toggleRowSelection = (index) => {
     if (selectedRows.includes(index)) {
       setSelectedRows(selectedRows.filter((i) => i !== index));
@@ -163,28 +170,27 @@ const Medical = () => {
                   </tr>
                 </thead>
                 <tbody>
-  {fullHistory.length > 0 ? (
-    fullHistory.map((entry, index) => (
-      <tr key={index}>
-        <td>
-          <input
-            type="checkbox"
-            checked={selectedRows.includes(index)}
-            onChange={() => toggleRowSelection(index)}
-          />
-        </td>
-        <td>{entry.YEAR}</td> {/* Access YEAR */}
-        <td>{entry.INCIDENT}</td> {/* Access INCIDENT */}
-        <td>{entry.TREATMENT}</td> {/* Access TREATMENT */}
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="4">No medical history found.</td>
-    </tr>
-  )}
-</tbody>
-
+                  {fullHistory.length > 0 ? (
+                    fullHistory.map((entry, index) => (
+                      <tr key={index}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedRows.includes(index)}
+                            onChange={() => toggleRowSelection(index)}
+                          />
+                        </td>
+                        <td>{entry.YEAR}</td> {/* Access YEAR */}
+                        <td>{entry.INCIDENT}</td> {/* Access INCIDENT */}
+                        <td>{entry.TREATMENT}</td> {/* Access TREATMENT */}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4">No medical history found.</td>
+                    </tr>
+                  )}
+                </tbody>
               </table>
               <div className="d-flex justify-content-between mt-2">
                 <button
@@ -215,7 +221,9 @@ const Medical = () => {
                         <select
                           className="form-input"
                           value={entry.year}
-                          onChange={(e) => handleChange(index, "year", e.target.value)}
+                          onChange={(e) =>
+                            handleChange(index, "year", e.target.value)
+                          }
                         >
                           <option value="">Select Year</option>
                           {yearOptions}
@@ -226,7 +234,9 @@ const Medical = () => {
                           type="text"
                           className="form-input"
                           value={entry.incident}
-                          onChange={(e) => handleChange(index, "incident", e.target.value)}
+                          onChange={(e) =>
+                            handleChange(index, "incident", e.target.value)
+                          }
                           placeholder="Incident"
                         />
                       </td>
@@ -235,7 +245,9 @@ const Medical = () => {
                           type="text"
                           className="form-input"
                           value={entry.treatment}
-                          onChange={(e) => handleChange(index, "treatment", e.target.value)}
+                          onChange={(e) =>
+                            handleChange(index, "treatment", e.target.value)
+                          }
                           placeholder="Treatment"
                         />
                       </td>
@@ -244,14 +256,22 @@ const Medical = () => {
                 </tbody>
               </table>
               <div className="d-flex justify-content-between mt-2">
-                <button className="btn btn-primary" type="button" onClick={handleAddRow}>
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={handleAddRow}
+                >
                   Add Row
                 </button>
                 <div>
                   <button type="submit" className="btn btn-success">
                     Save
                   </button>
-                  <button className="btn btn-info ml-2" type="button" onClick={fetchFullHistory}>
+                  <button
+                    className="btn btn-info ml-2"
+                    type="button"
+                    onClick={fetchFullHistory}
+                  >
                     View History
                   </button>
                 </div>
