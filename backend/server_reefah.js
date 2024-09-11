@@ -1051,11 +1051,22 @@ app.post("/api/cart", async (req, res) => {
 app.get('/api/cart2', async (req, res) => {
   let conn;
   try {
+    // Extract userId from the query parameters and convert it to a number if necessary
+    const userId = parseInt(req.query.userId, 10);  // Parse userId as an integer
+
+    if (isNaN(userId)) {
+      return res.status(400).send('Valid userId is required');
+    }
+
     // Establish the connection to Oracle DB
     conn = await connection();
 
-    // Execute the query to fetch all items from the cart
-    const result = await conn.execute('SELECT * FROM cart', [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    // Execute the query to fetch all items from the cart for the given userId
+    const result = await conn.execute(
+      'SELECT * FROM cart WHERE user_id = :userId',
+      { userId },  // Bind the userId variable
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
 
     // Log the result to check the data structure
     console.log("Final Result: ", result.rows);
@@ -1077,19 +1088,23 @@ app.get('/api/cart2', async (req, res) => {
 });
 
 
+
 app.delete('/api/cart/:id', async (req, res) => {
   const productId = req.params.id;
-  console.log(productId);  // Optional, for debugging
+  const userId = req.query.userId;  // Access userId from query parameters
+
+  console.log('Received productId:', productId, 'and userId:', userId);  // Debug log
+
   let conn;
 
   try {
     // Establish a connection
     conn = await connection();
 
-    // Execute the delete query
+    // Execute the delete query using both productId and userId
     const result = await conn.execute(
-      'DELETE FROM cart WHERE productid = :productId',
-      { productId },
+      'DELETE FROM cart WHERE productid = :productId AND user_id = :userId',
+      { productId, userId },
       { autoCommit: true }
     );
 
@@ -1108,26 +1123,33 @@ app.delete('/api/cart/:id', async (req, res) => {
   }
 });
 
+
 app.put('/api/cart/:id', async (req, res) => {
   const productId = req.params.id;
-  const { change } = req.body;
-  console.log(productId, change);  // Optional logging for debugging
+  const { change, userId } = req.body;  // Expecting both productId and userId in the request
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  console.log('Updating product for user:', { productId, change, userId });
+
   let conn;
 
   try {
     // Establish a connection
     conn = await connection();
 
-    // Execute the update query
+    // Update only the product for the specific user
     const result = await conn.execute(
-      'UPDATE cart SET quantity = quantity + :change WHERE productid = :productId',
-      { change, productId },
+      'UPDATE cart SET quantity = quantity + :change WHERE productid = :productId AND user_id = :userId',
+      { change, productId, userId },  // Pass both productId and userId
       { autoCommit: true }
     );
 
-    // Check if any rows were affected (i.e., if the product exists in the cart)
+    // Check if any rows were affected
     if (result.rowsAffected === 0) {
-      res.status(404).json({ error: 'Product not found in cart' });
+      res.status(404).json({ error: 'Product not found in user\'s cart' });
     } else {
       res.status(200).json({ message: 'Product quantity updated successfully' });
     }
@@ -1144,6 +1166,8 @@ app.put('/api/cart/:id', async (req, res) => {
     }
   }
 });
+
+
 
 
 
@@ -1198,7 +1222,12 @@ app.post('/api/order', async (req, res) => {
     await conn.commit();
 
     // Truncate the cart table
-    await conn.execute('TRUNCATE TABLE cart', [], { autoCommit: true });
+    await conn.execute(
+  'DELETE FROM cart WHERE user_id = :userId',
+  { userId: userId },  // Pass the bind variable properly
+  { autoCommit: true }
+);
+
 
     // Respond with success and the generated order ID
     res.json({ success: true, orderId, message: 'Order placed successfully' });
