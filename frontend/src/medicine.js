@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./medicine.css";
+import "./CSS/medicine.css";
 
 const MedicineTracker = () => {
   const [isFormVisible, setIsFormVisible] = useState(false); // Changed to handle form visibility
@@ -188,58 +188,7 @@ const MedicineTracker = () => {
   };
 
   return (
-    <div>
-      <nav className="navbar navbar-expand-lg">
-        <div className="container">
-          <a className="navbar-brand" href="home.html">
-            Maternity Maven
-          </a>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarScroll"
-            aria-controls="navbarScroll"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarScroll">
-            <ul className="navbar-nav me-auto my-2 my-lg-0">
-              <li className="nav-item">
-                <a className="nav-link" href="home.html">
-                  Home
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Doctors
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Shop
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Resources
-                </a>
-              </li>
-            </ul>
-            <button
-              className="btn"
-              type="submit"
-              id="loginButton"
-              href="login.html"
-            >
-              Log In
-            </button>
-          </div>
-        </div>
-      </nav>
-
+    <div className="medicine-tracker-bg">
       <div className="appointment-form">
         <h1>Medicine Tracker</h1>
         <button

@@ -10,7 +10,7 @@ import {
   DropdownButton,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./appointment.css";
+import "./CSS/appointment.css";
 import doctorImage from "./CSS/assets/doctor.jpg";
 import { Link } from "react-router-dom";
 

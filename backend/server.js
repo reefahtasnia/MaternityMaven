@@ -67,31 +67,46 @@ app.post('/api/cart', async (req, res) => {
 });
 
 // Fetch Cart Data
-app.get('/api/cart', async (req, res) => {
-  let connection;
+app.put('/api/cart/:id', async (req, res) => {
+  const productId = req.params.id;
+  const { change } = req.body;
+  const { userId } = req.body;  // Expecting userId in the request body
+
+  console.log(productId, change, userId);  // Optional logging for debugging
+
+  let conn;
+
   try {
-    connection = await oracledb.getConnection(dbConfig);
-    const result = await connection.execute('SELECT * FROM cart');
-    res.json(result.rows.map(row => ({
-      productId: row[0],
-      title: row[1],
-      price: row[2],
-      quantity: row[4],
-    })));
-    console.log(result);
+    // Establish a connection
+    conn = await connection();
+
+    // Execute the update query with both productId and userId
+    const result = await conn.execute(
+      'UPDATE cart SET quantity = quantity + :change WHERE productid = :productId AND user_id = :userId',
+      { change, productId, userId },
+      { autoCommit: true }
+    );
+
+    // Check if any rows were affected (i.e., if the product exists in the cart for the user)
+    if (result.rowsAffected === 0) {
+      res.status(404).json({ error: 'Product not found in user\'s cart' });
+    } else {
+      res.status(200).json({ message: 'Product quantity updated successfully' });
+    }
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Database Error');
+    console.error('Error updating product quantity:', err);
+    res.status(500).json({ error: 'Error updating product quantity' });
   } finally {
-    if (connection) {
+    if (conn) {
       try {
-        await connection.close();
+        await conn.close();
       } catch (err) {
-        console.error(err);
+        console.error('Error closing the connection:', err);
       }
     }
   }
 });
+
 
 // Remove Product from Cart
 app.delete('/api/cart/:id', async (req, res) => {

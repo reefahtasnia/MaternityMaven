@@ -5,23 +5,7 @@ body {
     background-color: #fce4ec;
     margin: 0;
     padding: 0;
-  }
-  
-  .navbar {
-    background-color: #f8bbd0;
-  }
-  
-  .navbar-brand {
-    font-size: 24px;
-    font-weight: bold;
-    color: #880e4f;
-  }
-  
-  .navbar-nav .nav-link {
-    color: #880e4f;
-    font-weight: bold;
-  }
-  
+  }  
   #loginButton {
     background-color: #880e4f;
     color: white;

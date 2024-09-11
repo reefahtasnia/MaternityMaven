@@ -8,60 +8,6 @@ const Cart = () => {
   const [error, setError] = useState(null);
   const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
-  useEffect(() => {
-    // Fetch the cart data from the backend
-    const fetchCartData = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/cart2');
-	   const data = await response.data;
-	   console.log("Cart data: ",data);
-	   setProducts(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching cart data:', error);	
-        setError('Error fetching cart data. Please try again later.');
-        setLoading(false);
-      }
-    };
-
-    fetchCartData();
-  }, []);
-
-  const handleQuantityChange = async (id, change) => {
-    // Update local state
-    setProducts(prevProducts =>
-      prevProducts.map(product => {
-        if (product.PRODUCTID === id) {
-          const newQuantity = product.QUANTITY + change;
-          return { ...product, quantity: newQuantity > 0 ? newQuantity : product.QUANTITY };
-        }
-        return product;
-      })
-    );
-
-    // Update the quantity in the database
-    try {
-      await axios.put(`http://localhost:5000/api/cart/${id}`, { change });
-    } catch (error) {
-      console.error('Error updating cart data:', error);
-    }
-  };
-
-  const handleRemove = async (id) => {
-    try {
-      // Make DELETE request to backend API
-      await axios.delete(`http://localhost:5000/api/cart/${id}`);
-      
-      // Update local state after successful deletion
-      setProducts(prevProducts => prevProducts.filter(product => product.PRODUCTID !== id));
-    } catch (error) {
-      console.error('Error removing product from cart:', error);
-      setError('Error removing product from cart. Please try again later.');
-    }
-  };
-
-  //const navigate = useNavigate();
-
   const getUserFromLocalStorage = () => {
     const userString = localStorage.getItem("user");
     try {
@@ -75,6 +21,85 @@ const Cart = () => {
   const auth = getUserFromLocalStorage();
   const userId = auth ? auth.userId : null;
   console.log("Retrieved userId:", userId); // Debug log the userId
+
+  useEffect(() => {
+    // Fetch the cart data from the backend
+    const fetchCartData = async () => {
+      try {
+
+        if (!userId) {
+          throw new Error('User ID is not available');
+        }
+
+        // Make the request with userId as a query parameter
+        const response = await axios.get(`http://localhost:5000/api/cart2?userId=${userId}`);
+        const data = await response.data;
+        
+        console.log("Cart data: ", data);
+        setProducts(data); // Update the state with the fetched products
+        setLoading(false); // Mark loading as finished
+      } catch (error) {
+        console.error('Error fetching cart data:', error);	
+        setError('Error fetching cart data. Please try again later.');
+        setLoading(false); // Mark loading as finished
+      }
+    };
+
+    fetchCartData(); // Trigger the fetch
+  }, []);
+
+
+  const handleQuantityChange = async (id, change) => {
+    if (!userId) {
+      console.error('User ID is not available');
+      return;
+    }
+  
+    // Update local state
+    setProducts(prevProducts =>
+      prevProducts.map(product => {
+        if (product.PRODUCTID === id) {
+          const newQuantity = product.QUANTITY + change;
+          return { ...product, QUANTITY: newQuantity > 0 ? newQuantity : product.QUANTITY };
+        }
+        return product;
+      })
+    );
+  
+    // Update the quantity in the database
+    try {
+      await axios.put(`http://localhost:5000/api/cart/${id}`, { change, userId });
+    } catch (error) {
+      console.error('Error updating cart data:', error);
+    }
+  };
+  
+  
+  
+
+  const handleRemove = async (id) => {
+    try {
+
+  
+      if (!userId) {
+        throw new Error('User ID is not available');
+      }
+  
+      // Pass userId as a query parameter in the DELETE request
+      await axios.delete(`http://localhost:5000/api/cart/${id}?userId=${userId}`);
+      
+      // Update local state after successful deletion
+      setProducts(prevProducts => prevProducts.filter(product => product.PRODUCTID !== id));
+    } catch (error) {
+      console.error('Error removing product from cart:', error);
+      setError('Error removing product from cart. Please try again later.');
+    }
+  };
+  
+
+  //const navigate = useNavigate();
+
+
 
   const handleConfirmOrder = async () => {
     setButtonsDisabled(true);
