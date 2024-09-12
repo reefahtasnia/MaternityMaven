@@ -4,12 +4,27 @@ import "./CSS/calorie.css";
 const CalorieTracker = () => {
   const [date, setDate] = useState("");
   const [foodItem, setFoodItem] = useState("");
-  const [servings, setServings] = useState(1); // State for servings
-  const [mealtype, setMealtype] = useState(""); // State for meal type
+  const [calories, setCalories] = useState(0);
+  const [servings, setServings] = useState(1);
+  const [mealtype, setMealtype] = useState("");
   const [totalCalories, setTotalCalories] = useState(0);
   const [foodList, setFoodList] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false); // For showing suggestions
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const getUserFromLocalStorage = () => {
+    const userString = localStorage.getItem("user");
+    try {
+      return userString ? JSON.parse(userString) : null;
+    } catch (error) {
+      console.error("Failed to parse user from local storage:", error);
+      return null;
+    }
+  };
+
+  const auth = getUserFromLocalStorage();
+  const userId = auth ? auth.userId : null;
+  console.log("Retrieved userId:", userId);
 
   useEffect(() => {
     setDefaultDate();
@@ -24,87 +39,102 @@ const CalorieTracker = () => {
   const updateCalorieDisplay = async (selectedDate) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/user-data/${selectedDate}`
+        `http://localhost:5000/calorie-data/${selectedDate}`
       );
       const data = await response.json();
+      console.log("Fetched food data:", data);
       updateFoodList(data);
 
       const totalResponse = await fetch(
-        `http://localhost:3000/user-data2/${selectedDate}`
+        `http://localhost:5000/totalcal/${selectedDate}?userId=${userId}`
       );
       const totalData = await totalResponse.json();
-      setTotalCalories(totalData);
+      if (totalData && totalData.total_calories !== undefined) {
+        setTotalCalories(totalData.total_calories);
+      } else {
+        console.error("Unexpected totalData format:", totalData);
+      }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching data:", error);
     }
   };
 
   const updateFoodList = (data) => {
     if (Array.isArray(data)) {
+      console.log("Updating food list with data:", data);
       setFoodList(data);
     } else {
+      console.error("Food data is not an array:", data);
       setFoodList([]);
     }
   };
 
   const handleInputChange = async (event) => {
     const query = event.target.value;
-    setFoodItem(query); // Set the input value to whatever the user types
+    setFoodItem(query);
 
     if (query.length > 0) {
       try {
         const response = await fetch(
           `http://localhost:5000/search-food-items?query=${query}`
-        ); // Fetch matching results from backend
+        );
         const filteredSuggestions = await response.json();
-        console.log("Fetched Suggestions:", filteredSuggestions);
-        setSuggestions(filteredSuggestions); // Update suggestions with the fetched data
-        setShowSuggestions(true); // Show suggestions when there is input
+        setSuggestions(filteredSuggestions);
+        setShowSuggestions(true);
       } catch (error) {
         console.error("Error fetching suggestions:", error);
       }
     } else {
       setSuggestions([]);
-      setShowSuggestions(false); // Hide suggestions when input is empty
+      setShowSuggestions(false);
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setFoodItem(suggestion.food_name); // Set the clicked suggestion to the input field
-    console.log(suggestion.food_name);
-    console.log(suggestion.calories);
-    setSuggestions([]); // Clear suggestions
-    setShowSuggestions(false); // Hide suggestions after selection
+  const handleSuggestionClick = async (suggestion) => {
+    setFoodItem(suggestion.food_name);
+    setSuggestions([]);
+    setShowSuggestions(false);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/search-food-items?query=${suggestion.food_name}`
+      );
+      const data = await response.json();
+      if (data && data.length > 0) {
+        setCalories(data[0].calories || 0);
+      } else {
+        setCalories(0);
+      }
+    } catch (error) {
+      console.error("Error fetching calories for selected food item:", error);
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const lowerCaseFoodItem = foodItem.toLowerCase();
+
+    if (!calories) {
+      alert(
+        "Please select a food item from the suggestions to fetch calories."
+      );
+      return;
+    }
+
+    const totalCaloriesForFood = calories * servings;
 
     try {
-      const response = await fetch("http://localhost:3000/calories");
-      const data = await response.json();
-      const foodData = data.find(
-        (item) => item.food_name.toLowerCase() === lowerCaseFoodItem
-      );
-
-      if (!foodData) {
-        alert("Food item not found in the database.");
-        return;
-      }
-
-      const calories = foodData.calories * servings; // Multiply calories by servings
-      const responsePost = await fetch("http://localhost:3000/user-data", {
+      const responsePost = await fetch("http://localhost:5000/calories", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          date_of_entry: date,
-          foodItem: lowerCaseFoodItem,
-          calories,
-          servings, // Include servings in the data
-          mealtype, // Include meal type in the data
+          foodItem: foodItem.toLowerCase(),
+          userId,
+          servings,
+          calories: totalCaloriesForFood,
+          mealtype,
+          date,
         }),
       });
 
@@ -121,7 +151,7 @@ const CalorieTracker = () => {
 
   const handleDelete = async (foodItem) => {
     try {
-      const response = await fetch("http://localhost:3000/user-data", {
+      const response = await fetch("http://localhost:5000/user-data", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -141,13 +171,14 @@ const CalorieTracker = () => {
 
   const clearForm = () => {
     setFoodItem("");
-    setServings(1); // Reset servings
-    setMealtype(""); // Reset meal type
-    setShowSuggestions(false); // Hide suggestions
+    setCalories(0);
+    setServings(1);
+    setMealtype("");
+    setShowSuggestions(false);
   };
 
   const handleMealtypeChange = (event) => {
-    setMealtype(event.target.value); // Correctly update meal type
+    setMealtype(event.target.value);
   };
 
   return (
@@ -207,7 +238,7 @@ const CalorieTracker = () => {
             id="mealtype"
             name="mealtype"
             value={mealtype}
-            onChange={handleMealtypeChange} // Correct handler
+            onChange={handleMealtypeChange}
             required
           >
             <option value="">Select Meal Type</option>
@@ -219,9 +250,32 @@ const CalorieTracker = () => {
           <button type="submit">Add</button>
           <button type="button">Plan a Custom Diet</button>
         </form>
+
         <h2>
           Total Calories: <span id="total-calories">{totalCalories}</span>
         </h2>
+
+        <div className="food-list">
+          <h3>Food Log</h3>
+          {foodList.length > 0 ? (
+            <ul>
+              {foodList.map((item, index) => (
+                //key={`${item.food_name}-${index}`}
+                <li key={`${item.foodItem}-${index}`}>
+                  {item.foodItem} ({item.calories} calories)
+                  <button
+                    onClick={() => handleDelete(item.foodItem)}
+                    className="delete-btn"
+                  >
+                    &#x2715; {/* Cross mark */}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No food items logged yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );

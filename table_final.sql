@@ -132,6 +132,16 @@ nutrition_details nutrition_facts
 INSERT INTO foodlist (food_name, nutrition_details)
 VALUES ('Apple', nutrition_facts(52.00, 0.26, 13.81, 0.17));
 
+CREATE TABLE Calorietracker (
+    food_item VARCHAR2(255),
+    user_id INT,
+    serving INT,
+    calories INT,
+    meal_type VARCHAR2(255),
+    entry_date DATE,  -- Renamed to 'entry_date' to avoid confusion with reserved keywords
+    entry_time TIMESTAMP,  -- Changed from TIME to TIMESTAMP
+    FOREIGN KEY (user_id) REFERENCES Users(userid)
+);
 
 CREATE TABLE Calorietracker (
     food_item VARCHAR2(255),

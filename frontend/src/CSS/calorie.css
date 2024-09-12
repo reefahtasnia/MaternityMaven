@@ -144,3 +144,31 @@
 .suggestions-container p:hover {
   background-color: #f0f0f0;
 }
+.food-list {
+  margin-top: 20px;
+}
+
+.food-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.food-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  color: red;
+  cursor: pointer;
+  font-size: 1.2em;
+}
+
+.delete-btn:hover {
+  color: darkred;
+}
+

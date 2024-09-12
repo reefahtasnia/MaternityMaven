@@ -1296,3 +1296,103 @@ app.get("/search-food-items", async (req, res) => {
     }
   }
 });
+app.post("/calories", async (req, res) => {
+  const { foodItem, userId, servings, calories, mealtype, date } = req.body;
+  console.log("Received body: ", req.body);
+
+  let conn;
+  try {
+    conn = await connection(); // Assuming you have a method to establish DB connection
+
+    // Insert query to store the calorie tracking data
+    const result = await conn.execute(
+      `INSERT INTO Calorietracker (food_item, user_id, serving, calories, meal_type, entry_date, entry_time)
+       VALUES (:foodItem, :userId, :servings, :calories, :mealtype, TO_DATE(:entry_date, 'YYYY-MM-DD'), SYSTIMESTAMP)`,
+      {
+        foodItem: foodItem,
+        userId: userId,
+        servings: servings,
+        calories: calories,
+        mealtype: mealtype,
+        entry_date: date, // Renamed to avoid conflict
+      },
+      { autoCommit: true } // Commit automatically after successful execution
+    );
+
+    console.log("Insert result: ", result);
+
+    // Send success response
+    res.status(201).json({ message: "Calorie record added successfully." });
+  } catch (error) {
+    console.error("Error inserting calorie data:", error);
+
+    // Send error response
+    res.status(500).json({ error: "Internal Server Error" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing the connection:", err);
+      }
+    }
+  }
+});
+
+app.get("/calorie-data/:date", async (req, res) => {
+  let conn;
+  try {
+    conn = await connection();
+    const result = await conn.execute(
+      "SELECT food_item, calories FROM Calorietracker WHERE entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD')",
+      { entry_date: req.params.date }
+    );
+    console.log("Fetched user data for date:", req.params.date, result.rows);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error during fetching user data:", err);
+    res.status(500).json({ error: "Database query failed" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing the connection:", err);
+      }
+    }
+  }
+});
+
+app.get("/totalcal/:date", async (req, res) => {
+  const { date } = req.params;
+  const userId = req.query.userId;
+
+  let conn;
+  try {
+    conn = await connection();
+    const query = `
+      SELECT SUM(calories) as total_calories 
+      FROM Calorietracker 
+      WHERE entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD') AND user_id = :userId
+    `;
+    const result = await conn.execute(query, {
+      entry_date: date,
+      userId: userId,
+    });
+
+    // Ensure you extract the first item from the rows and get the total_calories
+    const totalCalories =
+      result.rows.length > 0 ? result.rows[0].TOTAL_CALORIES : 0;
+    console.log("Total Calories:", totalCalories);
+
+    // Send the totalCalories as JSON
+    res.json({ total_calories: totalCalories });
+  } catch (error) {
+    console.error("Error fetching total calories:", error);
+    res.status(500).json({ error: "Failed to fetch total calories" });
+  } finally {
+    if (conn) {
+      await conn.close();
+    }
+  }
+});
