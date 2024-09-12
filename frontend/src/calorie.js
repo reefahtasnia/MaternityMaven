@@ -71,6 +71,8 @@ const CalorieTracker = () => {
 
   const handleSuggestionClick = (suggestion) => {
     setFoodItem(suggestion.food_name); // Set the clicked suggestion to the input field
+    console.log(suggestion.food_name);
+    console.log(suggestion.calories);
     setSuggestions([]); // Clear suggestions
     setShowSuggestions(false); // Hide suggestions after selection
   };

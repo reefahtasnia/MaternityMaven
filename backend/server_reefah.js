@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -1261,6 +1261,7 @@ app.get("/search-food-items", async (req, res) => {
   let conn;
   try {
     conn = await connection();
+    console.log("Received query:", query);
 
     const result = await conn.execute(
       `
@@ -1272,12 +1273,14 @@ app.get("/search-food-items", async (req, res) => {
       `,
       { query: `%${query}%` } // Use named bind parameters for clarity and security
     );
+    console.log("Raw result from database:", result);
 
     // Format the result to ensure it returns an array of objects with proper keys
-    const formattedResult = result.rows.map(row => ({
-      food_name: row[0],
-      calories: row[1]
+    const formattedResult = result.rows.map((row) => ({
+      food_name: row["FOOD_NAME"],
+      calories: row["NUTRITION_DETAILS.CALORIES"],
     }));
+    console.log("Formatted result: ", formattedResult);
 
     res.json(formattedResult);
   } catch (error) {
