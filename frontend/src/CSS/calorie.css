@@ -171,4 +171,16 @@
 .delete-btn:hover {
   color: darkred;
 }
+.progress-circle-container {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+}
+
+.calorie-tracker h2 {
+  color: #e91e63;
+  margin-top: 30px;
+  text-align: center;
+}
+
 

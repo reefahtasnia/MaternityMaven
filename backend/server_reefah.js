@@ -1371,8 +1371,17 @@ app.get("/calorie-data/:date", async (req, res) => {
       "SELECT food_item, calories FROM Calorietracker WHERE entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD')",
       { entry_date: req.params.date }
     );
-    console.log("Fetched user data for date:", req.params.date, result.rows);
-    res.json(result.rows);
+    const formattedResult = result.rows.map((row) => ({
+      foodItem: row["FOOD_ITEM"], // Assuming the first column is food_item
+      calories: row["CALORIES"], // Assuming the second column is calories
+    }));
+
+    console.log(
+      "Fetched user data for date:",
+      req.params.date,
+      formattedResult
+    );
+    res.json(formattedResult); // Send the formatted response
   } catch (err) {
     console.error("Error during fetching user data:", err);
     res.status(500).json({ error: "Database query failed" });
@@ -1417,6 +1426,59 @@ app.get("/totalcal/:date", async (req, res) => {
   } finally {
     if (conn) {
       await conn.close();
+    }
+  }
+});
+
+app.get("/getnutri/:food", async (req, res) => {
+  const { food } = req.params; // Extract the food name from the request params
+  let conn;
+
+  try {
+    // Establish a connection to the database
+    conn = await connection();
+
+    // Query to fetch the protein, carbohydrates, and fat details for the food item
+    const query = `
+      SELECT 
+        f.nutrition_details.protein, 
+        f.nutrition_details.carbohydrates, 
+        f.nutrition_details.fat
+      FROM 
+        foodlist f 
+      WHERE 
+        LOWER(f.food_name) = LOWER(:food)
+    `;
+
+    // Execute the query, passing the food name as a parameter object
+    const result = await conn.execute(query, { food });
+
+    // Log the structure of result.rows for debugging purposes
+    console.log(result.rows);
+
+    const formattedResult = result.rows.map((row) => ({
+      protein: row["NUTRITION_DETAILS.PROTEIN"], // Assuming the first column is food_item
+      carbohydrates: row["NUTRITION_DETAILS.CARBOHYDRATES"],
+      fat: row["NUTRITION_DETAILS.FAT"],
+    }));
+
+    console.log(
+      "Fetched nutitional data:",
+
+      formattedResult
+    );
+    res.json(formattedResult); // Send the formatted response
+  } catch (error) {
+    console.error("Error fetching nutrition data:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  } finally {
+    // Always close the database connection when done
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing the connection:", err);
+      }
     }
   }
 });

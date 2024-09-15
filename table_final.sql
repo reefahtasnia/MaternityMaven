@@ -143,17 +143,6 @@ CREATE TABLE Calorietracker (
     FOREIGN KEY (user_id) REFERENCES Users(userid)
 );
 
-CREATE TABLE Calorietracker (
-    food_item VARCHAR2(255),
-    user_id INT,
-    serving INT,
-    calories INT,
-    meal_type VARCHAR2(255),
-    date DATE,
-    time TIME,
-    FOREIGN KEY (user_id) REFERENCES Users(userid)
-);
-
 
 
 CREATE TABLE products (

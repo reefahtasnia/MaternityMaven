@@ -30,6 +30,7 @@ function App() {
           {<Route path="/" element={<Home />} />}
           <Route element={<PrivateComponent />}>
             <Route path="/Patient" element={<UserProfile />} />
+            <Route path="/Doctor" element={<DoctorProfile />} />
             <Route path="/Medicinetracker" element={<MedicineTracker />} />
             <Route path="/Calorietracker" element={<CalorieTracker />} />
             <Route path="/Medicalhistory" element={<Medical />} />
@@ -39,7 +40,6 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/DoctorSignup" element={<DoctorSignup />} />
-          <Route path="/Doctor" element={<DoctorProfile />} />
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/reset" element={<ResetPassword />} />
