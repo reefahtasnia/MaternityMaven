@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import "./CSS/calorie.css";
+import {
+  CircularProgressbarWithChildren,
+  buildStyles,
+} from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css"; // Import the CSS for the progress bar
+import "./CSS/calorie.css"; // Your custom CSS file
 
 const CalorieTracker = () => {
   const [date, setDate] = useState("");
@@ -11,6 +16,12 @@ const CalorieTracker = () => {
   const [foodList, setFoodList] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [protein, setProtein] = useState(0);
+  const [carbs, setCarbs] = useState(0);
+  const [lipids, setLipids] = useState(0);
+  const [hoveredNutrient, setHoveredNutrient] = useState(""); // To track hovered section
+
+  const maxCalories = 2000; // Set a daily calorie goal (for example)
 
   const getUserFromLocalStorage = () => {
     const userString = localStorage.getItem("user");
@@ -26,14 +37,27 @@ const CalorieTracker = () => {
   const userId = auth ? auth.userId : null;
   console.log("Retrieved userId:", userId);
 
+  // Load saved nutritional data from localStorage on page load
   useEffect(() => {
     setDefaultDate();
+    loadNutritionalData(); // Load saved values from localStorage
   }, []);
 
   const setDefaultDate = () => {
     const today = new Date().toISOString().split("T")[0];
     setDate(today);
     updateCalorieDisplay(today);
+  };
+
+  // Function to load nutritional data from localStorage
+  const loadNutritionalData = () => {
+    const savedProtein = localStorage.getItem("protein");
+    const savedCarbs = localStorage.getItem("carbs");
+    const savedLipids = localStorage.getItem("lipids");
+
+    if (savedProtein) setProtein(Number(savedProtein));
+    if (savedCarbs) setCarbs(Number(savedCarbs));
+    if (savedLipids) setLipids(Number(savedLipids));
   };
 
   const updateCalorieDisplay = async (selectedDate) => {
@@ -147,6 +171,59 @@ const CalorieTracker = () => {
     } catch (error) {
       console.error("Error submitting user data:", error);
     }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/getnutri/${foodItem.toLowerCase()}`
+      );
+
+      if (response.ok) {
+        const nutritionData = await response.json();
+        console.log(nutritionData); // Log the fetched data to see if it's correct
+
+        // Check if the response is an array and contains at least one item
+        if (Array.isArray(nutritionData) && nutritionData.length > 0) {
+          const {
+            protein: newProtein,
+            carbohydrates: newCarbs,
+            fat: newLipids,
+          } = nutritionData[0]; // Access the first item in the array
+
+          // Log to confirm the fetched values
+          console.log(
+            "Fetched Protein:",
+            newProtein,
+            "Carbs:",
+            newCarbs,
+            "Lipids:",
+            newLipids
+          );
+
+          // Update the state for protein, carbs, and lipids and save to localStorage
+          setProtein((prevProtein) => {
+            const updatedProtein = prevProtein + newProtein * servings;
+            localStorage.setItem("protein", updatedProtein); // Save to localStorage
+            return updatedProtein;
+          });
+          setCarbs((prevCarbs) => {
+            const updatedCarbs = prevCarbs + newCarbs * servings;
+            localStorage.setItem("carbs", updatedCarbs); // Save to localStorage
+            return updatedCarbs;
+          });
+          setLipids((prevLipids) => {
+            const updatedLipids = prevLipids + newLipids * servings;
+            localStorage.setItem("lipids", updatedLipids); // Save to localStorage
+            return updatedLipids;
+          });
+        } else {
+          console.error("No nutritional data found.");
+        }
+      } else {
+        console.error("Failed to fetch nutritional data.");
+      }
+    } catch (error) {
+      console.error("Error fetching nutritional data:", error);
+    }
   };
 
   const handleDelete = async (foodItem) => {
@@ -181,11 +258,38 @@ const CalorieTracker = () => {
     setMealtype(event.target.value);
   };
 
+  // Debugging logs
+  console.log("Protein:", protein, "Carbs:", carbs, "Lipids:", lipids);
+
+  const proteinPercent = totalCalories
+    ? ((protein * 4) / totalCalories) * 100
+    : 0; // 4 kcal per gram of protein
+  const carbsPercent = totalCalories ? ((carbs * 4) / totalCalories) * 100 : 0; // 4 kcal per gram of carbs
+  const lipidsPercent = totalCalories
+    ? ((lipids * 9) / totalCalories) * 100
+    : 0; // 9 kcal per gram of lipids
+
+  // Debugging logs
+  console.log("Protein:", protein, "Carbs:", carbs, "Lipids:", lipids);
+
   return (
     <div className="calorie-tracker">
       <div className="container">
         <h1>Calorie Counter</h1>
         <form id="calorie-form" onSubmit={handleSubmit}>
+          {/* <label htmlFor="trimester">Which trimester are you in? </label>
+          <select
+            id="trimester"
+            name="trimester"
+            value={trimester}
+            onChange={handleMealtypeChange}
+            required
+          >
+            <option value="">Select Meal Type</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+          </select> */}
           <label htmlFor="date">Date:</label>
           <input
             type="date"
@@ -250,11 +354,112 @@ const CalorieTracker = () => {
           <button type="submit">Add</button>
           <button type="button">Plan a Custom Diet</button>
         </form>
+        {/* Circular Multi-Progress Bar for Protein, Carbs, Lipids and Calories */}
+        <div className="progress-circle-wrapper">
+          <div
+            className="progress-circle-container"
+            style={{ width: 200, height: 200, margin: "30px auto" }}
+          >
+            <CircularProgressbarWithChildren
+              value={(totalCalories / maxCalories) * 100}
+              styles={buildStyles({
+                pathColor: "#e91e63", // Pink for total calories
+                trailColor: "#f0f0f0",
+                strokeLinecap: "butt",
+              })}
+            >
+              {/* Protein layer */}
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 3, // Ensure protein layer is on top
+                }}
+              >
+                <CircularProgressbarWithChildren
+                  value={proteinPercent}
+                  styles={buildStyles({
+                    pathColor: "#4CAF50", // Green for protein
+                    trailColor: "transparent", // Transparent to layer correctly
+                  })}
+                />
+              </div>
 
-        <h2>
-          Total Calories: <span id="total-calories">{totalCalories}</span>
-        </h2>
+              {/* Carbs layer */}
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 2, // Carbs layer below protein
+                }}
+              >
+                <CircularProgressbarWithChildren
+                  value={carbsPercent}
+                  styles={buildStyles({
+                    pathColor: "#2196F3", // Blue for carbs
+                    trailColor: "transparent", // Transparent to layer correctly
+                  })}
+                />
+              </div>
 
+              {/* Lipids layer */}
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 1, // Lipids layer below protein and carbs
+                }}
+              >
+                <CircularProgressbarWithChildren
+                  value={lipidsPercent}
+                  styles={buildStyles({
+                    pathColor: "#FFC107", // Yellow for lipids
+                    trailColor: "transparent", // Transparent to layer correctly
+                  })}
+                />
+              </div>
+
+              {/* Inner text showing total calories */}
+              <div style={{ fontSize: 20, marginTop: -5 }}>
+                <strong>{totalCalories} Cal</strong>
+              </div>
+            </CircularProgressbarWithChildren>
+          </div>
+
+          {/* Legend Section */}
+          <div className="legend-container">
+            <div className="legend-item">
+              <div
+                className="legend-color"
+                style={{ backgroundColor: "#4CAF50" }} // Green for protein
+              ></div>
+              <span>Protein: {protein}</span>
+            </div>
+            <div className="legend-item">
+              <div
+                className="legend-color"
+                style={{ backgroundColor: "#2196F3" }} // Blue for carbs
+              ></div>
+              <span>Carbohydrates: {carbs}</span>
+            </div>
+            <div className="legend-item">
+              <div
+                className="legend-color"
+                style={{ backgroundColor: "#FFC107" }} // Yellow for lipids
+              ></div>
+              <span>Fat: {lipids}</span>
+            </div>
+          </div>
+        </div>
         <div className="food-list">
           <h3>Food Log</h3>
           {foodList.length > 0 ? (
