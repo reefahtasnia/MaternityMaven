@@ -1,64 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './CSS/home.css';
-import pregnancyPillow from './CSS/assets/pregnancypillow.jpeg';
-import prenatalVitamins from './CSS/assets/prenatal_vitamins.jpg';
-import diaper from './CSS/assets/diaper.png';
-import babyWipes from './CSS/assets/baby_wipes.jpg';
-import maternityDress from './CSS/assets/maternity_dress.png';
-import stretchMarkOil from './CSS/assets/stretch_mark_oil.jpg';
 import './CSS/shop.css';
 import axios from 'axios';
 
-const products = [
-  {
-    id: 1,
-    image: pregnancyPillow,
-    title: 'Pregnancy Pillow',
-    price: '130.00',
-    quantity: '1'
-  },
-  {
-    id: 2,
-    image: prenatalVitamins,
-    title: 'Vitamins',
-    price: '150.00',
-    quantity: '1'
-  },
-  {
-    id: 3,
-    image: diaper,
-    title: 'Diapers',
-    price: '200.00',
-    quantity: '1'
-  },
-  {
-    id: 4,
-    image: babyWipes,
-    title: 'Baby Wipes',
-    price: '80.00',
-    quantity: '1'
-  },
-  {
-    id: 5,
-    image: maternityDress,
-    title: 'Maternity Dresses',
-    price: '300.00',
-    quantity: '1'
-  },
-  {
-    id: 6,
-    image: stretchMarkOil,
-    title: 'Stretch Mark Oil',
-    price: '100.00',
-    quantity: '1'
-  }
-];
 
 
 
 const Shop = () => {
+  const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [checkboxes, setCheckboxes] = useState({
     all: false,
@@ -83,6 +34,25 @@ const Shop = () => {
   const auth = getUserFromLocalStorage();
   const userId = auth ? auth.userId : null;
   console.log("Retrieved userId:", userId); // Debug log the userId
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/products');
+        console.log("eh" ,response.data);
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+     if(products.length == 0) return ;
+      console.log("Products:", products);
+  },[products]);
+
 
   const addToCart = async (product) => {
     try {
@@ -209,16 +179,16 @@ const Shop = () => {
           </Link>
               </div>
             </div>
-            {products.map((product, index) => (
+              { products.length>0 ? products.map((product, index) => (
               <div className="col-lg-4 col-md-6 col-sm-12 pb-1" key={index}>
                 <div className="card product-item border-0 mb-4">
                   <div className="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                    <img className="img-fluid w-100" src={product.image} alt={product.title} />
+                    <img className="img-fluid w-100" src={product.IMAGE} alt={product.PRODUCT_NAME} />
                   </div>
                   <div className="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                    <h6 className="text-truncate mb-3">{product.title}</h6>
+                    <h6 className="text-truncate mb-3">{product.PRODUCT_NAME}</h6>
                     <div className="d-flex justify-content-center">
-                      <h6>{product.price}</h6>
+                      <h6>{product.PRICE}</h6>
                     </div>
                   </div>
                   <div className="card-footer d-flex justify-content-between bg-light border">
@@ -228,7 +198,7 @@ const Shop = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            )): <h1>Loading...</h1>}
             <div className="col-12 pb-1">
               <nav aria-label="Page navigation">
                 <ul className="pagination justify-content-center mb-3">

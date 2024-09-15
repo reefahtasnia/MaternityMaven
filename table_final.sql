@@ -156,7 +156,7 @@ CREATE TABLE Calorietracker (
 
 
 
-CREATE TABLE Shop (
+CREATE TABLE products (
     productId NUMBER PRIMARY KEY,
     product_name VARCHAR2(255) NOT NULL,
     price NUMBER NOT NULL,
@@ -173,13 +173,7 @@ CREATE TABLE Places (
     FOREIGN KEY (order_item_id) REFERENCES Order_Item(order_item_id)
 );
 
-CREATE TABLE cart (
-  productid NUMBER PRIMARY KEY,
-  title VARCHAR2(255),
-  price NUMBER,
-  image VARCHAR2(255),
-  quantity NUMBER
-);
+
 
 CREATE TABLE Admin (
     admin_id INT PRIMARY KEY,
