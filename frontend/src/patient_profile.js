@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./CSS/userprofile.css"; // Adjust the path as necessary
-import { FaShoppingCart } from "react-icons/fa"; 
+import { FaShoppingCart } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
 const UserProfile = () => {
@@ -17,43 +17,67 @@ const UserProfile = () => {
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState("");
   const [country, setCountry] = useState("");
+  const [calorieData, setCalorieData] = useState([]);
+  const [hasFetchedCalorieData, setHasFetchedCalorieData] = useState(false);
+  const [hasFetchedProfileData, setHasFetchedProfileData] = useState(false);
   const capitalizeWords = (string) => {
-    return string.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    return string.toLowerCase().replace(/(?:^|\s)\S/g, function (a) {
+      return a.toUpperCase();
+    });
   };
   useEffect(() => {
     if (auth && auth.userId) {
-      const url = `http://localhost:5000/api/user?userId=${auth.userId}`;
-      fetch(url)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP status ${response.status}`);
+      const fetchUserData = async () => {
+        try {
+          // Fetch user data
+          const userDataUrl = `http://localhost:5000/api/user?userId=${auth.userId}`;
+          const userResponse = await fetch(userDataUrl);
+          if (!userResponse.ok) {
+            throw new Error(`HTTP status ${userResponse.status}`);
           }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Fetched user data:", data);
-          localStorage.setItem("userdata", JSON.stringify(data));
-          console.log("User data stored in local storage"+localStorage.getItem("userdata")); 
-          setProfileData(data);
-        })
-        .catch((error) => {
-          console.error("Failed to fetch user:", error.message);
-          alert(`Failed to load user data: ${error.message}`);
-        });
+          const userData = await userResponse.json();
+          console.log("Fetched user data:", userData);
+          setProfileData(userData);
+
+          // Fetch calorie data if not already fetched
+          if (!hasFetchedCalorieData) {
+            const calorieDataUrl = `http://localhost:5000/api/calorie-data?userId=${auth.userId}`;
+            const calorieResponse = await fetch(calorieDataUrl);
+            if (!calorieResponse.ok) {
+              throw new Error(`HTTP status ${calorieResponse.status}`);
+            }
+            const fetchedCalorieData = await calorieResponse.json();
+            console.log("Fetched calorie data:", fetchedCalorieData);
+            setCalorieData(fetchedCalorieData);
+            setHasFetchedCalorieData(true);
+          }
+        } catch (error) {
+          console.error("Failed to fetch data:", error.message);
+          alert(`Failed to load data: ${error.message}`);
+        }
+      };
+
+      fetchUserData();
     }
-  }, []);
+  }, []); // Empty dependency array to run only once on component mount
 
   const setProfileData = (data) => {
     try {
       // Assuming `ADDRESS` is null, handle address gracefully if it's present later
-      const address = data.ADDRESS || {}; 
-  
-      setFullName(capitalizeWords(`${data.FIRSTNAME || ""} ${data.LASTNAME || ""}`)); 
-      setEmail(data.EMAIL ? data.EMAIL.toLowerCase() : ""); 
-      setDob(data.DATE_OF_BIRTH ? new Date(data.DATE_OF_BIRTH).toISOString().slice(0, 10) : ""); 
-      setPhone(data.PHONE_NUMBER || ""); 
+      const address = data.ADDRESS || {};
+
+      setFullName(
+        capitalizeWords(`${data.FIRSTNAME || ""} ${data.LASTNAME || ""}`)
+      );
+      setEmail(data.EMAIL ? data.EMAIL.toLowerCase() : "");
+      setDob(
+        data.DATE_OF_BIRTH
+          ? new Date(data.DATE_OF_BIRTH).toISOString().slice(0, 10)
+          : ""
+      );
+      setPhone(data.PHONE_NUMBER || "");
       setBloodGroup(data.BLOOD_GROUP || "");
-  
+
       // If `ADDRESS` is null, these fields will be set to empty
       setStreet(capitalizeWords(address.STREET || ""));
       setRegion(capitalizeWords(address.REGION || ""));
@@ -77,15 +101,15 @@ const UserProfile = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-  
+
     const nameParts = fullName.trim().split(" ");
     const firstname = nameParts[0];
-    const lastname = nameParts.slice(1).join(" "); 
-  
+    const lastname = nameParts.slice(1).join(" ");
+
     const updatedUser = {
       userId: auth.userId,
-      firstname, 
-      lastname,   
+      firstname,
+      lastname,
       email,
       dob,
       phone,
@@ -93,11 +117,11 @@ const UserProfile = () => {
       street,
       region,
       district,
-      country
+      country,
     };
-  
+
     console.log("Saving updated user data:", updatedUser);
-  
+
     fetch(`http://localhost:5000/api/user/update`, {
       method: "POST",
       headers: {
@@ -124,7 +148,6 @@ const UserProfile = () => {
         alert("An error occurred during profile update");
       });
   };
-  
   return (
     <div className="profile-container">
       <div className="profile-content">
@@ -221,7 +244,7 @@ const UserProfile = () => {
                 onChange={(e) => setBloodGroup(e.target.value)}
               />
             </div>
-            
+
             <div className="profile-detail">
               <label className="profile-detail-label">
                 House No. & Road No.
@@ -259,33 +282,80 @@ const UserProfile = () => {
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
               />
-            </div> 
+            </div>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Medicine Reminders</h3>
-          <button className="profile-section-button" onClick={() => window.location.href = '/Medicinetracker'}>Edit</button>
+          <button
+            className="profile-section-button"
+            onClick={() => (window.location.href = "/Medicinetracker")}
+          >
+            Edit
+          </button>
           <div className="profile-section-content">
             <p>No upcoming reminders.</p>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Calories Intake</h3>
-          <button className="profile-section-button" onClick={() => window.location.href = '/Calorietracker'}>Edit</button>
+          <button
+            className="profile-section-button"
+            onClick={() => (window.location.href = "/Calorietracker")}
+          >
+            Edit
+          </button>
           <div className="profile-section-content">
-            <p>No data entered.</p>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Food Item</th>
+                  <th>Calories</th>
+                  <th>Meal Type</th>
+                  <th>Servings</th>
+                  <th>Protein (g)</th>
+                  <th>Carbs (g)</th>
+                  <th>Fat (g)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {calorieData.map((entry, index) => (
+                  <tr key={index}>
+                    <td>{new Date(entry.date).toLocaleDateString()}</td>
+                    <td>{capitalizeWords(entry.foodItem)}</td>
+                    <td>{entry.calories}</td>
+                    <td>{entry.mealType}</td>
+                    <td>{entry.servings}</td>
+                    <td>{entry.protein}</td>
+                    <td>{entry.carbohydrates}</td>
+                    <td>{entry.fat}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Medical History</h3>
-          <button className="profile-section-button" onClick={() => window.location.href = '/Medicalhistory'}>Edit</button>
+          <button
+            className="profile-section-button"
+            onClick={() => (window.location.href = "/Medicalhistory")}
+          >
+            Edit
+          </button>
           <div className="profile-section-content">
             <p>No known medical conditions.</p>
           </div>
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Upcoming Appointments</h3>
-          <button className="profile-section-button" onClick={() => window.location.href = '/Appointment'}>Add</button>
+          <button
+            className="profile-section-button"
+            onClick={() => (window.location.href = "/Appointment")}
+          >
+            Add
+          </button>
           <div className="profile-section-content">
             <p>No upcoming appointments.</p>
           </div>

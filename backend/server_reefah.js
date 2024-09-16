@@ -1458,3 +1458,37 @@ app.get("/getnutri/:food", async (req, res) => {
     }
   }
 });
+app.get("/api/calorie-data", async (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  const query = `
+    SELECT ct.food_item, ct.calories, ct.meal_type, ct.serving, ct.entry_date,
+           fn.NUTRITION_DETAILS.protein, fn.NUTRITION_DETAILS.carbohydrates, fn.NUTRITION_DETAILS.fat
+    FROM Calorietracker ct
+    JOIN foodlist fn ON UPPER(ct.food_item) = UPPER(fn.food_name)
+    WHERE ct.user_id = :userId
+  `;
+
+  try {
+    const results = await run_query(query, { userId: userId });
+    const data = results.map(row => ({
+      date: row.ENTRY_DATE,
+      calories: row.CALORIES,
+      foodItem: row.FOOD_ITEM,
+      mealType: row.MEAL_TYPE,
+      servings: row.SERVING,
+      protein: row['NUTRITION_DETAILS.PROTEIN'],  // Access using the exact field names
+      carbohydrates: row['NUTRITION_DETAILS.CARBOHYDRATES'],  // Access using the exact field names
+      fat: row['NUTRITION_DETAILS.FAT']  // Access using the exact field names
+    }));
+    console.log(data);
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching calorie data:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});

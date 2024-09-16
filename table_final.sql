@@ -116,13 +116,13 @@ CREATE TABLE Books (
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (appointment_id) REFERENCES Appointment(appointment_id)
 );
-// Calorie Tracker needs two tables.
+--Calorie Tracker needs two tables.
 
 CREATE TYPE nutrition_facts AS OBJECT (
     calories DECIMAL(5, 2),
     protein DECIMAL(5, 2),
     carbohydrates DECIMAL(5, 2),
-    fat DECIMAL(5, 2),
+    fat DECIMAL(5, 2)
 );
 
 Create table foodlist (
@@ -142,19 +142,6 @@ CREATE TABLE Calorietracker (
     entry_time TIMESTAMP,  -- Changed from TIME to TIMESTAMP
     FOREIGN KEY (user_id) REFERENCES Users(userid)
 );
-
-CREATE TABLE Calorietracker (
-    food_item VARCHAR2(255),
-    user_id INT,
-    serving INT,
-    calories INT,
-    meal_type VARCHAR2(255),
-    date DATE,
-    time TIME,
-    FOREIGN KEY (user_id) REFERENCES Users(userid)
-);
-
-
 
 CREATE TABLE Shop (
     productId NUMBER PRIMARY KEY,
