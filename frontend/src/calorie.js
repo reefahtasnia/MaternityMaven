@@ -19,7 +19,7 @@ const CalorieTracker = () => {
   const [protein, setProtein] = useState(0);
   const [carbs, setCarbs] = useState(0);
   const [lipids, setLipids] = useState(0);
-  const [hoveredNutrient, setHoveredNutrient] = useState(""); // To track hovered section
+  const [trimester, setTrimester] = useState("");
 
   const maxCalories = 2000; // Set a daily calorie goal (for example)
 

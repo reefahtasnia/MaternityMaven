@@ -143,13 +143,24 @@ CREATE TABLE Calorietracker (
     FOREIGN KEY (user_id) REFERENCES Users(userid)
 );
 
-CREATE TABLE Shop (
+
+
+CREATE TABLE products (
     productId NUMBER PRIMARY KEY,
     product_name VARCHAR2(255) NOT NULL,
     price NUMBER NOT NULL,
     stock NUMBER NOT NULL,
     image VARCHAR2(255) NOT NULL
 );
+
+INSERT INTO Shop (productId, product_name, price, stock, image)
+VALUES
+(1, 'Pregnancy Pillow', 130.00, 1, '/assets/pregnancypillow.jpeg'),
+(2, 'Vitamins', 150.00, 1, '/assets/prenatal_vitamins.jpg'),
+(3, 'Diapers', 200.00, 1, '/assets/diaper.png'),
+(4, 'Baby Wipes', 80.00, 1, '/assets/baby_wipes.jpg'),
+(5, 'Maternity Dresses', 300.00, 1, '/assets/maternity_dress.png');
+
 
 CREATE TABLE Places (
     user_id INT,
@@ -160,13 +171,7 @@ CREATE TABLE Places (
     FOREIGN KEY (order_item_id) REFERENCES Order_Item(order_item_id)
 );
 
-CREATE TABLE cart (
-  productid NUMBER PRIMARY KEY,
-  title VARCHAR2(255),
-  price NUMBER,
-  image VARCHAR2(255),
-  quantity NUMBER
-);
+
 
 CREATE TABLE Admin (
     admin_id INT PRIMARY KEY,
