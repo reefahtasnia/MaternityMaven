@@ -1,6 +1,7 @@
 import oracledb from "oracledb";
 import dotenv from "dotenv";
 
+
 //oracle.outFormat = oracle.OUT_FORMAT_OBJECT;
 
 dotenv.config();
