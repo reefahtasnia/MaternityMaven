@@ -19,7 +19,8 @@ const UserProfile = () => {
   const [country, setCountry] = useState("");
   const [calorieData, setCalorieData] = useState([]);
   const [hasFetchedCalorieData, setHasFetchedCalorieData] = useState(false);
-  const [hasFetchedProfileData, setHasFetchedProfileData] = useState(false);
+  const [medicineReminders, setMedicineReminders] = useState([]);
+  const [medicalHistory, setMedicalHistory] = useState([]);
   const capitalizeWords = (string) => {
     return string.toLowerCase().replace(/(?:^|\s)\S/g, function (a) {
       return a.toUpperCase();
@@ -56,8 +57,44 @@ const UserProfile = () => {
           alert(`Failed to load data: ${error.message}`);
         }
       };
-
+      const fetchMedicineReminders = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/medicine-reminders?userId=${auth.userId}`
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+          }
+          const data = await response.json();
+          setMedicineReminders(data);
+        } catch (error) {
+          console.error("Failed to fetch medicine reminders:", error.message);
+        }
+      };
+      const fetchMedicalHistory = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/medicalhistory?userId=${auth.userId}`
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+          }
+          const data = await response.json();
+          console.log("Fetched medical history:", data);
+          if (data.length === 0) {
+            console.log(
+              "No medical history entries found for user:",
+              auth.userId
+            );
+          }
+          setMedicalHistory(data);
+        } catch (error) {
+          console.error("Failed to fetch medical history:", error.message);
+        }
+      };
       fetchUserData();
+      fetchMedicineReminders();
+      fetchMedicalHistory();
     }
   }, []); // Empty dependency array to run only once on component mount
 
@@ -190,7 +227,10 @@ const UserProfile = () => {
           <div className="profile-header-info">
             <h2 className="profile-name">{fullName || "John Doe"}</h2>
             <p className="profile-email">{email || "johndoe@gmail.com"}</p>
-            <button className="my-cart-button">
+            <button
+              className="my-cart-button"
+              onClick={() => (window.location.href = "/cart")}
+            >
               <FaShoppingCart className="cart-icon" />
               My Cart
             </button>
@@ -294,7 +334,32 @@ const UserProfile = () => {
             Edit
           </button>
           <div className="profile-section-content">
-            <p>No upcoming reminders.</p>
+            {medicineReminders.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Dosage</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {medicineReminders.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.MEDICINE_NAME}</td>
+                      <td>{item.DOSAGE}</td>
+                      <td>
+                        {new Date(
+                          "1970-01-01T" + item.TIME + "Z"
+                        ).toLocaleTimeString("en-US", { timeStyle: "short" })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No upcoming reminders.</p>
+            )}
           </div>
         </div>
         <div className="profile-section">
@@ -345,7 +410,30 @@ const UserProfile = () => {
             Edit
           </button>
           <div className="profile-section-content">
-            <p>No known medical conditions.</p>
+            {medicalHistory.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Year of Incident</th>
+                    <th>Incident</th>
+                    <th>Treatment</th>
+                    <th>Age of Incident</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {medicalHistory.map((entry, index) => (
+                    <tr key={index}>
+                      <td>{entry.INCIDENT_YEAR}</td>
+                      <td>{entry.INCIDENT}</td>
+                      <td>{entry.TREATMENT}</td>
+                      <td>{entry["Age of Incident"]}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No medical history found.</p>
+            )}
           </div>
         </div>
         <div className="profile-section">

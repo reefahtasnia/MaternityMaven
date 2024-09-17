@@ -10,6 +10,7 @@ CREATE OR REPLACE TYPE Address_Type AS OBJECT (
     Country  VARCHAR2(50)
 );
 /
+
 CREATE TABLE Users (
     userid NUMBER DEFAULT user_id_seq.NEXTVAL NOT NULL,
     firstname VARCHAR(50) NOT NULL,
@@ -28,6 +29,29 @@ CREATE TABLE Users (
 ALTER TABLE USERS 
 ADD CONSTRAINT CHK_PHONE CHECK (LENGTH(PHONE_NUMBER) BETWEEN 11 AND 16);
 
+--WARNING HERE NEW ADDITIONS!!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--new additions
+ALTER TABLE Users
+ADD age NUMBER;
+
+CREATE OR REPLACE PROCEDURE UpdateUserAges IS
+BEGIN
+    UPDATE Users
+    SET age = FLOOR(MONTHS_BETWEEN(SYSDATE, date_of_birth) / 12)
+    WHERE date_of_birth IS NOT NULL;
+    
+    COMMIT;
+END UpdateUserAges;
+/
+
+CREATE OR REPLACE VIEW MedicalHistoryView AS
+SELECT m.user_id, m.year AS incident_year, m.incident, m.treatment,
+       u.firstname, u.lastname, u.date_of_birth,
+       (m.year - EXTRACT(YEAR FROM u.date_of_birth)) AS age_of_incident
+FROM Medical_History m
+JOIN Users u ON m.user_id = u.userid;
+
+--new additions end up to above~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CREATE TABLE Doctors (
     BMDC VARCHAR(100) NOT NULL,
@@ -142,7 +166,6 @@ CREATE TABLE Calorietracker (
     entry_time TIMESTAMP,  -- Changed from TIME to TIMESTAMP
     FOREIGN KEY (user_id) REFERENCES Users(userid)
 );
-
 
 
 CREATE TABLE products (

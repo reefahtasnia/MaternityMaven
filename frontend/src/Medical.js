@@ -26,30 +26,15 @@ const Medical = () => {
       );
       console.log("Operation count API response:", response.data);
 
-      // Check if response.data.rows is an array and has at least one item
-      if (
-        response.data &&
-        Array.isArray(response.data.rows) &&
-        response.data.rows.length > 0
-      ) {
-        const operationCount = response.data.rows[0]?.OPERATION_COUNT;
-
-        if (typeof operationCount === "number") {
-          setOperationCount(operationCount);
-        } else {
-          console.error(
-            "Unexpected format of OPERATION_COUNT:",
-            response.data.rows[0]
-          );
-        }
+      if (typeof response.data.operationCount === "number") {
+        setOperationCount(response.data.operationCount);
       } else {
-        console.error("No rows found in the response:", response.data);
+        console.error("Unexpected response format:", response.data);
       }
     } catch (error) {
       console.error("Error fetching operation count", error);
     }
   }, [auth.userId]);
-
   // useCallback to memoize the fetchFullHistory function to prevent re-creation on every render
   const fetchFullHistory = useCallback(async () => {
     try {
@@ -150,134 +135,136 @@ const Medical = () => {
   }
 
   return (
-    <div className="container mt-4">
-      <div className="card">
-        <div className="card-header">
-          <h3>Medical History</h3>
-          <h4>Total Operations: {operationCount}</h4>
-        </div>
-        <div className="card-body">
-          {viewHistory ? (
-            <div>
-              <h4>Full Medical History</h4>
-              <table className="table table-striped blue-table">
-                <thead>
-                  <tr>
-                    <th>Select</th>
-                    <th>Year</th>
-                    <th>Incident</th>
-                    <th>Treatment</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {fullHistory.length > 0 ? (
-                    fullHistory.map((entry, index) => (
-                      <tr key={index}>
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={selectedRows.includes(index)}
-                            onChange={() => toggleRowSelection(index)}
-                          />
-                        </td>
-                        <td>{entry.YEAR}</td> {/* Access YEAR */}
-                        <td>{entry.INCIDENT}</td> {/* Access INCIDENT */}
-                        <td>{entry.TREATMENT}</td> {/* Access TREATMENT */}
-                      </tr>
-                    ))
-                  ) : (
+    <div className="medical_history">
+      <div className="container mt-4">
+        <div className="card">
+          <div className="card-header">
+            <h3>Medical History</h3>
+            <h4>Total Operations: {operationCount}</h4>
+          </div>
+          <div className="card-body">
+            {viewHistory ? (
+              <div>
+                <h4>Full Medical History</h4>
+                <table className="table table-striped blue-table">
+                  <thead>
                     <tr>
-                      <td colSpan="4">No medical history found.</td>
+                      <th>Select</th>
+                      <th>Year</th>
+                      <th>Incident</th>
+                      <th>Treatment</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-              <div className="d-flex justify-content-between mt-2">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setViewHistory(false)}
-                >
-                  Back
-                </button>
-                <button className="btn btn-danger" onClick={handleDelete}>
-                  Delete Selected
-                </button>
-              </div>
-            </div>
-          ) : (
-            <form id="medical-history-form" onSubmit={handleSave}>
-              <table className="table table-striped blue-table">
-                <thead>
-                  <tr>
-                    <th>Year</th>
-                    <th>Incident</th>
-                    <th>Treatment</th>
-                  </tr>
-                </thead>
-                <tbody id="medicalHistoryTableBody">
-                  {medicalHistory.map((entry, index) => (
-                    <tr key={index}>
-                      <td>
-                        <select
-                          className="form-input"
-                          value={entry.year}
-                          onChange={(e) =>
-                            handleChange(index, "year", e.target.value)
-                          }
-                        >
-                          <option value="">Select Year</option>
-                          {yearOptions}
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          className="form-input"
-                          value={entry.incident}
-                          onChange={(e) =>
-                            handleChange(index, "incident", e.target.value)
-                          }
-                          placeholder="Incident"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          className="form-input"
-                          value={entry.treatment}
-                          onChange={(e) =>
-                            handleChange(index, "treatment", e.target.value)
-                          }
-                          placeholder="Treatment"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="d-flex justify-content-between mt-2">
-                <button
-                  className="btn btn-primary"
-                  type="button"
-                  onClick={handleAddRow}
-                >
-                  Add Row
-                </button>
-                <div>
-                  <button type="submit" className="btn btn-success">
-                    Save
-                  </button>
+                  </thead>
+                  <tbody>
+                    {fullHistory.length > 0 ? (
+                      fullHistory.map((entry, index) => (
+                        <tr key={index}>
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={selectedRows.includes(index)}
+                              onChange={() => toggleRowSelection(index)}
+                            />
+                          </td>
+                          <td>{entry.YEAR}</td> {/* Access YEAR */}
+                          <td>{entry.INCIDENT}</td> {/* Access INCIDENT */}
+                          <td>{entry.TREATMENT}</td> {/* Access TREATMENT */}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4">No medical history found.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                <div className="d-flex justify-content-between mt-2">
                   <button
-                    className="btn btn-info ml-2"
-                    type="button"
-                    onClick={fetchFullHistory}
+                    className="btn btn-secondary"
+                    onClick={() => setViewHistory(false)}
                   >
-                    View History
+                    Back
+                  </button>
+                  <button className="btn btn-danger" onClick={handleDelete}>
+                    Delete Selected
                   </button>
                 </div>
               </div>
-            </form>
-          )}
+            ) : (
+              <form id="medical-history-form" onSubmit={handleSave}>
+                <table className="table table-striped blue-table">
+                  <thead>
+                    <tr>
+                      <th>Year</th>
+                      <th>Incident</th>
+                      <th>Treatment</th>
+                    </tr>
+                  </thead>
+                  <tbody id="medicalHistoryTableBody">
+                    {medicalHistory.map((entry, index) => (
+                      <tr key={index}>
+                        <td>
+                          <select
+                            className="form-input"
+                            value={entry.year}
+                            onChange={(e) =>
+                              handleChange(index, "year", e.target.value)
+                            }
+                          >
+                            <option value="">Select Year</option>
+                            {yearOptions}
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={entry.incident}
+                            onChange={(e) =>
+                              handleChange(index, "incident", e.target.value)
+                            }
+                            placeholder="Incident"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={entry.treatment}
+                            onChange={(e) =>
+                              handleChange(index, "treatment", e.target.value)
+                            }
+                            placeholder="Treatment"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="d-flex justify-content-between mt-2">
+                  <button
+                    className="btn btn-primary"
+                    type="button"
+                    onClick={handleAddRow}
+                  >
+                    Add Row
+                  </button>
+                  <div>
+                    <button type="submit" className="btn btn-success">
+                      Save
+                    </button>
+                    <button
+                      className="btn btn-info ml-2"
+                      type="button"
+                      onClick={fetchFullHistory}
+                    >
+                      View History
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>

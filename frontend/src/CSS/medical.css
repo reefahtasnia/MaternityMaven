@@ -3,6 +3,17 @@
   margin: 0;
   box-sizing: border-box;
 }
+.medical_history{
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  align-items: top;
+  height: 100vh;
+  background-image: url('./assets/medical_history_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 .appointment-form {
   max-width: 500px;
   margin: 25px auto;

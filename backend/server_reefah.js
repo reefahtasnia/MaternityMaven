@@ -75,6 +75,7 @@ app.post("/api/signup", async (req, res) => {
     );
 
     const userId = userResult.outBinds.userid[0];
+    await conn.execute("BEGIN UpdateUserAges; END;", [], { autoCommit: false });
 
     const hash = await bcrypt.hash(password, saltRounds);
 
@@ -502,7 +503,7 @@ app.post("/api/send-otp", async (req, res) => {
   try {
     conn = await connection();
     let result = await conn.execute(
-      "SELECT userid, email FROM Users WHERE email = :email",
+      "SELECT userid, email FROM Users WHERE email = UPPER(:email)",
       [email],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
@@ -517,7 +518,7 @@ app.post("/api/send-otp", async (req, res) => {
 
     // If not found in Users, check the Doctors table
     result = await conn.execute(
-      "SELECT BMDC, email FROM Doctors WHERE email = :email",
+      "SELECT BMDC, email FROM Doctors WHERE email = UPPER(:email)",
       [email],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
@@ -573,7 +574,9 @@ app.post("/api/reset-password", async (req, res) => {
 
     const currentPasswordResult = await run_query(selectQuery, selectParams);
     const currentPassword =
-      currentPasswordResult.length > 0 ? currentPasswordResult[0][0] : null;
+      currentPasswordResult.length > 0
+        ? currentPasswordResult[0].HASHED_PASSWORD
+        : null;
     console.log(currentPasswordResult);
     console.log(currentPassword);
     if (!currentPassword) {
@@ -836,9 +839,9 @@ app.get("/api/medical-history/count-operations", async (req, res) => {
        AND USER_ID = :userid`,
       [userid]
     );
-    console.log(result);
-    // Wrap the count in an object with the 'OPERATION_COUNT' key
-    res.json({ rows: [{ OPERATION_COUNT: result.rows[0][0] }] });
+    const operationCount = result.rows[0].OPERATION_COUNT;
+    console.log("Operation count:", operationCount);
+    res.json({ operationCount });
   } catch (err) {
     console.error("Error fetching operation count:", err);
     res.status(500).send("Error fetching operation count");
@@ -1020,22 +1023,22 @@ app.get("/api/departments", async (req, res) => {
 });
 
 // Route to get products
-app.get('/api/products', async (req, res) => {
+app.get("/api/products", async (req, res) => {
   let conn;
   try {
     conn = await connection();
-    
-    const result = await conn.execute('SELECT * FROM products');
-    return  res.json(result.rows);
+
+    const result = await conn.execute("SELECT * FROM products");
+    return res.json(result.rows);
   } catch (err) {
-    console.error('Database query error:', err);
+    console.error("Database query error:", err);
     throw err;
   } finally {
     if (connection) {
       try {
         await conn.close();
       } catch (err) {
-        console.error('Error closing database connection:', err);
+        console.error("Error closing database connection:", err);
       }
     }
   }
@@ -1278,7 +1281,6 @@ app.post("/api/order", async (req, res) => {
   }
 });
 
-
 //Endpoint for searching fooditems
 app.get("/search-food-items", async (req, res) => {
   const { query } = req.query;
@@ -1482,6 +1484,7 @@ app.get("/getnutri/:food", async (req, res) => {
     }
   }
 });
+//Reefah Made changes below to display data in table in userprofile
 app.get("/api/calorie-data", async (req, res) => {
   const userId = req.query.userId;
 
@@ -1499,20 +1502,84 @@ app.get("/api/calorie-data", async (req, res) => {
 
   try {
     const results = await run_query(query, { userId: userId });
-    const data = results.map(row => ({
+    const data = results.map((row) => ({
       date: row.ENTRY_DATE,
       calories: row.CALORIES,
       foodItem: row.FOOD_ITEM,
       mealType: row.MEAL_TYPE,
       servings: row.SERVING,
-      protein: row['NUTRITION_DETAILS.PROTEIN'],  // Access using the exact field names
-      carbohydrates: row['NUTRITION_DETAILS.CARBOHYDRATES'],  // Access using the exact field names
-      fat: row['NUTRITION_DETAILS.FAT']  // Access using the exact field names
+      protein: row["NUTRITION_DETAILS.PROTEIN"], // Access using the exact field names
+      carbohydrates: row["NUTRITION_DETAILS.CARBOHYDRATES"], // Access using the exact field names
+      fat: row["NUTRITION_DETAILS.FAT"], // Access using the exact field names
     }));
     console.log(data);
     res.json(data);
   } catch (error) {
     console.error("Error fetching calorie data:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+app.get("/api/medicine-reminders", async (req, res) => {
+  const { userId } = req.query;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  let conn;
+  try {
+    conn = await connection();
+    const result = await conn.execute(
+      `SELECT m.MEDICINE_NAME, mt.dosage, mt.time
+           FROM MEDICINETRACKER mt
+           JOIN MEDICINE m ON mt.medicine_code = m.medicine_code
+           WHERE mt.user_id = :userId
+           ORDER BY mt.time ASC`,
+      { userId },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error querying medicine reminders:", err);
+    res.status(500).json({ message: "Internal server error" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection:", err);
+      }
+    }
+  }
+});
+
+app.get("/api/medicalhistory", async (req, res) => {
+  const { userId } = req.query;
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+  console.log("Fetching medical history for user:", userId);
+  let conn;
+  try {
+    conn = await connection();
+    const query = `
+      SELECT incident_year, incident, treatment, age_of_incident AS "Age of Incident"
+      FROM MedicalHistoryView
+      WHERE user_id = :userId
+    `;
+    const result = await conn.execute(query, { userId });
+    console.log("result is" + result.rows[0].AGE_OF_INCIDENT);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Failed to fetch medical history from view:", error);
+    res.status(500).json({ message: "Failed to fetch medical history" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing the connection:", err);
+      }
+    }
   }
 });

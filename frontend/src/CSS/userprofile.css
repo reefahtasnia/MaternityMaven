@@ -137,7 +137,7 @@
   background-color: #e781a3 !important ;/* Pink color for the header */
   color: black;
   padding: 10px;
-  text-align: left;
+  text-align: center;
   border: 1px solid #ddd;
 }
 
@@ -153,7 +153,7 @@
 }
 
 .table tr:nth-child(odd) {
-  background-color: #f9f9f9; /* Light grey for odd rows */
+  background-color: #f5cffc; /* Light grey for odd rows */
 }
 
 /* Table row hover effect */

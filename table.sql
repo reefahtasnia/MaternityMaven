@@ -1,11 +1,13 @@
 select * from users;
 select * from passwords;
 select * from Medical_History;
-select * from medicine;
 select * from orders;
 select * from cart;
 select * from medicine;
 select * from MEDICINETRACKER;
+select * from doctors;
+select * from appointments;
+select * from MedicalHistoryView;
 
 drop TRIGGER medicine_trigger;
 
@@ -17,6 +19,8 @@ BEGIN
 END;
 
 ALTER TRIGGER C##ZAFIRA.MEDICINE_TRIGGER COMPILE;
+
+SELECT * FROM user_errors WHERE type = 'TRIGGER' AND name = 'MEDICINE_TRIGGER';
 
 INSERT INTO medicine (medicine_code, medicine_name) VALUES (1, 'Paracetamol');
 INSERT INTO medicine (medicine_code, medicine_name) VALUES (2, 'Ibuprofen');
@@ -40,3 +44,5 @@ INSERT INTO medicine (medicine_code, medicine_name) VALUES (19, 'Hydrochlorothia
 INSERT INTO medicine (medicine_code, medicine_name) VALUES (20, 'Pantoprazole');
 
 commit;
+
+

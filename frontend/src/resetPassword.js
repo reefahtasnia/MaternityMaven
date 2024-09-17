@@ -29,6 +29,9 @@ const ResetPassword = () => {
       const data = await response.json();
       if (response.ok) {
         alert('Password reset successfully!');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('bmdc');
+        localStorage.removeItem('OTP');
         navigate('/login'); // Navigate to login after successful password reset
       } else {
         console.error('Failed to reset password:', data.message);
