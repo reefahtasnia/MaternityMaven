@@ -175,14 +175,16 @@ CREATE TABLE products (
     stock NUMBER NOT NULL,
     image VARCHAR2(255) NOT NULL
 );
+alter table products add ctgr varchar(255);
 
-INSERT INTO Shop (productId, product_name, price, stock, image)
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr)
 VALUES
-(1, 'Pregnancy Pillow', 130.00, 1, '/assets/pregnancypillow.jpeg'),
-(2, 'Vitamins', 150.00, 1, '/assets/prenatal_vitamins.jpg'),
-(3, 'Diapers', 200.00, 1, '/assets/diaper.png'),
-(4, 'Baby Wipes', 80.00, 1, '/assets/baby_wipes.jpg'),
-(5, 'Maternity Dresses', 300.00, 1, '/assets/maternity_dress.png');
+(1, 'Pregnancy Pillow', 130.00, 1, '/assets/pregnancypillow.jpeg', 'Maternity'),
+(2, 'Vitamins', 150.00, 1, '/assets/prenatal_vitamins.jpg', 'Maternity'),
+(3, 'Diapers', 200.00, 1, '/assets/diaper.png', 'Baby'),
+(4, 'Baby Wipes', 80.00, 1, '/assets/baby_wipes.jpg', 'Baby'),
+(5, 'Maternity Dresses', 300.00, 1, '/assets/maternity_dress.png', 'Maternity');
 
 
 CREATE TABLE Places (
