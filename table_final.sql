@@ -184,17 +184,9 @@ VALUES
 (2, 'Vitamins', 150.00, 1, '/assets/prenatal_vitamins.jpg', 'Maternity'),
 (3, 'Diapers', 200.00, 1, '/assets/diaper.png', 'Baby'),
 (4, 'Baby Wipes', 80.00, 1, '/assets/baby_wipes.jpg', 'Baby'),
-(5, 'Maternity Dresses', 300.00, 1, '/assets/maternity_dress.png', 'Maternity');
+(5, 'Maternity Dresses', 300.00, 1, '/assets/maternity_dress.png', 'clothes');
 
 
-CREATE TABLE Places (
-    user_id INT,
-    order_item_id INT,
-    date DATE,
-    quantity INT,
-    FOREIGN KEY (user_id) REFERENCES User(user_id),
-    FOREIGN KEY (order_item_id) REFERENCES Order_Item(order_item_id)
-);
 
 
 
@@ -233,6 +225,13 @@ CREATE TABLE orders (
   image VARCHAR2(255),
   quantity NUMBER
 
+);
+
+CREATE TABLE Places (
+    user_id INT,
+    order_id INT,
+    date_t DATE,
+    bill NUMBER
 );
 
 commit;

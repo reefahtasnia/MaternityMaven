@@ -5,11 +5,9 @@ import './CSS/home.css';
 import './CSS/shop.css';
 import axios from 'axios';
 
-
-
-
 const Shop = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [checkboxes, setCheckboxes] = useState({
     all: false,
@@ -39,8 +37,9 @@ const Shop = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/products');
-        console.log("eh" ,response.data);
+        console.log("Products fetched:", response.data);
         setProducts(response.data);
+        setFilteredProducts(response.data); // Initialize with all products
       } catch (error) {
         console.error('Error fetching products:', error);
       }
@@ -49,10 +48,24 @@ const Shop = () => {
   }, []);
 
   useEffect(() => {
-     if(products.length == 0) return ;
-      console.log("Products:", products);
-  },[products]);
+    filterProducts();
+  }, [checkboxes, products]);
 
+  const filterProducts = () => {
+    if (checkboxes.all) {
+      setFilteredProducts(products); // Show all products if "All" is checked
+    } else {
+      const filtered = products.filter((product) => {
+        const productCategory = product.CTGR.toLowerCase();
+        if (checkboxes.maternity && productCategory === 'maternity') return true;
+        if (checkboxes.baby && productCategory === 'baby') return true;
+        if (checkboxes.food && productCategory === 'food') return true;
+        if (checkboxes.clothes && productCategory === 'clothes') return true;
+        return false;
+      });
+      setFilteredProducts(filtered.length > 0 ? filtered : products); // Show filtered products or all if none are checked
+    }
+  };
 
   const addToCart = async (product) => {
     try {
@@ -64,13 +77,12 @@ const Shop = () => {
         userid: userId 
       });
       setCart([...cart, product]);
-      alert("Item added to cart succesfully!");
+      alert("Item added to cart successfully!");
     } catch (error) {
       alert("Item already added to cart");
       console.error('Error adding product to cart:', error);
     }
   };
-  
   
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
@@ -108,7 +120,6 @@ const Shop = () => {
                   onChange={handleCheckboxChange}
                 />
                 <label className="custom-control-label" htmlFor="price-all">All</label>
-                <span className="badge border font-weight-normal">1000</span>
               </div>
               <div className="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                 <input
@@ -120,7 +131,6 @@ const Shop = () => {
                   onChange={handleCheckboxChange}
                 />
                 <label className="custom-control-label" htmlFor="price-1">Maternity products</label>
-                <span className="badge border font-weight-normal">150</span>
               </div>
               <div className="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                 <input
@@ -132,7 +142,6 @@ const Shop = () => {
                   onChange={handleCheckboxChange}
                 />
                 <label className="custom-control-label" htmlFor="price-2">Baby products & toys</label>
-                <span className="badge border font-weight-normal">295</span>
               </div>
               <div className="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                 <input
@@ -144,7 +153,6 @@ const Shop = () => {
                   onChange={handleCheckboxChange}
                 />
                 <label className="custom-control-label" htmlFor="price-3">Food</label>
-                <span className="badge border font-weight-normal">246</span>
               </div>
               <div className="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                 <input
@@ -156,7 +164,6 @@ const Shop = () => {
                   onChange={handleCheckboxChange}
                 />
                 <label className="custom-control-label" htmlFor="price-4">Clothes</label>
-                <span className="badge border font-weight-normal">145</span>
               </div>
             </form>
           </div>
@@ -175,11 +182,12 @@ const Shop = () => {
                   </div>
                 </form>
                 <Link to="/cart">
-            <button className="btn btn-primary ml-3">Cart</button>
-          </Link>
+                  <button className="btn btn-primary ml-3">Cart</button>
+                </Link>
               </div>
             </div>
-              { products.length>0 ? products.map((product, index) => (
+
+            {filteredProducts.length > 0 ? filteredProducts.map((product, index) => (
               <div className="col-lg-4 col-md-6 col-sm-12 pb-1" key={index}>
                 <div className="card product-item border-0 mb-4">
                   <div className="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
@@ -198,7 +206,8 @@ const Shop = () => {
                   </div>
                 </div>
               </div>
-            )): <h1>Loading...</h1>}
+            )) : <h1>Loading...</h1>}
+
             <div className="col-12 pb-1">
               <nav aria-label="Page navigation">
               </nav>

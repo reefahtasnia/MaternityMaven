@@ -1,0 +1,45 @@
+.order-history-container {
+  padding: 20px;
+}
+
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
+}
+
+.order-card {
+  border: 2px solid #ffc0cb;
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+}
+
+.order-image {
+  width: 100px;
+}
+
+.order-details {
+  flex: 1;
+  margin-left: 20px;
+}
+
+.details-button {
+  padding: 10px 20px;
+  background-color: #ffc0cb;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.details-button:hover {
+  background-color: #ff6f6f;
+}
+
+h1 {
+  text-align: center;
+  color: #ff6f6f;
+}

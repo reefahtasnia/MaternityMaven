@@ -1583,3 +1583,37 @@ app.get("/api/medicalhistory", async (req, res) => {
     }
   }
 });
+
+//for order history
+
+app.get('/api/orders/:userId', async (req, res) => {
+  const userId = req.params.userId;
+
+  let conn;
+
+  try {
+    conn = await connection();
+
+    // Query to get orders from the Places table
+    const result = await conn.execute(
+      `SELECT order_id, TO_CHAR(date_t, 'YYYY-MM-DD') as date_t, bill 
+       FROM Places 
+       WHERE user_id = :userId`,
+      [userId]
+    );
+    console.log(result.rows);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching orders', err);
+    res.status(500).send('Error fetching order history');
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error('Error closing connection', err);
+      }
+    }
+  }
+});
+

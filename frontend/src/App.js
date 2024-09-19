@@ -19,6 +19,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Shop from "./shop.js";
 import Cart from "./cart.js";
+import OrderDetails from "./order_history.js";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
             <Route path="/Medicalhistory" element={<Medical />} />
             <Route path="/Appointment" element={<Appointment />} />
             <Route path="/Bookappointment" element={<BookAppointment />} />
+            <Route path="/orderdetails" element={<OrderDetails/>}/>
           </Route>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
