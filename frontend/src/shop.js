@@ -57,9 +57,9 @@ const Shop = () => {
   const addToCart = async (product) => {
     try {
       await axios.post('http://localhost:5000/api/cart', {
-        productId: product.id,
-        title: product.title,
-        price: product.price,
+        productId: product.PRODUCTID,
+        title: product.PRODUCT_NAME,
+        price: product.PRICE,
         quantity: '1',
         userid: userId 
       });
@@ -188,7 +188,7 @@ const Shop = () => {
                   <div className="card-body border-left border-right text-center p-0 pt-4 pb-3">
                     <h6 className="text-truncate mb-3">{product.PRODUCT_NAME}</h6>
                     <div className="d-flex justify-content-center">
-                      <h6>{product.PRICE}</h6>
+                      <h6>Price: Tk {product.PRICE}</h6>
                     </div>
                   </div>
                   <div className="card-footer d-flex justify-content-between bg-light border">
@@ -201,23 +201,6 @@ const Shop = () => {
             )): <h1>Loading...</h1>}
             <div className="col-12 pb-1">
               <nav aria-label="Page navigation">
-                <ul className="pagination justify-content-center mb-3">
-                  <li className="page-item disabled">
-                    <a className="page-link" href="#" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                      <span className="sr-only">Previous</span>
-                    </a>
-                  </li>
-                  <li className="page-item active"><a className="page-link" href="#">1</a></li>
-                  <li className="page-item"><button className="page-link" onClick={() => navigate('/shop2')}>2</button></li>
-                  <li className="page-item"><button className="page-link" onClick={() => navigate('/shop3')}>3</button></li>
-                  <li className="page-item">
-                    <a className="page-link" href="#" aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
-                      <span className="sr-only">Next</span>
-                    </a>
-                  </li>
-                </ul>
               </nav>
             </div>
           </div>
