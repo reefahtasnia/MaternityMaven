@@ -1005,7 +1005,7 @@ app.get("/api/doctors", async (req, res) => {
 
     // Add sorting if provided
     if (sort) {
-      query += ` ORDER BY ${sort}`;
+      query += ` ORDER BY ${sort} DESC`;
     }
     console.log("Runnung query:", query, params);
     const result = await conn.execute(query, params);

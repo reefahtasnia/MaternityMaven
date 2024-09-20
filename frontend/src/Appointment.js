@@ -33,13 +33,12 @@ function Appointment() {
       const response = await fetch(
         `http://localhost:5000/api/doctors?sort=${sort}`
       );
-      console.log("respomse status:",response.status);
-      if(!response.ok)
-      {
+      console.log("respomse status:", response.status);
+      if (!response.ok) {
         console.error("network response was not ok");
       }
       const data = await response.json();
-      console.log("fetched data:",data);
+      console.log("fetched data:", data);
       setDoctors(data);
       setResultCount(data.length);
     } catch (error) {
@@ -54,7 +53,7 @@ function Appointment() {
         `http://localhost:5000/api/doctors?search=${search}&sort=${sort}`
       );
       const data = await response.json();
-      console.log('in');
+      console.log("in");
       setDoctors(data);
       setResultCount(data.length); // Update result count
       setShowSuggestions(false); // Hide suggestions after search
@@ -64,26 +63,29 @@ function Appointment() {
   };
 
   const handleInputChange = async (e) => {
-  const input = e.target.value;
-  setSearch(input);
+    const input = e.target.value;
+    setSearch(input);
 
-  if (input.length > 0) {
-    const fetchUrl = `http://localhost:5000/api/departments?search=${input}`;
-    console.log("Fetching suggestions from:", fetchUrl); // Log the URL
-    try {
-      const response = await fetch(fetchUrl);
-      const fetchedSuggestions = await response.json();
-      console.log("Fetched suggestions:", fetchedSuggestions);
-      setSuggestions(fetchedSuggestions);
-      setShowSuggestions(true);
-    } catch (error) {
-      console.error("Error fetching suggestions:", error);
+    if (input.length > 0) {
+      const fetchUrl = `http://localhost:5000/api/departments?search=${input}`;
+      console.log("Fetching suggestions from:", fetchUrl); // Log the URL
+      try {
+        const response = await fetch(fetchUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP status ${response.status}`);
+        }
+        const fetchedSuggestions = await response.json();
+        console.log("Fetched suggestions:", fetchedSuggestions);
+        setSuggestions(fetchedSuggestions);
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    } else {
+      setSuggestions([]); // Clear suggestions if input is empty
+      setShowSuggestions(false);
     }
-  } else {
-    setSuggestions([]); // Clear suggestions if input is empty
-    setShowSuggestions(false);
-  }
-};
+  };
 
   const handleSuggestionClick = (suggestion) => {
     setSearch(suggestion);
@@ -111,9 +113,9 @@ function Appointment() {
                   {suggestions.map((suggestion, index) => (
                     <p
                       key={index}
-                      onClick={() => handleSuggestionClick(suggestion?.DEPT)}
+                      onClick={() => handleSuggestionClick(suggestion)}
                     >
-                      {suggestion?.DEPT}
+                      {suggestion}
                     </p>
                   ))}
                 </div>
@@ -161,7 +163,8 @@ function Appointment() {
                       <br />
                       <strong>Experience:</strong> {doctor.EXPERIENCE} years
                       <br />
-                      <strong>Total Operations:</strong> {doctor.TOTAL_OPERATIONS}
+                      <strong>Total Operations:</strong>{" "}
+                      {doctor.TOTAL_OPERATIONS}
                       <br />
                       <strong>Phone Number:</strong> {doctor.PHONE}
                       <br />
