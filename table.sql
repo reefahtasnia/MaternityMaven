@@ -44,5 +44,3 @@ INSERT INTO medicine (medicine_code, medicine_name) VALUES (19, 'Hydrochlorothia
 INSERT INTO medicine (medicine_code, medicine_name) VALUES (20, 'Pantoprazole');
 
 commit;
-
-

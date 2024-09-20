@@ -284,7 +284,7 @@ app.post("/api/user/update", async (req, res) => {
 
 app.post("/api/doctorSignup", async (req, res) => {
   const {
-    regno, // Using regno as BMDC
+    regno,
     fullname,
     email,
     gender,
@@ -294,26 +294,38 @@ app.post("/api/doctorSignup", async (req, res) => {
     hosp,
     chamber,
     password,
-    dob, // expecting dob in 'YYYY-MM-DD' format
+    dob,
+    total_operations, // Extract total_operations from the request
   } = req.body;
 
-  if (!email || !fullname || !regno || !mbbsYear || !dob) {
-    console.log(email, fullname, regno, mbbsYear, dob); // Updated to log regno instead of BMDC
-    return res.status(400).json({ message: "Missing required fields" });
+  if (
+    !email ||
+    !fullname ||
+    !regno ||
+    !mbbsYear ||
+    !dob ||
+    isNaN(total_operations)
+  ) {
+    console.log(email, fullname, regno, mbbsYear, dob, total_operations);
+    return res
+      .status(400)
+      .json({ message: "Missing required fields or invalid input" });
   }
-
+  
+  console.log("Received signup request for", req.body);
   let conn;
   try {
     conn = await connection();
-    console.log(req.body);
+
     const dobDate = new Date(dob);
     if (isNaN(dobDate.getTime())) {
       return res.status(400).json({ message: "Invalid date of birth" });
     }
 
+    // Prepare to insert doctor's information
     const insertQuery = `
-      INSERT INTO Doctors (BMDC, fullname, email, gender, phone, dept, mbbsYear, hosp, chamber, date_of_birth)
-      VALUES (UPPER(:BMDC), UPPER(:fullname), UPPER(:email), UPPER(:gender), UPPER(:phone), UPPER(:dept), :mbbsYear, UPPER(:hosp), UPPER(:chamber), :dob)
+      INSERT INTO Doctors (BMDC, fullname, email, gender, phone, dept, mbbsYear, hosp, chamber, total_operations, date_of_birth)
+      VALUES (UPPER(:BMDC), UPPER(:fullname), UPPER(:email), UPPER(:gender), UPPER(:phone), UPPER(:dept), :mbbsYear, UPPER(:hosp), UPPER(:chamber), :total_operations, :dob)
     `;
 
     const bindVars = {
@@ -326,22 +338,25 @@ app.post("/api/doctorSignup", async (req, res) => {
       mbbsYear,
       hosp,
       chamber,
+      total_operations,
       dob: { val: dobDate, type: oracledb.DATE },
     };
 
-    await conn.execute(insertQuery, bindVars, { autoCommit: true });
-
-    const hash = await bcrypt.hash(password, saltRounds);
-    console.log(hash, req.body.BMDC);
-    const insertPasswordQuery =
-      "INSERT INTO Passwords (BMDC, hashed_password) VALUES (:BMDC, :hashedPassword)";
-    await conn.execute(
-      insertPasswordQuery,
-      { BMDC: regno, hashedPassword: hash },
-      { autoCommit: true }
-    );
-
-    res.status(201).json({ message: "Doctor registered successfully" });
+    // Start a transaction to ensure both operations are executed successfully
+    try {
+      await conn.execute(insertQuery, bindVars, { autoCommit: false });
+      await conn.execute("BEGIN CalculateExperience(:BMDC); END;", { BMDC: regno }, { autoCommit: false });
+      const hash = await bcrypt.hash(password, saltRounds);
+      await conn.execute("INSERT INTO Passwords (BMDC, hashed_password) VALUES (:BMDC, :hashedPassword)", { BMDC: regno, hashedPassword: hash }, { autoCommit: false });
+      await conn.commit(); // Commit both the insertion and the experience calculation together
+      res.status(201).json({ message: "Doctor registered successfully" });
+    } catch (error) {
+      console.error("Error during doctor signup:", error);
+      await conn.rollback(); // Rollback the entire transaction if any part fails
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
   } catch (error) {
     console.error("Error during doctor signup:", error);
     res
@@ -357,6 +372,7 @@ app.post("/api/doctorSignup", async (req, res) => {
     }
   }
 });
+
 
 app.post("/api/doctorLogin", async (req, res) => {
   const { email, password } = req.body;
@@ -438,58 +454,71 @@ app.get("/api/doctoruser", async (req, res) => {
 });
 
 app.post("/api/doctor/update", async (req, res) => {
-  const { BMDC, fullname, email, phone, dept, mbbsYear, hosp, chamber } =
-    req.body;
+  const {
+    BMDC,
+    fullname,
+    email,
+    phone,
+    dept,
+    mbbsYear,
+    totalOperations,
+    hosp,
+    chamber,
+  } = req.body;
 
   let conn;
   try {
     conn = await connection();
-    const updateQuery = `
-      UPDATE Doctors
-      SET
-        fullname = UPPER(:fullname),
-        email = UPPER(:email),
-        phone = UPPER(:phone),
-        dept = UPPER(:dept),
-        mbbsYear = :mbbsYear,
-        hosp = UPPER(:hosp),
-        chamber = UPPER(:chamber)
-      WHERE BMDC = :BMDC
+    const plsql = `
+      DECLARE
+        v_oldMbbsYear VARCHAR2(4);
+      BEGIN
+        SELECT mbbsYear INTO v_oldMbbsYear FROM Doctors WHERE BMDC = :BMDC;
+
+        UPDATE Doctors
+        SET
+          fullname = UPPER(:fullname),
+          email = UPPER(:email),
+          phone = UPPER(:phone),
+          dept = UPPER(:dept),
+          mbbsYear = :mbbsYear,
+          total_operations = :totalOperations,
+          hosp = UPPER(:hosp),
+          chamber = UPPER(:chamber)
+        WHERE BMDC = :BMDC;
+
+        -- Check if mbbsYear has changed and call the procedure
+        IF v_oldMbbsYear != :mbbsYear THEN
+          CalculateExperience(:BMDC);
+        END IF;
+
+        COMMIT;
+      END;
     `;
 
-    const params = {
-      BMDC,
-      fullname,
-      email,
-      phone,
-      dept,
-      mbbsYear,
-      hosp,
-      chamber,
-    };
-
-    const result = await conn.execute(updateQuery, params, {
-      autoCommit: true,
-    });
-
-    if (result.rowsAffected === 0) {
-      return res
-        .status(404)
-        .json({ message: "Doctor not found or no updates made" });
-    }
+    await conn.execute(
+      plsql,
+      {
+        BMDC,
+        fullname,
+        email,
+        phone,
+        dept,
+        mbbsYear,
+        totalOperations,
+        hosp,
+        chamber,
+      },
+      { autoCommit: false }
+    );
 
     res.status(200).json({ message: "Doctor profile updated successfully" });
   } catch (error) {
     console.error("Error during doctor profile update:", error);
     res.status(500).json({ message: "Internal server error" });
+    if (conn) await conn.rollback();
   } finally {
-    if (conn) {
-      try {
-        await conn.close();
-      } catch (err) {
-        console.error("Error closing connection:", err);
-      }
-    }
+    if (conn) await conn.close();
   }
 });
 
@@ -957,7 +986,7 @@ app.post("/api/medical-history/delete", async (req, res) => {
 app.get("/api/doctors", async (req, res) => {
   const { search, sort } = req.query;
   let conn;
-  console.log("received API request:",{search,sort});
+  console.log("received API request:", { search, sort });
   try {
     conn = await connection();
 
@@ -978,9 +1007,9 @@ app.get("/api/doctors", async (req, res) => {
     if (sort) {
       query += ` ORDER BY ${sort}`;
     }
-    console.log("Runnung query:",query,params);
+    console.log("Runnung query:", query, params);
     const result = await conn.execute(query, params);
-    console.log("query result:",result.rows);
+    console.log("query result:", result.rows);
     res.json(result.rows || []);
     console.log(result.rows || []);
     console.log("out");
@@ -1000,7 +1029,7 @@ app.get("/api/doctors", async (req, res) => {
 app.get("/api/departments", async (req, res) => {
   const { search } = req.query;
   let conn;
-  console.log("search term received ibn API:",search);
+  console.log("search term received ibn API:", search);
   try {
     conn = await connection();
 
@@ -1010,11 +1039,11 @@ app.get("/api/departments", async (req, res) => {
     let params = [`${search.toLowerCase()}%`];
 
     const result = await conn.execute(query, params);
-    console.log("Full query result:",result);
-    console.log("Raw department results:",result.rows);
-    const departments = result.rows.map(row => row.DEPT); // Extract department names
-console.log("Returning departments:", departments);
-res.json(departments); // Send only the array of department names
+    console.log("Full query result:", result);
+    console.log("Raw department results:", result.rows);
+    const departments = result.rows.map((row) => row.DEPT); // Extract department names
+    console.log("Returning departments:", departments);
+    res.json(departments); // Send only the array of department names
   } catch (err) {
     console.error("Error fetching departments:", err);
     res.status(500).send("Error fetching departments");
@@ -1593,7 +1622,7 @@ app.get("/api/medicalhistory", async (req, res) => {
 
 //for order history
 
-app.get('/api/orders/:userId', async (req, res) => {
+app.get("/api/orders/:userId", async (req, res) => {
   const userId = req.params.userId;
 
   let conn;
@@ -1611,16 +1640,15 @@ app.get('/api/orders/:userId', async (req, res) => {
     console.log(result.rows);
     res.json(result.rows);
   } catch (err) {
-    console.error('Error fetching orders', err);
-    res.status(500).send('Error fetching order history');
+    console.error("Error fetching orders", err);
+    res.status(500).send("Error fetching order history");
   } finally {
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        console.error('Error closing connection', err);
+        console.error("Error closing connection", err);
       }
     }
   }
 });
-

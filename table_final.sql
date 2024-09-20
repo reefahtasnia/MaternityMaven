@@ -51,6 +51,35 @@ SELECT m.user_id, m.year AS incident_year, m.incident, m.treatment,
 FROM Medical_History m
 JOIN Users u ON m.user_id = u.userid;
 
+CREATE OR REPLACE PROCEDURE CalculateExperience (p_bmdc IN Doctors.BMDC%TYPE) IS
+    v_current_year NUMBER;
+    v_mbbs_year NUMBER;
+    v_experience NUMBER;
+BEGIN
+    SELECT EXTRACT(YEAR FROM SYSDATE) INTO v_current_year FROM dual;
+    SELECT TO_NUMBER(mbbsYear) INTO v_mbbs_year FROM Doctors WHERE BMDC = p_bmdc;
+
+    v_experience := v_current_year - v_mbbs_year - 1;
+    
+    -- Correcting negative experience
+    IF v_experience < 1 THEN
+        v_experience := 0;
+    END IF;
+
+    -- Updating the doctor's experience
+    UPDATE Doctors
+    SET experience = v_experience
+    WHERE BMDC = p_bmdc;
+    
+    COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No such doctor found with BMDC: ' || p_bmdc);
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        ROLLBACK;
+END CalculateExperience;
+
 --new additions end up to above~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CREATE TABLE Doctors (
@@ -60,11 +89,11 @@ CREATE TABLE Doctors (
     gender VARCHAR2(10),
     phone VARCHAR2(15),
     dept VARCHAR2(100),
-    mbbsYear VARCHAR2(4) NOT NULL,
+    mbbsYear NUMBER NOT NULL,
     hosp VARCHAR2(255),
     chamber VARCHAR2(255),
-    experience number,
-    total_operations number,
+    experience NUMBER,
+    total_operations NUMBER,
     date_of_birth DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT PK_BMDC PRIMARY KEY (BMDC)

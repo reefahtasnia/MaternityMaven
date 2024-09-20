@@ -36,7 +36,7 @@ function Appointment() {
       console.log("respomse status:",response.status);
       if(!response.ok)
       {
-        console.error("network resonsoe was not ok");
+        console.error("network response was not ok");
       }
       const data = await response.json();
       console.log("fetched data:",data);

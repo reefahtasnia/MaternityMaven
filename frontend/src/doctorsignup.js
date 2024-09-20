@@ -4,64 +4,65 @@ import backgroundImage from "./CSS/assets/10508261.jpg";
 import bangladeshFlag from "./CSS/assets/Bangladesh_flag.png";
 
 const DoctorSignup = () => {
-    const [formData, setFormData] = useState({
-        regno: "",
-        fullname: "",
-        gender: "",
-        phone: "",
-        imagenid: null,
-        dept: "",
-        mbbsYear: "",
-        imagecert1: null,
-        hosp: "",
-        chamber: "",
+  const [formData, setFormData] = useState({
+    regno: "",
+    fullname: "",
+    gender: "",
+    phone: "",
+    imagenid: null,
+    dept: "",
+    mbbsYear: "",
+    imagecert1: null,
+    hosp: "",
+    chamber: "",
+    total_operations: "", // Add this line
+  });
+  useEffect(() => {
+    const initialData = JSON.parse(localStorage.getItem("doctorData"));
+    if (initialData) {
+      setFormData({ ...formData, ...initialData });
+    }
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: files[0],
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Submitting doctor details:", formData);
+
+    fetch(`http://localhost:5000/api/doctorSignup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Doctor profile created:", data);
+        alert("Doctor profile created successfully!");
+        localStorage.removeItem("doctorData");
+        window.location.href = "/login";
+      })
+      .catch((error) => {
+        console.error("Error during doctor signup:", error);
+        alert("Failed to create doctor profile");
       });
-      useEffect(() => {
-        const initialData = JSON.parse(localStorage.getItem("doctorData"));
-        if (initialData) {
-          setFormData({ ...formData, ...initialData });
-        }
-      }, []);
-    
-      const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          [name]: value,
-        }));
-      };
-    
-      const handleFileChange = (e) => {
-        const { name, files } = e.target;
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          [name]: files[0],
-        }));
-      };
-    
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Submitting doctor details:", formData);
-    
-        fetch(`http://localhost:5000/api/doctorSignup`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log("Doctor profile created:", data);
-          alert("Doctor profile created successfully!");
-          localStorage.removeItem("doctorData"); 
-          window.location.href = "/login";
-        })
-        .catch(error => {
-          console.error("Error during doctor signup:", error);
-          alert("Failed to create doctor profile");
-        });
-      };
+  };
 
   return (
     <div
@@ -121,7 +122,11 @@ const DoctorSignup = () => {
             <label htmlFor="phone">Phone Number</label>
             <div className="phone-input-container">
               <span className="flag-container">
-                <img src={bangladeshFlag} alt="Bangladesh Flag" className="flag-icon" />
+                <img
+                  src={bangladeshFlag}
+                  alt="Bangladesh Flag"
+                  className="flag-icon"
+                />
               </span>
               <span className="prefix">+880</span>
               <input
@@ -137,7 +142,9 @@ const DoctorSignup = () => {
             </div>
           </div>
           <div className="user-input-box">
-            <label htmlFor="imagenid">Upload proof of identification (NID / Birth Certificate)</label>
+            <label htmlFor="imagenid">
+              Upload proof of identification (NID / Birth Certificate)
+            </label>
             <input
               type="file"
               id="imagenid"
@@ -183,7 +190,9 @@ const DoctorSignup = () => {
             />
           </div>
           <div className="user-input-box">
-            <label htmlFor="imagecert1">Upload image of your visiting card</label>
+            <label htmlFor="imagecert1">
+              Upload image of your visiting card
+            </label>
             <p>(If you have one)</p>
             <input
               type="file"
@@ -194,7 +203,9 @@ const DoctorSignup = () => {
             />
           </div>
           <div className="user-input-box">
-            <label htmlFor="hosp">Name of the hospital currently employed/working in</label>
+            <label htmlFor="hosp">
+              Name of the hospital currently employed/working in
+            </label>
             <input
               type="text"
               id="hosp"
@@ -205,7 +216,9 @@ const DoctorSignup = () => {
             />
           </div>
           <div className="user-input-box">
-            <label htmlFor="chamber">Name of the clinic/chamber currently practicing in</label>
+            <label htmlFor="chamber">
+              Name of the clinic/chamber currently practicing in
+            </label>
             <input
               type="text"
               id="chamber"
@@ -214,11 +227,30 @@ const DoctorSignup = () => {
               onChange={handleChange}
             />
           </div>
-          <button type="submit" className="btn" id="signupbtn" onClick={handleSubmit}>
+          <div className="user-input-box">
+            <label htmlFor="total_operations">Total Operations Done so Far</label>
+            <input
+              type="number" // Use number type for numerical input
+              id="total_operations"
+              name="total_operations"
+              value={formData.total_operations}
+              onChange={handleChange}
+              placeholder="Enter total number of operations performed"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn"
+            id="signupbtn"
+            onClick={handleSubmit}
+          >
             Sign Up
           </button>
           <div className="login">
-            <p>Already have an account? <a href="/login">Log In</a></p>
+            <p>
+              Already have an account? <a href="/login">Log In</a>
+            </p>
           </div>
         </form>
       </div>

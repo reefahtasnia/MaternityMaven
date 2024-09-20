@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import "./CSS/userprofile.css";
 
 const DoctorProfile = () => {
-  const [profileImage, setProfileImage] = useState(
-    "https://via.placeholder.com/150"
-  );
+  const [profileImage, setProfileImage] = useState("https://via.placeholder.com/150");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [dept, setDept] = useState("");
   const [mbbsYear, setMBBSyear] = useState("");
+  const [totalOperations, setTotalOperations] = useState(0);
+  const [experience, setExperience] = useState(0);
   const [pracChamber, setPracChamber] = useState("");
   const [hosp, setHosp] = useState("");
   const triggerFileInput = () => {
@@ -32,17 +32,16 @@ const DoctorProfile = () => {
           return response.json();
         })
         .then((data) => {
-          console.log("Fetched data:", data); // Log the fetched data
-          setFullName(capitalizeWords(data.FULLNAME || ""));
+          setFullName(capitalizeWords(data.FULLNAME) || "");
           setEmail(data.EMAIL.toLowerCase() || "");
-          setPhone(data.PHONE || ""); // Phone numbers typically do not need capitalization
-          setDept(capitalizeWords(data.DEPT || ""));
-          setMBBSyear(data.MBBSYEAR|| ""); // Assuming MBBS year does not need capitalization
-          setPracChamber(capitalizeWords(data.CHAMBER || ""));
-          setHosp(capitalizeWords(data.HOSP || ""));
-          setProfileImage(
-            data.profileImage || "https://via.placeholder.com/150"
-          );
+          setPhone(data.PHONE || "");
+          setDept(capitalizeWords(data.DEPT) || "");
+          setMBBSyear(data.MBBSYEAR || "");
+          setTotalOperations(data.TOTAL_OPERATIONS || 0);
+          setExperience(data.EXPERIENCE || 0);
+          setPracChamber(capitalizeWords(data.CHAMBER) || "");
+          setHosp(capitalizeWords(data.HOSP) || "");
+          setProfileImage(data.profileImage || "https://via.placeholder.com/150");
         })
         .catch((error) => {
           console.error("Failed to fetch doctor data:", error);
@@ -68,6 +67,7 @@ const DoctorProfile = () => {
         phone: phone,
         dept: dept,
         mbbsYear: mbbsYear,
+        totalOperations: totalOperations, 
         hosp: hosp,
         chamber: pracChamber,
       };
@@ -210,6 +210,24 @@ const DoctorProfile = () => {
                 onChange={(e) => setPracChamber(e.target.value)}
               />
             </div>
+            <div className="profile-detail">
+          <label className="profile-detail-label">Total Operations</label>
+          <input
+            type="number"
+            className="profile-detail-input"
+            value={totalOperations}
+            onChange={(e) => setTotalOperations(e.target.value)}
+          />
+        </div>
+        <div className="profile-detail">
+          <label className="profile-detail-label">Years of Experience</label>
+          <input
+            type="number"
+            className="profile-detail-input"
+            value={experience}
+            readOnly // This field should be read-only
+          />
+        </div>
           </div>
         </div>
         <div className="profile-section">
