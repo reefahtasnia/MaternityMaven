@@ -957,7 +957,7 @@ app.post("/api/medical-history/delete", async (req, res) => {
 app.get("/api/doctors", async (req, res) => {
   const { search, sort } = req.query;
   let conn;
-
+  console.log("received API request:",{search,sort});
   try {
     conn = await connection();
 
@@ -978,9 +978,12 @@ app.get("/api/doctors", async (req, res) => {
     if (sort) {
       query += ` ORDER BY ${sort}`;
     }
-
+    console.log("Runnung query:",query,params);
     const result = await conn.execute(query, params);
+    console.log("query result:",result.rows);
     res.json(result.rows || []);
+    console.log(result.rows || []);
+    console.log("out");
   } catch (err) {
     console.error("Error fetching doctors:", err);
     res.status(500).send("Error fetching doctors");
@@ -997,17 +1000,21 @@ app.get("/api/doctors", async (req, res) => {
 app.get("/api/departments", async (req, res) => {
   const { search } = req.query;
   let conn;
-
+  console.log("search term received ibn API:",search);
   try {
     conn = await connection();
 
     // Query to fetch departments that match the search term
     let query =
-      "SELECT DISTINCT dept FROM Doctors WHERE LOWER(dept) LIKE :search";
+      "SELECT DISTINCT dept FROM Doctors WHERE LOWER(dept) LIKE :search ";
     let params = [`${search.toLowerCase()}%`];
 
     const result = await conn.execute(query, params);
-    res.json(result.rows.map((row) => row[0])); // Return only the department names
+    console.log("Full query result:",result);
+    console.log("Raw department results:",result.rows);
+    const departments = result.rows.map(row => row.DEPT); // Extract department names
+console.log("Returning departments:", departments);
+res.json(departments); // Send only the array of department names
   } catch (err) {
     console.error("Error fetching departments:", err);
     res.status(500).send("Error fetching departments");
@@ -1583,3 +1590,37 @@ app.get("/api/medicalhistory", async (req, res) => {
     }
   }
 });
+
+//for order history
+
+app.get('/api/orders/:userId', async (req, res) => {
+  const userId = req.params.userId;
+
+  let conn;
+
+  try {
+    conn = await connection();
+
+    // Query to get orders from the Places table
+    const result = await conn.execute(
+      `SELECT order_id, TO_CHAR(date_t, 'YYYY-MM-DD') as date_t, bill 
+       FROM Places 
+       WHERE user_id = :userId`,
+      [userId]
+    );
+    console.log(result.rows);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching orders', err);
+    res.status(500).send('Error fetching order history');
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error('Error closing connection', err);
+      }
+    }
+  }
+});
+

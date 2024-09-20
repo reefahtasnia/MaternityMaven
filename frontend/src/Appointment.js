@@ -23,15 +23,23 @@ function Appointment() {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
+    console.log("triggered");
     fetchDoctors();
   }, [sort]); // Fetch doctors when sort changes
 
   const fetchDoctors = async () => {
+    console.log("fetching doc");
     try {
       const response = await fetch(
         `http://localhost:5000/api/doctors?sort=${sort}`
       );
+      console.log("respomse status:",response.status);
+      if(!response.ok)
+      {
+        console.error("network resonsoe was not ok");
+      }
       const data = await response.json();
+      console.log("fetched data:",data);
       setDoctors(data);
       setResultCount(data.length);
     } catch (error) {
@@ -41,10 +49,12 @@ function Appointment() {
 
   const handleSearch = async () => {
     try {
+      console.log("try");
       const response = await fetch(
         `http://localhost:5000/api/doctors?search=${search}&sort=${sort}`
       );
       const data = await response.json();
+      console.log('in');
       setDoctors(data);
       setResultCount(data.length); // Update result count
       setShowSuggestions(false); // Hide suggestions after search
@@ -54,25 +64,26 @@ function Appointment() {
   };
 
   const handleInputChange = async (e) => {
-    const input = e.target.value;
-    setSearch(input);
+  const input = e.target.value;
+  setSearch(input);
 
-    if (input.length > 0) {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/departments?search=${input}`
-        );
-        const fetchedSuggestions = await response.json();
-        setSuggestions(fetchedSuggestions);
-        setShowSuggestions(true);
-      } catch (error) {
-        console.error("Error fetching suggestions:", error);
-      }
-    } else {
-      setSuggestions([]); // Clear suggestions if input is empty
-      setShowSuggestions(false);
+  if (input.length > 0) {
+    const fetchUrl = `http://localhost:5000/api/departments?search=${input}`;
+    console.log("Fetching suggestions from:", fetchUrl); // Log the URL
+    try {
+      const response = await fetch(fetchUrl);
+      const fetchedSuggestions = await response.json();
+      console.log("Fetched suggestions:", fetchedSuggestions);
+      setSuggestions(fetchedSuggestions);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
     }
-  };
+  } else {
+    setSuggestions([]); // Clear suggestions if input is empty
+    setShowSuggestions(false);
+  }
+};
 
   const handleSuggestionClick = (suggestion) => {
     setSearch(suggestion);
@@ -100,9 +111,9 @@ function Appointment() {
                   {suggestions.map((suggestion, index) => (
                     <p
                       key={index}
-                      onClick={() => handleSuggestionClick(suggestion)}
+                      onClick={() => handleSuggestionClick(suggestion?.DEPT)}
                     >
-                      {suggestion}
+                      {suggestion?.DEPT}
                     </p>
                   ))}
                 </div>
@@ -142,17 +153,17 @@ function Appointment() {
                     />
                   </Col>
                   <Col md={9}>
-                    <Card.Title>{doctor[1]}</Card.Title>
+                    <Card.Title>{doctor.FULLNAME}</Card.Title>
                     <Card.Text>
-                      <strong>Department:</strong> {doctor[5]}
+                      <strong>Department:</strong> {doctor.DEPT}
                       <br />
-                      <strong>Location:</strong> {doctor[7]}
+                      <strong>Location:</strong> {doctor.HOSP}
                       <br />
-                      <strong>Experience:</strong> {doctor[11]} years
+                      <strong>Experience:</strong> {doctor.EXPERIENCE} years
                       <br />
-                      <strong>Total Operations:</strong> {doctor[12]}
+                      <strong>Total Operations:</strong> {doctor.TOTAL_OPERATIONS}
                       <br />
-                      <strong>Phone Number:</strong> {doctor[4]}
+                      <strong>Phone Number:</strong> {doctor.PHONE}
                       <br />
                     </Card.Text>
                     <Link to="/Bookappointment">
