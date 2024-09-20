@@ -373,7 +373,7 @@ app.post("/api/doctorLogin", async (req, res) => {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
-    const bmdc = doctorResults[0][0]; // Assuming BMDC is the first element in the array
+    const bmdc = doctorResults[0].BMDC; // Assuming BMDC is the first element in the array
     console.log("BMDC:", bmdc);
 
     const passwordResults = await run_query(
@@ -383,13 +383,13 @@ app.post("/api/doctorLogin", async (req, res) => {
 
     console.log("Password Results:", passwordResults); // Log the results for debugging
 
-    if (passwordResults.length === 0 || !passwordResults[0][0]) {
+    if (passwordResults.length === 0 || !passwordResults[0].HASHED_PASSWORD) {
       return res
         .status(404)
         .json({ message: "Password not set for this doctor" });
     }
 
-    const hashed_password = passwordResults[0][0];
+    const hashed_password = passwordResults[0].HASHED_PASSWORD;
     console.log("Hashed Password:", hashed_password);
 
     const match = await bcrypt.compare(password, hashed_password);

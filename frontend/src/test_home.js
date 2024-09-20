@@ -4,7 +4,6 @@ import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
-import { FaFacebook, FaInstagram, FaGithub, FaTwitter } from "react-icons/fa";
 import medicalHistory from "./CSS/assets/medical_history2.png";
 import doctorPatient from "./CSS/assets/doctor and patient.png";
 import reminders from "./CSS/assets/reminders.png";
@@ -12,17 +11,13 @@ import pregnancyShop from "./CSS/assets/pregnancy_shop.png";
 import bloodDonor from "./CSS/assets/bloodDonor.png";
 import pregnancyResources from "./CSS/assets/pregnancy_resources.png";
 import pregnancyPillow from "./CSS/assets/pregnancypillow.jpeg";
-import prenatalVitamins from "./CSS/assets/prenatal_vitamins2.jpg";
-import diaper from "./CSS/assets/diaper3.jpeg";
-import babyWipes from "./CSS/assets/baby_wipes2.jpg";
+import prenatalVitamins from "./CSS/assets/prenatal_vitamins.jpg";
+import diaper from "./CSS/assets/diaper.png";
+import babyWipes from "./CSS/assets/baby_wipes.jpg";
 import maternityDress from "./CSS/assets/maternity_dress.png";
-import stretchMarkOil from "./CSS/assets/stretch_mark_oil2.jpg";
-import babyShoes from "./CSS/assets/shoes2.jpg";
-import babyClothes from "./CSS/assets/onesie.jpg";
-import babyToys from "./CSS/assets/hanging_toy2.jpg";
-import calorieTracker from "./CSS/assets/calorietracker.png";
+import stretchMarkOil from "./CSS/assets/stretch_mark_oil.jpg";
 
-const Home = () => {
+const test_Home = () => {
   return (
     <div style={{ backgroundColor: "white" }}>
       <section className="main">
@@ -89,109 +84,104 @@ const Home = () => {
           </div>
         </div>
       </section>
-      <section className="featured_products pt-5 pb-5">
-            <div className="col-lg-5 m-auto text-center">
-              <h1>FEATURED PRODUCTS</h1>
+      <section className="pt-5 pb-5">
+        <div className="container">
+          <div className="row">
+            <div className="col-6">
+              <h3
+                className="mb-3"
+                style={{
+                  fontFamily: "Georgia, 'Times New Roman', Times, serif",
+                }}
+              >
+                Featured Products
+              </h3>
+            </div>
+            <div className="col-6 text-right">
+              <a
+                className="btn mb-3 mr-1"
+                href="#carouselExampleIndicators2"
+                role="button"
+                data-slide="prev"
+              >
+                <i className="fa fa-arrow-left"></i>
+              </a>
+              <a
+                className="btn mb-3"
+                href="#carouselExampleIndicators2"
+                role="button"
+                data-slide="next"
+              >
+                <i className="fa fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
       <div className="carousel-container">
-        <Carousel responsive={responsive}>
-          <div>
-            <div className="card2">
-              <img src={pregnancyPillow} className="product--image" alt="..." />
-              <h2>Pregnancy Pillow</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
+      <Carousel responsive={responsive}>
+        <div>
+          <div className="card">
+            <img src={pregnancyPillow} className="product--image" alt="..." />
+            <h2>Pregnancy Pillow</h2>
+            <p className="price">Tk. 500</p>
+            <p>
+              <button>Add to Cart</button>
+            </p>
           </div>
-          <div>
-            <div className="card2">
-              <img
-                src={prenatalVitamins}
-                className="product--image"
-                alt="..."
-              />
-              <h2>Prenatal Vitamins</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
+        </div>
+        <div>
+          <div className="card">
+            <img src={pregnancyPillow} className="product--image" alt="..." />
+            <h2>Pregnancy Pillow</h2>
+            <p className="price">Tk. 500</p>
+            <p>
+              <button>Add to Cart</button>
+            </p>
           </div>
-          <div>
-            <div className="card2">
-              <img src={diaper} className="product--image" alt="..." />
-              <h2>Diapers</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
+        </div>
+        <div>
+          <div className="card">
+            <img src={pregnancyPillow} className="product--image" alt="..." />
+            <h2>Pregnancy Pillow</h2>
+            <p className="price">Tk. 500</p>
+            <p>
+              <button>Add to Cart</button>
+            </p>
           </div>
-          <div>
-            <div className="card2">
-              <img src={babyWipes} className="product--image" alt="..." />
-              <h2>Baby Wipes</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
+        </div>
+        <div>
+          <div className="card">
+            <img src={pregnancyPillow} className="product--image" alt="..." />
+            <h2>Pregnancy Pillow</h2>
+            <p className="price">Tk. 500</p>
+            <p>
+              <button>Add to Cart</button>
+            </p>
           </div>
-          <div>
-            <div className="card2">
-              <img src={maternityDress} className="product--image" alt="..." />
-              <h2>Maternity Dress</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
+        </div>
+        <div>
+          <div className="card">
+            <img src={pregnancyPillow} className="product--image" alt="..." />
+            <h2>Pregnancy Pillow</h2>
+            <p className="price">Tk. 500</p>
+            <p>
+              <button>Add to Cart</button>
+            </p>
           </div>
-          <div>
-            <div className="card2">
-              <img src={babyClothes} className="product--image" alt="..." />
-              <h2>Baby Clothes</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
+        </div>
+        <div>
+          <div className="card">
+            <img src={pregnancyPillow} className="product--image" alt="..." />
+            <h2>Pregnancy Pillow</h2>
+            <p className="price">Tk. 500</p>
+            <p>
+              <button>Add to Cart</button>
+            </p>
           </div>
-          <div>
-            <div className="card2">
-              <img src={babyShoes} className="product--image" alt="..." />
-              <h2>Baby Shoes</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
-          </div>
-          <div>
-            <div className="card2">
-              <img src={babyToys} className="product--image" alt="..." />
-              <h2>Baby's Hanging Toy</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
-          </div>
-          <div>
-            <div className="card2">
-              <img src={stretchMarkOil} className="product--image" alt="..." />
-              <h2>Stretch Mark Oil</h2>
-              <p className="price">Tk. 500</p>
-              <p>
-                <button>Add to Cart</button>
-              </p>
-            </div>
-          </div>
-        </Carousel>
-        ;
+        </div>
+      </Carousel>
+      ;
       </div>
       <section className="footer py-5">
         <div className="container py-2">
@@ -225,19 +215,19 @@ const Home = () => {
                     <a href="">About Us</a>
                   </p>
                 </div>
-                <div className="col-lg-2 fa">
-                <h4>Contact us</h4>
+                <div className="col-lg-2">
+                  <h4>Contact us</h4>
                   <span>
-                    <FaFacebook />
+                    <i className="fa fa-facebook-official"></i>
                   </span>
                   <span>
-                    <FaInstagram />
+                    <i className="fa fa-instagram" aria-hidden="true"></i>
                   </span>
                   <span>
-                    <FaGithub />
+                    <i className="fa fa-github"></i>
                   </span>
                   <span>
-                    <FaTwitter />
+                    <i className="fa fa-twitter"></i>
                   </span>
                 </div>
               </div>
@@ -276,9 +266,9 @@ const features = [
       "Find all your necessities related to your and your newborn's health",
   },
   {
-    image: calorieTracker,
-    title: "Calorie Tracker",
-    description: "Keep track of calories consumed in a day.",
+    image: bloodDonor,
+    title: "Blood Donor",
+    description: "Find nearest blood source for emergency blood transfusions.",
   },
   {
     image: pregnancyResources,
@@ -317,20 +307,6 @@ const products = [
       title: "Stretch Mark Oil",
     },
   ],
-  [
-    {
-      image: babyClothes,
-      title: "Baby Clothes",
-    },
-    {
-      image: babyShoes,
-      title: "Baby Shoes",
-    },
-    {
-      image: babyToys,
-      title: "Baby Hanging Toy",
-    },
-  ]
 ];
 const responsive = {
   superLargeDesktop: {
@@ -352,4 +328,4 @@ const responsive = {
   },
 };
 
-export default Home;
+export default test_Home;

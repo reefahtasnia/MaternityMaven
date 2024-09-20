@@ -33,13 +33,13 @@ const DoctorProfile = () => {
         })
         .then((data) => {
           console.log("Fetched data:", data); // Log the fetched data
-          setFullName(capitalizeWords(data[1] || ""));
-          setEmail(capitalizeWords(data[2] || ""));
-          setPhone(data[4] || ""); // Phone numbers typically do not need capitalization
-          setDept(capitalizeWords(data[5] || ""));
-          setMBBSyear(data[6] || ""); // Assuming MBBS year does not need capitalization
-          setPracChamber(capitalizeWords(data[8] || ""));
-          setHosp(capitalizeWords(data[7] || ""));
+          setFullName(capitalizeWords(data.FULLNAME || ""));
+          setEmail(data.EMAIL.toLowerCase() || "");
+          setPhone(data.PHONE || ""); // Phone numbers typically do not need capitalization
+          setDept(capitalizeWords(data.DEPT || ""));
+          setMBBSyear(data.MBBSYEAR|| ""); // Assuming MBBS year does not need capitalization
+          setPracChamber(capitalizeWords(data.CHAMBER || ""));
+          setHosp(capitalizeWords(data.HOSP || ""));
           setProfileImage(
             data.profileImage || "https://via.placeholder.com/150"
           );

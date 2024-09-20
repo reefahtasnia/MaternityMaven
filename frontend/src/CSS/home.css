@@ -86,6 +86,50 @@
 .feature .card:last-child {
   margin-right: 0;
 }
+.featured_products h1 {
+  font-size: 4.5rem;
+  color: rgb(177, 120, 223);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+.price {
+  color: grey;
+  font-size: 22px;
+}
+.card2 {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  width: 280px; /* Adjusted width */
+  margin: 20px auto; /* Adds space above and below while centering the card */
+  text-align: center;
+  font-family: arial;
+  padding-bottom: 20px; /* Ensures padding below the button */
+}
+
+.product--image {
+  width: 80%; /* Reduced width */
+  height: auto; /* Adjust height to be automatic */
+  object-fit: contain; /* Changes to contain to see all of the image */
+  margin: 0 auto 20px; /* Centers image and adds space below */
+  display: block; /* Ensures the image is block level to respect width/height */
+}
+
+.card2 button {
+  border: none;
+  outline: 0;
+  padding: 12px;
+  color: white;
+  background-color: #000;
+  text-align: center;
+  cursor: pointer;
+  width: 90%; /* Adjust button width to fit inside card */
+  margin: 0 auto; /* Center button horizontally */
+  display: block; /* Ensure button is block level */
+}
+
+/* Add padding to the carousel container */
+.carousel-container { /* You need to add this class in your React component */
+  padding: 0 100px; /* Adjusts padding to increase space on the sides */
+}
+
 .main2 {
   background-image: url("assets/doctorbookbg.jpg");
   background-size: cover;
@@ -180,7 +224,13 @@
   font-size: 1srem;
 }
 .footer .fa {
-  font-size: 2rem;
+  font-size: 1.5rem;
   margin-right: 10px;
   cursor: pointer;
+}
+.footer .fa h4 {
+  margin-top: 40px;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  font-family: Arial, Helvetica, sans-serif;
 }
