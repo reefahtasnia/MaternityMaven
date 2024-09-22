@@ -20,6 +20,8 @@ import "./App.css";
 import Shop from "./shop.js";
 import Cart from "./cart.js";
 import OrderDetails from "./order_history.js";
+import Dashboard from "./dashboard.js";
+import Admin from "./admin_profile.js";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -28,8 +30,10 @@ function App() {
       <BrowserRouter>
         <Navbar />
         <Routes>
-          {<Route path="/" element={<Home />} />}
+          <Route path="/" element={<Home />} />
           <Route element={<PrivateComponent />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/Dashboard" element={<Dashboard />} />
             <Route path="/Patient" element={<UserProfile />} />
             <Route path="/Doctor" element={<DoctorProfile />} />
             <Route path="/Medicinetracker" element={<MedicineTracker />} />
@@ -39,6 +43,7 @@ function App() {
             <Route path="/Bookappointment" element={<BookAppointment />} />
             <Route path="/orderdetails" element={<OrderDetails/>}/>
           </Route>
+          <Route path="/Admin" element={<Admin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/DoctorSignup" element={<DoctorSignup />} />

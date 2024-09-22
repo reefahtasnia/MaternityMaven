@@ -83,3 +83,29 @@ VALUES ('BMDC029', 'DR. CHARLOTTE WEB', 'CHARLOTTE.WEB@EXAMPLE.COM', 'FEMALE', '
 
 
 commit;
+CREATE TABLE products (
+    productId NUMBER PRIMARY KEY,
+    product_name VARCHAR2(255) NOT NULL,
+    price NUMBER NOT NULL,
+    stock NUMBER NOT NULL,
+    image VARCHAR2(255) NOT NULL
+);
+alter table products add ctgr varchar(255);
+
+-- Maternity Products
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(1, 'Pregnancy Pillow', 500, 10, '/public/assets/pregnancypillow.jpeg', 'Maternity products'),
+(2, 'Maternity Dress', 1200, 5, '/public/assets/maternity_dress.jpg', 'Maternity products'),
+(3, 'Stretch Mark Oil', 750, 20, '/public/assets/stretch_mark_oil.jpg', 'Maternity products'),
+(4, 'Maternity Top', 850, 15, '/public/assets/maternity_top.jpg', 'Maternity products'),
+(5, 'Prenatal Vitamins', 650, 25, '/public/assets/prenatal_vitamins.jpg', 'Maternity products'),
+(6, 'Maternity Essentials', 1500, 30, '/public/assets/maternity_essentials.jpg', 'Maternity products');
+
+-- Baby Products & Toys
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(7, 'Baby Wipes', 350, 50, '/public/assets/baby_wipes.jpg', 'Baby products & toys'),
+(8, 'Diapers', 450, 40, '/public/assets/diaper.jpg', 'Baby products & toys'),
+(9, 'Baby Shoes', 300, 15, '/public/assets/shoes.jpg', 'Baby products & toys'),
+(10, 'Baby Clothes', 400, 10, '/public/assets/onesie.jpg', 'Baby products & toys'),
+(11, 'Teether', 250, 20, '/public/assets/teether.jpg', 'Baby products & toys'),
+(12, "Baby's Hanging Toy", 550, 30, '/public/assets/hanging_toy.jpg', 'Baby products & toys');

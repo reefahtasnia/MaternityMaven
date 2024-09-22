@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./CSS/userprofile.css"; // Adjust the path as necessary
 import { FaShoppingCart } from "react-icons/fa";
-import { useHistory } from "react-router-dom";
 
 const UserProfile = () => {
   const auth = JSON.parse(localStorage.getItem("user"));

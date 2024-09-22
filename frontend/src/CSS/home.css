@@ -100,6 +100,7 @@
   width: 280px; /* Adjusted width */
   margin: 20px auto; /* Adds space above and below while centering the card */
   text-align: center;
+  background-color: white;
   font-family: arial;
   padding-bottom: 20px; /* Ensures padding below the button */
 }
