@@ -22,6 +22,8 @@ import Cart from "./cart.js";
 import OrderDetails from "./order_history.js";
 import Dashboard from "./dashboard.js";
 import Admin from "./admin_profile.js";
+import Secret from "./adminLogin.js";
+import AdminPrivateComponent from "./AdminPrivateComponent.js";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -43,7 +45,10 @@ function App() {
             <Route path="/Bookappointment" element={<BookAppointment />} />
             <Route path="/orderdetails" element={<OrderDetails/>}/>
           </Route>
-          <Route path="/Admin" element={<Admin />} />
+          <Route element={<AdminPrivateComponent />}> 
+            <Route path="/Admin" element={<Admin />} />
+          </Route>
+          <Route path="/secret" element={<Secret />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/DoctorSignup" element={<DoctorSignup />} />

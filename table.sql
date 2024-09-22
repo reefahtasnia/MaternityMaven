@@ -3,12 +3,14 @@ select * from passwords;
 select * from Medical_History;
 select * from orders;
 select * from cart;
+select * from products;
 select * from medicine;
 select * from MEDICINETRACKER;
 select * from doctors;
 select * from appointments;
 select * from MedicalHistoryView;
 
+drop table products;
 drop TRIGGER medicine_trigger;
 
 CREATE OR REPLACE TRIGGER medicine_trigger
@@ -92,20 +94,43 @@ CREATE TABLE products (
 );
 alter table products add ctgr varchar(255);
 
--- Maternity Products
+-- Insert Maternity Products
 INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
-(1, 'Pregnancy Pillow', 500, 10, '/public/assets/pregnancypillow.jpeg', 'Maternity products'),
-(2, 'Maternity Dress', 1200, 5, '/public/assets/maternity_dress.jpg', 'Maternity products'),
-(3, 'Stretch Mark Oil', 750, 20, '/public/assets/stretch_mark_oil.jpg', 'Maternity products'),
-(4, 'Maternity Top', 850, 15, '/public/assets/maternity_top.jpg', 'Maternity products'),
-(5, 'Prenatal Vitamins', 650, 25, '/public/assets/prenatal_vitamins.jpg', 'Maternity products'),
-(6, 'Maternity Essentials', 1500, 30, '/public/assets/maternity_essentials.jpg', 'Maternity products');
+(1, 'Pregnancy Pillow', 500, 10, '/assets/pregnancypillow.jpeg', 'Maternity products');
 
--- Baby Products & Toys
 INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
-(7, 'Baby Wipes', 350, 50, '/public/assets/baby_wipes.jpg', 'Baby products & toys'),
-(8, 'Diapers', 450, 40, '/public/assets/diaper.jpg', 'Baby products & toys'),
-(9, 'Baby Shoes', 300, 15, '/public/assets/shoes.jpg', 'Baby products & toys'),
-(10, 'Baby Clothes', 400, 10, '/public/assets/onesie.jpg', 'Baby products & toys'),
-(11, 'Teether', 250, 20, '/public/assets/teether.jpg', 'Baby products & toys'),
-(12, "Baby's Hanging Toy", 550, 30, '/public/assets/hanging_toy.jpg', 'Baby products & toys');
+(2, 'Maternity Dress', 1200, 5, '/assets/maternity_dress.jpg', 'Maternity products');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(3, 'Stretch Mark Oil', 750, 20, '/assets/stretch_mark_oil.jpg', 'Maternity products');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(4, 'Maternity Top', 850, 15, '/assets/maternity_top.jpg', 'Maternity products');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(5, 'Prenatal Vitamins', 650, 25, '/assets/prenatal_vitamins.jpg', 'Maternity products');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(6, 'Maternity Essentials', 1500, 30, '/assets/maternity_essentials.jpg', 'Maternity products');
+
+-- Insert Baby Products & Toys
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(7, 'Baby Wipes', 350, 50, '/assets/baby_wipes.jpg', 'Baby products & toys');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(8, 'Diapers', 450, 40, '/assets/diaper.jpg', 'Baby products & toys');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(9, 'Baby Shoes', 300, 15, '/assets/shoes.jpg', 'Baby products & toys');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(10, 'Baby Clothes', 400, 10, '/assets/onesie.jpg', 'Baby products & toys');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(11, 'Teether', 250, 20, '/assets/teether.jpg', 'Baby products & toys');
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
+(12, 'Babys Hanging Toy', 550, 30, '/assets/hanging_toy.jpg', 'Baby products & toys');
+
+INSERT INTO Admin (admin_id, name, email, hashed_password, phone_no)
+VALUES (2, 'JOHN DOE', 'JOHN.DOE@EXAMPLE.COM', 'plaintext', '1234567890');

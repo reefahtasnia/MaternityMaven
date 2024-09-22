@@ -6,6 +6,7 @@ import logo from "./logo2fotor.png";
 
 const Navbar = () => {
   const auth = localStorage.getItem("user");
+  const admin = localStorage.getItem("admin");
   const navigate = useNavigate();
   const logout = () => {
     alert("Logged out successfully");
@@ -13,10 +14,11 @@ const Navbar = () => {
     localStorage.removeItem("userType");
     localStorage.removeItem("doctor");
     localStorage.removeItem("userdata");
+    localStorage.removeItem("admin");
     navigate("/login");
   };
   const handleIconClick = () => {
-    if (auth) {
+    if (auth || admin) {
       logout();
     } else {
       navigate("/login");
@@ -25,6 +27,8 @@ const Navbar = () => {
   const handleClick = () => {
     if (auth) {
       navigate("/Patient");
+    } else if (admin) {
+      navigate("/Admin");
     } else {
       navigate("/login");
     }
@@ -72,7 +76,7 @@ const Navbar = () => {
             </Link>
           </div>
           <button className="btn" type="button" onClick={handleIconClick}>
-            {auth ? "Log Out" : "Log In"}
+            {auth || admin ? "Log Out" : "Log In"}
           </button>
         </div>
       </div>
@@ -80,4 +84,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar;

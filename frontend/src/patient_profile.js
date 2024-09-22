@@ -370,6 +370,7 @@ const UserProfile = () => {
             Edit
           </button>
           <div className="profile-section-content">
+            {calorieData.length >0 ? (
             <table className="table">
               <thead>
                 <tr>
@@ -398,6 +399,9 @@ const UserProfile = () => {
                 ))}
               </tbody>
             </table>
+          ):(
+          <p>No calorie data found.</p>
+          )}  
           </div>
         </div>
         <div className="profile-section">

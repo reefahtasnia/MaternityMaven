@@ -2,20 +2,13 @@ import React, { useState } from "react";
 import "./CSS/login.css";
 import backgroundImage from "./CSS/assets/pinkpg2.jpg";
 
-const Login = () => {
+const Secret = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("user"); // Default to "user"
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if(email ==="admin" && password ==="admin"){
-      window.location.href = "/secret"; 
-      return;
-    }
-    const endpoint = userType === "doctor" ? "/api/doctorLogin" : "/api/login";
-
-    fetch(`http://localhost:5000${endpoint}`, {
+    fetch(`http://localhost:5000/api/secret`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -29,21 +22,8 @@ const Login = () => {
       .then((data) => {
         if (data.message === "Login successful") {
           alert("Login successful!");
-          // Check the type and store appropriate identifier
-          if (userType === "doctor") {
-            localStorage.setItem(
-              "user",
-              JSON.stringify({ BMDC: data.BMDC, email })
-            );
-            window.location.href = "/Doctor"; // Redirect to doctor dashboard
-          } else {
-            localStorage.setItem(
-              "user",
-              JSON.stringify({ userId: data.userId, email })
-            );
-            window.location.href = "/Dashboard"; // Redirect to patient dashboard
-          }
-          localStorage.setItem("userType", userType); // Store the user type in local storage
+          localStorage.setItem("admin",JSON.stringify({email}));
+          window.location.href = "/Admin"; 
         } else {
           alert(data.message);
         }
@@ -89,30 +69,13 @@ const Login = () => {
             />
             <i className="bx bxs-lock-alt"></i>
           </div>
-          <div className="dropdown">
-            <select
-              value={userType}
-              onChange={(e) => setUserType(e.target.value)}
-            >
-              <option value="user">User</option>
-              <option value="doctor">Doctor</option>
-            </select>
-          </div>
-          <div className="forgot-pass">
-            <a href="/forgot">Forgot Password?</a>
-          </div>
           <button type="submit" className="btn" id="loginbtn">
             Log In
           </button>
-          <div className="signup">
-            <p>
-              Don't have an account? <a href="/signup">Sign Up</a>
-            </p>
-          </div>
         </form>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default Secret;

@@ -116,7 +116,7 @@ app.post("/api/signup", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
-  try {
+  try { 
     const userResults = await run_query(
       "SELECT userid FROM users WHERE email = UPPER(:email)",
       { email }
@@ -156,6 +156,62 @@ app.post("/api/login", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+app.post("/api/secret", async (req, res) => {
+  const { email, password } = req.body;
+  try{
+    const adminResults = await run_query(
+      "SELECT email FROM Admin WHERE email = UPPER(:email)",
+      { email }
+    );
+    if (adminResults.length === 0) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    const adminEmail = adminResults[0].EMAIL;
+    const passwordResults = await run_query(
+      "SELECT hashed_password FROM Admin WHERE email = :email",
+      { email: adminEmail }
+    );
+    if (passwordResults.length === 0 || !passwordResults[0].HASHED_PASSWORD) {
+      return res
+        .status(404)
+        .json({ message: "Password not set for this admin" });
+    }
+    const hashed_password = passwordResults[0].HASHED_PASSWORD;
+    console.log(hashed_password);
+    if (hashed_password === password) {
+      res.status(200).json({
+        message: "Login successful",
+        email: adminEmail,
+      });
+    } else {
+      res.status(401).json({ message: "Incorrect password" });
+    }
+  }catch(error){
+    console.error("Error during admin login process:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+app.get("/api/secret", async (req, res) => {
+  const { email } = req.query;
+  try {
+    const adminResults = await run_query(
+      "SELECT * FROM Admin WHERE email = UPPER(:email)",
+      { email }
+    );
+    if (adminResults.length === 0) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    console.log(adminResults);
+    const data=adminResults;
+    console.log("Fetching admin data");
+    console.log(data);
+    res.json(data);
+  } catch (error) {
+    console.error("Error during admin search:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
@@ -1065,6 +1121,8 @@ app.get("/api/products", async (req, res) => {
     conn = await connection();
 
     const result = await conn.execute("SELECT * FROM products");
+    console.log("Fetching products");
+    console.log(result.rows[0]);
     return res.json(result.rows);
   } catch (err) {
     console.error("Database query error:", err);

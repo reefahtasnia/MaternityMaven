@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import "./CSS/adminprofile.css"; // Adjust the path as necessary
-import { FaShoppingCart } from "react-icons/fa";
+import "./CSS/userprofile.css";
 
 const AdminProfile = () => {
-  const auth = JSON.parse(localStorage.getItem("user"));
+  const auth = JSON.parse(localStorage.getItem("admin"));
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -15,11 +14,11 @@ const AdminProfile = () => {
     });
   };
   useEffect(() => {
-    if (auth && auth.userId) {
+    if (auth) {
       const fetchUserData = async () => {
         try {
           // Fetch user data
-          const userDataUrl = `http://localhost:5000/api/user?userId=${auth.userId}`;
+          const userDataUrl = `http://localhost:5000/api/secret?email=${auth.email}`;
           const userResponse = await fetch(userDataUrl);
           if (!userResponse.ok) {
             throw new Error(`HTTP status ${userResponse.status}`);
@@ -32,31 +31,33 @@ const AdminProfile = () => {
           alert(`Failed to load data: ${error.message}`);
         }
       };
-      const fetchProductData=async()=>{
-        try{
-            const productDataUrl = `http://localhost:5000/api/products`;
-            const productResponse = await fetch(productDataUrl);
-            if (!productResponse.ok) {
-                throw new Error(`HTTP status ${productResponse.status}`);
-            }
-            const productData = await productResponse.json();
-            console.log("Fetched product data:", productData);
+      const fetchProductData = async () => {
+        try {
+          const productDataUrl = `http://localhost:5000/api/products`;
+          const productResponse = await fetch(productDataUrl);
+          if (!productResponse.ok) {
+            throw new Error(`HTTP status ${productResponse.status}`);
+          }
+          const productData = await productResponse.json();
+          console.log("Fetched product data:", productData);
+          setProducts(productData);
         } catch (error) {
-            console.error("Failed to fetch data:", error.message);
-            alert(`Failed to load data: ${error.message}`);
+          console.error("Failed to fetch product data:", error);
+          alert(`Failed to load product data: ${error.message}`);
         }
-    };
+      };
       fetchUserData();
+      fetchProductData();
     }
   }, []); // Empty dependency array to run only once on component mount
 
   const setProfileData = (data) => {
     try {
       setFullName(
-        capitalizeWords(`${data.FIRSTNAME || ""} ${data.LASTNAME || ""}`)
+        capitalizeWords(data[0].NAME)
       );
-      setEmail(data.EMAIL ? data.EMAIL.toLowerCase() : "");
-      setPhone(data.PHONE_NUMBER || "");
+      setEmail(data[0].EMAIL.toLowerCase());
+      setPhone(data[0].PHONE_NO || "");
     } catch (error) {
       console.error("Error setting profile data:", error);
     }
@@ -111,14 +112,40 @@ const AdminProfile = () => {
             Edit
           </button>
           <div className="profile-section-content">
-            <ul className="profile-section-list">
-              {products.map((product) => (
-                <li key={product.id} className="profile-section-item">
-                  <span>{product.name}</span>
-                  <span>{product.price}</span>
-                </li>
-              ))}
-            </ul>
+            {products.length >0 ? (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Category</th>
+                  <th>Image</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product, index) => (
+                  <tr key={`product-${product.PRODUCTID}-${index}`}>
+                    <td>{product.PRODUCTID}</td>
+                    <td>{product.PRODUCT_NAME}</td>
+                    <td>{product.PRICE}</td>
+                    <td>{product.STOCK}</td>
+                    <td>{product.CTGR}</td>
+                    <td>
+                      <img
+                        src={product.IMAGE}
+                        alt={product.PRODUCT_NAME}
+                        style={{ width: "100px" }}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            ) : (
+              <p>No products available</p>
+            )}
           </div>
         </div>
         <div className="profile-section">
