@@ -41,7 +41,7 @@ const Login = () => {
               "user",
               JSON.stringify({ userId: data.userId, email })
             );
-            window.location.href = "/Dashboard"; // Redirect to patient dashboard
+            window.location.href = "/"; // Redirect to patient dashboard
           }
           localStorage.setItem("userType", userType); // Store the user type in local storage
         } else {

@@ -134,3 +134,10 @@ INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
 
 INSERT INTO Admin (admin_id, name, email, hashed_password, phone_no)
 VALUES (2, 'JOHN DOE', 'JOHN.DOE@EXAMPLE.COM', 'plaintext', '1234567890');
+
+
+
+SELECT * FROM USER_IMAGES;
+
+
+SELECT image_data, mime_type FROM user_images WHERE user_id = 21 AND ROWNUM = 1

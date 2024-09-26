@@ -91,6 +91,24 @@ const UserProfile = () => {
           console.error("Failed to fetch medical history:", error.message);
         }
       };
+      const checkProfileImage = async () => {
+        const possibleExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+        for (const ext of possibleExtensions) {
+          const imagePath = `/assets/${auth.userId}_profile_pic${ext}`;
+          try {
+            const response = await fetch(imagePath);
+            if (response.ok) {
+              setProfileImage(imagePath);
+              alert("Profile image found" + imagePath);
+              break;
+            }
+          } catch (error) {
+            console.error("Error checking profile image:", error);
+          }
+        }
+      };
+      fetchProfileImage();
+      //checkProfileImage();
       fetchUserData();
       fetchMedicineReminders();
       fetchMedicalHistory();
@@ -127,13 +145,91 @@ const UserProfile = () => {
   const triggerFileInput = () => {
     document.getElementById("fileInput").click();
   };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setProfileImage(URL.createObjectURL(file));
+  const fetchProfileImage = async () => {
+    try {
+      const imageUrl = `http://localhost:3001/api/user-image/${auth.userId}`;
+      const response = await fetch(imageUrl);
+      if (response.ok) {
+        console.log("Profile image found:", imageUrl);
+        setProfileImage(imageUrl);
+      } else {
+        console.log('No profile image found, using default');
+        setProfileImage("https://via.placeholder.com/150");
+      }
+    } catch (error) {
+      console.error("Error fetching profile image:", error);
+      setProfileImage("https://via.placeholder.com/150");
     }
   };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.name.toLowerCase().endsWith('.jpg')) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("userId", auth.userId);
+
+        try {
+          const response = await fetch("http://localhost:3001/api/upload-image", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to upload image: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          if (result) alert("Image uploaded successfully");
+          fetchProfileImage(); // Fetch the new image after successful upload
+        } catch (error) {
+          console.error("Error uploading file:", error);
+          alert("Error uploading file: " + error.message);
+        }
+      } else {
+        alert("Please select a .jpg file for upload.");
+      }
+    }
+  };
+
+  // const handleFileChange = async (event) => {
+  //   const file = event.target.files[0];
+  //   console.log(file);
+  //   if (file) {
+  //     // Check if the file has a .jpg extension
+  //     if (file.name.toLowerCase().endsWith('.jpg')) {
+  //       const formData = new FormData();
+  //       formData.append("file", file);
+  //       formData.append("userId", auth.userId);
+  //       console.log("FormData:");
+  //       for (var pair of formData.entries()) {
+  //         console.log(`${pair[0]}: ${pair[1]}`);
+  //       }
+  
+  //       try {
+  //         const response = await fetch("http://localhost:3001/api/upload-image", {
+  //           method: "POST",
+  //           body: formData,
+  //         });
+  
+  //         if (!response.ok) {
+  //           throw new Error(`Failed to upload image: ${response.statusText}`);
+  //         }
+  
+  //         const result = await response.json();
+  //         if (result) alert("Image uploaded successfully");
+  //         const newImagePath = `http://localhost:3001${result.filePath}`;
+  //         setProfileImage(newImagePath); // Update state to reflect new image path
+  //       } catch (error) {
+  //         console.error("Error uploading file:", error);
+  //         alert("Error uploading file: " + error.message);
+  //       }
+  //     } else {
+  //       alert("Please select a .jpg file for upload.");
+  //     }
+  //   }
+  // };
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -370,38 +466,38 @@ const UserProfile = () => {
             Edit
           </button>
           <div className="profile-section-content">
-            {calorieData.length >0 ? (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Food Item</th>
-                  <th>Calories</th>
-                  <th>Meal Type</th>
-                  <th>Servings</th>
-                  <th>Protein (g)</th>
-                  <th>Carbs (g)</th>
-                  <th>Fat (g)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {calorieData.map((entry, index) => (
-                  <tr key={index}>
-                    <td>{new Date(entry.date).toLocaleDateString()}</td>
-                    <td>{capitalizeWords(entry.foodItem)}</td>
-                    <td>{entry.calories}</td>
-                    <td>{entry.mealType}</td>
-                    <td>{entry.servings}</td>
-                    <td>{entry.protein}</td>
-                    <td>{entry.carbohydrates}</td>
-                    <td>{entry.fat}</td>
+            {calorieData.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Food Item</th>
+                    <th>Calories</th>
+                    <th>Meal Type</th>
+                    <th>Servings</th>
+                    <th>Protein (g)</th>
+                    <th>Carbs (g)</th>
+                    <th>Fat (g)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ):(
-          <p>No calorie data found.</p>
-          )}  
+                </thead>
+                <tbody>
+                  {calorieData.map((entry, index) => (
+                    <tr key={index}>
+                      <td>{new Date(entry.date).toLocaleDateString()}</td>
+                      <td>{capitalizeWords(entry.foodItem)}</td>
+                      <td>{entry.calories}</td>
+                      <td>{entry.mealType}</td>
+                      <td>{entry.servings}</td>
+                      <td>{entry.protein}</td>
+                      <td>{entry.carbohydrates}</td>
+                      <td>{entry.fat}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No calorie data found.</p>
+            )}
           </div>
         </div>
         <div className="profile-section">

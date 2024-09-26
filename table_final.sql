@@ -80,6 +80,16 @@ EXCEPTION
         ROLLBACK;
 END CalculateExperience;
 
+CREATE TABLE user_images (
+    image_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id NUMBER NOT NULL,
+    filename VARCHAR2(255) NOT NULL,
+    mime_type VARCHAR2(100) NOT NULL,
+    image_data BLOB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES Users(userid)
+);
+
 --new additions end up to above~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CREATE TABLE Doctors (

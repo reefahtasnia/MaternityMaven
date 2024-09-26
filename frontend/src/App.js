@@ -15,8 +15,6 @@ import CalorieTracker from "./calorie.js";
 import Medical from "./Medical.js";
 import Appointment from "./Appointment.js";
 import BookAppointment from "./bookappointment.js";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./App.css";
 import Shop from "./shop.js";
 import Cart from "./cart.js";
 import OrderDetails from "./order_history.js";
@@ -24,18 +22,24 @@ import Dashboard from "./dashboard.js";
 import Admin from "./admin_profile.js";
 import Secret from "./adminLogin.js";
 import AdminPrivateComponent from "./AdminPrivateComponent.js";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import useAuth from './Auth.js';
 
 function App() {
+  const isAuthenticated = localStorage.getItem('user'); // You may need a more complex logic here, based on how authentication is handled
+
   return (
     <div className="App">
       <BrowserRouter>
         <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route element={<PrivateComponent />}>
+          {isAuthenticated ? (
             <Route path="/" element={<Dashboard />} />
-            <Route path="/Dashboard" element={<Dashboard />} />
+          ) : (
+            <Route path="/" element={<Home />} />
+          )}
+          <Route element={<PrivateComponent />}>
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/Patient" element={<UserProfile />} />
             <Route path="/Doctor" element={<DoctorProfile />} />
             <Route path="/Medicinetracker" element={<MedicineTracker />} />
@@ -43,9 +47,9 @@ function App() {
             <Route path="/Medicalhistory" element={<Medical />} />
             <Route path="/Appointment" element={<Appointment />} />
             <Route path="/Bookappointment" element={<BookAppointment />} />
-            <Route path="/orderdetails" element={<OrderDetails/>}/>
+            <Route path="/orderdetails" element={<OrderDetails />} />
           </Route>
-          <Route element={<AdminPrivateComponent />}> 
+          <Route element={<AdminPrivateComponent />}>
             <Route path="/Admin" element={<Admin />} />
           </Route>
           <Route path="/secret" element={<Secret />} />
@@ -55,7 +59,7 @@ function App() {
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/reset" element={<ResetPassword />} />
-          <Route path="/shop" element={<Shop/>}/>
+          <Route path="/shop" element={<Shop />} />
           <Route path="/cart" element={<Cart />} />
         </Routes>
       </BrowserRouter>

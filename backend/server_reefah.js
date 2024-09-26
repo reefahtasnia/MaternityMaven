@@ -23,10 +23,6 @@ app.use(
   })
 );
 
-app.get("/api", (req, res) => {
-  res.send("API is working");
-});
-
 app.post("/api/signup", async (req, res) => {
   let { firstname, lastname, email, password, dob } = req.body;
 

@@ -74,7 +74,7 @@ const Dashboard = () => {
               <h2>Pregnancy Pillow</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
@@ -88,7 +88,7 @@ const Dashboard = () => {
               <h2>Prenatal Vitamins</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
@@ -98,7 +98,7 @@ const Dashboard = () => {
               <h2>Diapers</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
@@ -108,7 +108,7 @@ const Dashboard = () => {
               <h2>Baby Wipes</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
@@ -118,7 +118,7 @@ const Dashboard = () => {
               <h2>Maternity Dress</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
@@ -128,7 +128,7 @@ const Dashboard = () => {
               <h2>Baby Clothes</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
@@ -138,7 +138,7 @@ const Dashboard = () => {
               <h2>Baby Shoes</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
@@ -148,7 +148,7 @@ const Dashboard = () => {
               <h2>Baby's Hanging Toy</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
@@ -158,12 +158,13 @@ const Dashboard = () => {
               <h2>Stretch Mark Oil</h2>
               <p className="price">Tk. 500</p>
               <p>
-                <button>Add to Cart</button>
+                {/* <button>Add to Cart</button> */}
               </p>
             </div>
           </div>
         </Carousel>
         ;
+        <button>View More</button>
       </div>
     </div>
   );
