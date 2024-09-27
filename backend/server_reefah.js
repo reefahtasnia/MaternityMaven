@@ -1755,3 +1755,64 @@ app.delete("/delfood", async (req, res) => {
     res.status(500).send("Error deleting the food entry");
   }
 });
+app.post("/book-appointment", async (req, res) => {
+  const { email, date, time, day, userId } = req.body;
+  let conn;
+  console.log(req.body);
+  try {
+    // Establish connection to the Oracle database
+    conn = await connection();
+
+    // Fetch the BMDC number from the Doctors table using the provided email
+    const doctorResult = await conn.execute(
+      `SELECT BMDC FROM Doctors WHERE email = :email`,
+      { email: email }
+    );
+
+    if (doctorResult.rows.length === 0) {
+      res
+        .status(404)
+        .json({ message: "Doctor not found with the given email" });
+      return; // Stop further execution if no doctor is found
+    }
+
+    const bmdc = doctorResult.rows[0]?.BMDC; // Using optional chaining
+    // Assuming BMDC is the first column
+    console.log(bmdc);
+    console.log(userId);
+
+    // Combine `date` and `time` into a single `TIMESTAMP` for `appointment_timestamp`
+    const appointmentTimestamp = `${date} ${time}`; // Combine date and time into 'YYYY-MM-DD HH24:MI:SS' format
+
+    // Insert the new appointment into the Appointment table
+    const sql = `
+      INSERT INTO Appointment (appointment_id, user_id, BMDC_no, appointment_timestamp, day_of_week)
+      VALUES (appointment_seq.nextval, :user_id, :bmdc, TO_TIMESTAMP(:appointment_timestamp, 'YYYY-MM-DD HH24:MI:SS'), :day_of_week)
+    `;
+
+    // Execute the query with correct bind variables
+    await conn.execute(
+      sql,
+      {
+        user_id: userId,
+        bmdc: bmdc,
+        appointment_timestamp: appointmentTimestamp, // Correctly formatted TIMESTAMP input
+        day_of_week: day, // Day of the week
+      },
+      { autoCommit: true } // Commit the transaction
+    );
+
+    res.status(201).json({ message: "Appointment booked successfully" });
+  } catch (error) {
+    console.error("Error booking appointment:", error);
+    res.status(500).json({ error: "Database query failed" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing the connection:", err);
+      }
+    }
+  }
+});

@@ -45,7 +45,7 @@ function App() {
             <Route path="/Calorietracker" element={<CalorieTracker />} />
             <Route path="/Medicalhistory" element={<Medical />} />
             <Route path="/Appointment" element={<Appointment />} />
-            <Route path="/Bookappointment" element={<BookAppointment />} />
+            <Route path="/book-appointment/:email" element={<BookAppointment />} />
             <Route path="/orderdetails" element={<OrderDetails />} />
           </Route>
           <Route element={<AdminPrivateComponent />}>

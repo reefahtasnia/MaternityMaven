@@ -169,8 +169,12 @@ function Appointment() {
                       <strong>Phone Number:</strong> {doctor.PHONE}
                       <br />
                     </Card.Text>
-                    <Link to="/Bookappointment">
-                      <Button variant="primary">Book Appointment</Button>
+                    <Link
+                      to={`/book-appointment/${encodeURIComponent(
+                        doctor.EMAIL
+                      )}`}
+                    >
+                      Book Appointment
                     </Link>
                   </Col>
                 </Row>

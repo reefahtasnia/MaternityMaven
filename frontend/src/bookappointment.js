@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import "./CSS/bookAppointment.css";
-//book appointment.css CSS folder e move korsi - reefah
+
 const BookAppointment = () => {
   const { email } = useParams();
   const [appointmentDetails, setAppointmentDetails] = useState({
@@ -9,24 +9,46 @@ const BookAppointment = () => {
     date: "",
     time: "",
     day: "",
+    userId: "", // Initially empty, will be set later
   });
 
+  const getUserFromLocalStorage = () => {
+    const userString = localStorage.getItem("user");
+    try {
+      return userString ? JSON.parse(userString) : null;
+    } catch (error) {
+      console.error("Failed to parse user from local storage:", error);
+      return null;
+    }
+  };
+
+  const auth = getUserFromLocalStorage();
+  const userId = auth ? auth.userId : null;
+
   const handleInputChange = (event) => {
+    const { name, value } = event.target;
     setAppointmentDetails((prev) => ({
       ...prev,
-      [event.target.name]: event.target.value,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Set userId in appointmentDetails before submitting
+    const newAppointmentDetails = {
+      ...appointmentDetails,
+      userId: userId, // Add userId here
+    };
+
     try {
-      const response = await fetch("http://localhost:3000/book-appointment", {
+      const response = await fetch("http://localhost:5000/book-appointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(appointmentDetails),
+        body: JSON.stringify(newAppointmentDetails),
       });
 
       if (response.ok) {
@@ -36,6 +58,7 @@ const BookAppointment = () => {
           date: "",
           time: "",
           day: "",
+          userId: "", // Reset userId after booking
         });
       } else {
         const errorData = await response.json();
