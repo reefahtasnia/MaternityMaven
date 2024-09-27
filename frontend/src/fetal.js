@@ -34,7 +34,7 @@ const FetalMovement = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/fetal-movement?userid=${auth.userId}', {
+      await axios.post('http://localhost:5000/api/fetal-movement', {
         user_id: auth.userId, 
         baby_movement: babyMovement,
         duration: parseInt(duration),
