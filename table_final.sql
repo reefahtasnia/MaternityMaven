@@ -265,7 +265,7 @@ CREATE TABLE Feedbacks (
     rate INT,
     user_id INT,
     doctor_id INT,
-    FOREIGN KEY (user_id) REFERENCES User(user_id),
+    FOREIGN KEY (user_id) REFERENCES Users(userid),
     FOREIGN KEY (doctor_id) REFERENCES Doctor(BMDC_no)
 );
 
