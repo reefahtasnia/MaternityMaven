@@ -12,6 +12,7 @@ select * from MedicalHistoryView;
 SELECT * FROM USER_IMAGES;
 SELECT * FROM doctor_images;
 select * from admin;
+select * from feedbacks;
 
 drop table products;
 drop TRIGGER medicine_trigger;
@@ -149,4 +150,19 @@ CREATE TABLE doctor_images (
 );
 SELECT MAX(PRODUCTID) AS maxId FROM products;
 
-ROLLBACK;
+CREATE TABLE Feedbacks (
+    feedback_id INT DEFAULT FEEDBACK_SEQ.NEXTVAL , 
+    des clob,
+    rate INT,
+    user_id INT,
+    doctor_id VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES Users(userid),
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(BMDC)
+);
+
+CREATE SEQUENCE FEEDBACK_SEQ
+START WITH 1
+INCREMENT BY 1
+NOCYCLE;
+/
+COMMIT;

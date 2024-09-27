@@ -7,6 +7,7 @@ import logo from "./logo2fotor.png";
 const Navbar = () => {
   const auth = localStorage.getItem("user");
   const admin = localStorage.getItem("admin");
+  const userType = localStorage.getItem("userType");
   const navigate = useNavigate();
   const logout = () => {
     alert("Logged out successfully");
@@ -59,16 +60,26 @@ const Navbar = () => {
                 Home
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/Appointment">
-                Doctors
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/shop">
-                Shop
-              </Link>
-            </li>
+            {userType != "doctor" && (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/Appointment">
+                    Doctors
+                  </Link>
+                </li>
+              ) && (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/shop">
+                    Shop
+                  </Link>
+                </li>
+              )}
+            {auth && !admin && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/feedback">
+                  Feedback
+                </Link>
+              </li>
+            )}
           </ul>
           <div className="nav-icon-container" onClick={handleClick}>
             <Link to="/Patient">

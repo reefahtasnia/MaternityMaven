@@ -8,6 +8,7 @@ const AdminProfile = () => {
   const [phone, setPhone] = useState("");
   const [products, setProducts] = useState([]);
   const [feedback, setFeedback] = useState([]);
+  const [feedbackType, setFeedbackType] = useState("user"); 
   const capitalizeWords = (string) => {
     return string.toLowerCase().replace(/(?:^|\s)\S/g, function (a) {
       return a.toUpperCase();
@@ -46,16 +47,28 @@ const AdminProfile = () => {
           alert(`Failed to load product data: ${error.message}`);
         }
       };
+      const fetchFeedbackData = async (type) => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/feedback/details?type=${type}`
+          );
+          if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+          const data = await response.json();
+          console.log(data);
+          setFeedback(data);
+        } catch (error) {
+          console.error("Failed to fetch feedback data:", error);
+        }
+      };
+      fetchFeedbackData(feedbackType);
       fetchUserData();
       fetchProductData();
     }
-  }, []); // Empty dependency array to run only once on component mount
+  }, [feedbackType]); // Empty dependency array to run only once on component mount
 
   const setProfileData = (data) => {
     try {
-      setFullName(
-        capitalizeWords(data[0].NAME)
-      );
+      setFullName(capitalizeWords(data[0].NAME));
       setEmail(data[0].EMAIL.toLowerCase());
       setPhone(data[0].PHONE_NO || "");
     } catch (error) {
@@ -112,37 +125,37 @@ const AdminProfile = () => {
             Edit
           </button>
           <div className="profile-section-content">
-            {products.length >0 ? (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Category</th>
-                  <th>Image</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product, index) => (
-                  <tr key={`product-${product.PRODUCTID}-${index}`}>
-                    <td>{product.PRODUCTID}</td>
-                    <td>{product.PRODUCT_NAME}</td>
-                    <td>{product.PRICE}</td>
-                    <td>{product.STOCK}</td>
-                    <td>{product.CTGR}</td>
-                    <td>
-                      <img
-                        src={product.IMAGE}
-                        alt={product.PRODUCT_NAME}
-                        style={{ width: "100px" }}
-                      />
-                    </td>
+            {products.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Category</th>
+                    <th>Image</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {products.map((product, index) => (
+                    <tr key={`product-${product.PRODUCTID}-${index}`}>
+                      <td>{product.PRODUCTID}</td>
+                      <td>{product.PRODUCT_NAME}</td>
+                      <td>{product.PRICE}</td>
+                      <td>{product.STOCK}</td>
+                      <td>{product.CTGR}</td>
+                      <td>
+                        <img
+                          src={product.IMAGE}
+                          alt={product.PRODUCT_NAME}
+                          style={{ width: "100px" }}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             ) : (
               <p>No products available</p>
             )}
@@ -150,13 +163,45 @@ const AdminProfile = () => {
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Feedback reports</h3>
+          <select
+            className="feedback-type-dropdown"
+            value={feedbackType}
+            onChange={(e) => setFeedbackType(e.target.value)}
+            style={{ marginLeft: "10px" }}
+          >
+            <option value="user">User Feedback</option>
+            <option value="doctor">Doctor Feedback</option>
+          </select>
           <button
             className="profile-section-button"
-            onClick={() => (window.location.href = "/Calorietracker")}
+            // onClick={() => (window.location.href = "/Calorietracker")}
           >
             Edit
           </button>
-          <div className="profile-section-content"></div>
+          <div className="profile-section-content">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Rate</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {feedback.map((f, index) => (
+                  <tr key={`feedback-${f.feedback_id}-${index}`}>
+                    <td>{f.feedback_id}</td>
+                    <td>{f.fullname}</td>
+                    <td>{f.email}</td>
+                    <td>{f.rate}</td>
+                    <td>{f.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

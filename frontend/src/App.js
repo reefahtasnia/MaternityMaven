@@ -28,34 +28,53 @@ import AddProduct from "./addProduct.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
-  const isAuthenticated = localStorage.getItem('user'); // You may need a more complex logic here, based on how authentication is handled
-
+  const isAuthenticated = localStorage.getItem('user'); // Check if user is authenticated
+  const userType = localStorage.getItem('userType'); 
   return (
     <div className="App">
       <BrowserRouter>
         <Navbar />
         <Routes>
-          {isAuthenticated ? (
-            <Route path="/" element={<Dashboard />} />
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                userType === "doctor" ? (
+                  <Navigate to="/Doctor" />
+                ) : (
+                  <Dashboard />
+                )
+              ) : (
+                <Home />
+              )
+            }
+          />
+          {isAuthenticated && userType === "doctor" ? (
+            // Routes for doctors
+            <Route element={<PrivateComponent />}>
+              <Route path="/Doctor" element={<DoctorProfile />} />
+              <Route path="/feedback" element={<Feedback />} />
+            </Route>
           ) : (
-            <Route path="/" element={<Home />} />
+            // Routes for other authenticated users
+            <Route element={<PrivateComponent />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/Patient" element={<UserProfile />} />
+              <Route path="/Medicinetracker" element={<MedicineTracker />} />
+              <Route path="/Calorietracker" element={<CalorieTracker />} />
+              <Route path="/Medicalhistory" element={<Medical />} />
+              <Route path="/fetal" element={<Fetal />} />
+              <Route path="/Appointment" element={<Appointment />} />
+              <Route path="/feedback" element={<Feedback />} />
+              <Route
+                path="/book-appointment/:email"
+                element={<BookAppointment />}
+              />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/orderdetails" element={<OrderDetails />} />
+              <Route path="/cart" element={<Cart />} />
+            </Route>
           )}
-          <Route element={<PrivateComponent />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/Patient" element={<UserProfile />} />
-            <Route path="/Doctor" element={<DoctorProfile />} />
-            <Route path="/Medicinetracker" element={<MedicineTracker />} />
-            <Route path="/Calorietracker" element={<CalorieTracker />} />
-            <Route path="/Medicalhistory" element={<Medical />} />
-            <Route path="/fetal" element={<Fetal />} />
-            <Route path="/Appointment" element={<Appointment />} />
-            <Route path="/feedback" element={<Feedback/>}/>
-            <Route
-              path="/book-appointment/:email"
-              element={<BookAppointment />}
-            />
-            <Route path="/orderdetails" element={<OrderDetails />} />
-          </Route>
           <Route element={<AdminPrivateComponent />}>
             <Route path="/Admin" element={<Admin />} />
             <Route path="/add-product" element={<AddProduct />} />
@@ -67,8 +86,6 @@ function App() {
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/reset" element={<ResetPassword />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/cart" element={<Cart />} />
         </Routes>
       </BrowserRouter>
     </div>

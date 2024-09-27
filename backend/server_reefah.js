@@ -2037,27 +2037,87 @@ app.post("/check-appointment", async (req, res) => {
 });
 
 
-///FEEDBACK ER TRIAL API
+///FEEDBACK ER API done 
 
 app.post('/api/feedback', async (req, res) => {
   const { description, rate, user_id, doctor_id } = req.body;
-
-  // SQL query to insert feedback into the database
-  const insertFeedbackQuery = `
-    INSERT INTO Feedbacks (description, rate, user_id, doctor_id) 
-    VALUES (:description, :rate, :user_id, :doctor_id)
-  `;
-
+  console.log("Received feedback:", req.body);
+  let conn;
   try {
-    const result = await yourDatabaseConnection.execute(insertFeedbackQuery, {
+    conn = await connection();
+    const insertFeedbackQuery = `
+      INSERT INTO Feedbacks (des, rate, user_id, doctor_id) 
+      VALUES (:description, :rate, :user_id, :doctor_id)
+    `;
+    const result=await conn.execute(insertFeedbackQuery, {
       description,
       rate,
-      user_id,
-      doctor_id
-    });
+      user_id: user_id || null,  // Ensure that null is passed if user_id is not set
+      doctor_id: doctor_id || null  // Ensure that null is passed if doctor_id is not set
+    }, { autoCommit: true });
+    if(result) console.log("Feedback inserted successfully");
+    else console.log("Feedback not inserted");
     res.status(201).json({ message: "Feedback submitted successfully!" });
   } catch (error) {
     console.error("Error inserting feedback:", error);
-    res.status(500).json({ error: "An error occurred while submitting feedback." });
+    res.status(500).json({ message: "An error occurred while submitting feedback.", error: error.message });
   }
 });
+//display feedback in admin profile
+
+// Utility to read CLOB data
+async function readClob(clob) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    clob.setEncoding('utf8');
+    clob.on('data', chunk => { data += chunk; });
+    clob.on('end', () => { resolve(data); });
+    clob.on('error', err => { reject(err); });
+  });
+}
+app.get('/api/feedback/details', async (req, res) => {
+  const { type } = req.query;
+  let query = '';
+  if (type === 'user') {
+    query = `
+      SELECT f.feedback_id, f.des AS description, f.rate, f.user_id, u.fullname, u.email
+      FROM Feedbacks f
+      JOIN Users u ON f.user_id = u.userid
+    `;
+  } else if (type === 'doctor') {
+    query = `
+      SELECT f.feedback_id, f.des AS description, f.rate, f.doctor_id, d.fullname, d.email
+      FROM Feedbacks f
+      JOIN Doctors d ON f.doctor_id = d.BMDC
+    `;
+  } else {
+    return res.status(400).json({ message: "Invalid type specified" });
+  }
+
+  try {
+    const conn = await connection();
+    const result = await conn.execute(query);
+    const feedback = await Promise.all(result.rows.map(async row => {
+      let description = '';
+      if (row.DESCRIPTION) {
+        // Assuming DESCRIPTION is a CLOB
+        description = await readClob(row.DESCRIPTION);
+      }
+      return {
+        feedback_id: row.FEEDBACK_ID,
+        description,
+        rate: row.RATE,
+        user_or_doctor_id: type === 'user' ? row.USER_ID : row.DOCTOR_ID,
+        fullname: row.FULLNAME,
+        email: row.EMAIL
+      };
+    }));
+    res.status(200).json(feedback);
+  } catch (error) {
+    console.error("Error fetching feedback details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+
