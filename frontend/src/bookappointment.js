@@ -33,41 +33,73 @@ const BookAppointment = () => {
     }));
   };
 
+  const checkAvailability = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/check-appointment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: appointmentDetails.date,
+          time: appointmentDetails.time,
+          email: appointmentDetails.email,
+          day: appointmentDetails.day,
+          userId: userId,
+        }),
+      });
+
+      return response.ok; // Return true if the slot is available
+    } catch (error) {
+      console.error("Error checking availability:", error);
+      return false; // If there's an error, assume the slot is not available
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Set userId in appointmentDetails before submitting
+    // Set userId in appointmentDetails before checking availability
     const newAppointmentDetails = {
       ...appointmentDetails,
       userId: userId, // Add userId here
     };
 
-    try {
-      const response = await fetch("http://localhost:5000/book-appointment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newAppointmentDetails),
-      });
+    // Check availability of the appointment slot
+    const isAvailable = await checkAvailability();
 
-      if (response.ok) {
-        alert("Appointment booked successfully!");
-        setAppointmentDetails({
-          email: decodeURIComponent(email),
-          date: "",
-          time: "",
-          day: "",
-          userId: "", // Reset userId after booking
+    if (isAvailable) {
+      try {
+        const response = await fetch("http://localhost:5000/book-appointment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newAppointmentDetails),
         });
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to book the appointment: ${errorData.message}`);
+
+        if (response.ok) {
+          alert("Appointment booked successfully!");
+          setAppointmentDetails({
+            email: decodeURIComponent(email),
+            date: "",
+            time: "",
+            day: "",
+            userId: "", // Reset userId after booking
+          });
+        } else {
+          const errorData = await response.json();
+          alert(`Failed to book the appointment: ${errorData.message}`);
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        alert(
+          "An error occurred while booking the appointment. Please try again later."
+        );
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
+    } else {
       alert(
-        "An error occurred while booking the appointment. Please try again later."
+        "The selected appointment slot is not available. Please choose another time."
       );
     }
   };
