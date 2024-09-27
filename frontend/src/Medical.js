@@ -91,6 +91,14 @@ const Medical = () => {
       alert("Please fill in at least one row before saving.");
     }
   };
+  const isTreatmentValid = (treatment) => {
+    const keywords = ["ongoing", "upcoming", "proceeding" , "in progress","under way","ing"];
+    const isOngoing = keywords.some(keyword => treatment.toLowerCase().includes(keyword));
+    const isEndingWithIng = treatment.toLowerCase().endsWith("ing");
+  
+    return isOngoing || isEndingWithIng;
+  };
+  
 
   const handleDelete = async () => {
     const rowsToDelete = selectedRows.map((index) => ({
@@ -99,7 +107,12 @@ const Medical = () => {
       incident: fullHistory[index].INCIDENT,
       treatment: fullHistory[index].TREATMENT,
     }));
+    const hasInvalidTreatments = rowsToDelete.some(row => !isTreatmentValid(row.treatment));
 
+    if (hasInvalidTreatments) {
+      alert("You cannot delete past records "); // Warning message
+      return; // Stop execution if there are invalid treatments
+    }
     if (rowsToDelete.length > 0) {
       try {
         await axios.post("http://localhost:5000/api/medical-history/delete", {

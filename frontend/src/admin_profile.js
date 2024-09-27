@@ -107,7 +107,7 @@ const AdminProfile = () => {
           <h3 className="profile-section-title">Products</h3>
           <button
             className="profile-section-button"
-            onClick={() => (window.location.href = "/Medicinetracker")}
+            onClick={() => (window.location.href = "/Add-product")}
           >
             Edit
           </button>
