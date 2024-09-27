@@ -129,6 +129,13 @@ CREATE TABLE Medical_History (
     treatment VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES Users(userid)
 );
+CREATE TABLE Fetal_Movement (
+    user_id INT,
+    baby_movement VARCHAR(255),
+    duration INT,
+    movement_date DATE,
+    FOREIGN KEY (user_id) REFERENCES Users(userid)
+);
 // Medicine Tracker er shob 
 create table medicine (
 medicine_code int,
