@@ -1946,3 +1946,29 @@ app.post("/check-appointment", async (req, res) => {
     }
   }
 });
+
+
+///FEEDBACK ER TRIAL API
+
+app.post('/api/feedback', async (req, res) => {
+  const { description, rate, user_id, doctor_id } = req.body;
+
+  // SQL query to insert feedback into the database
+  const insertFeedbackQuery = `
+    INSERT INTO Feedbacks (description, rate, user_id, doctor_id) 
+    VALUES (:description, :rate, :user_id, :doctor_id)
+  `;
+
+  try {
+    const result = await yourDatabaseConnection.execute(insertFeedbackQuery, {
+      description,
+      rate,
+      user_id,
+      doctor_id
+    });
+    res.status(201).json({ message: "Feedback submitted successfully!" });
+  } catch (error) {
+    console.error("Error inserting feedback:", error);
+    res.status(500).json({ error: "An error occurred while submitting feedback." });
+  }
+});

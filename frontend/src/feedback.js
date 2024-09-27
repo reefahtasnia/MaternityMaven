@@ -1,38 +1,58 @@
 import React, { useState } from "react";
-import './CSS/feedback.css'; // Import the CSS file for styling
+import axios from "axios";
+import './CSS/feedback.css';
 
 const Feedback = () => {
-  const [rating, setRating] = useState(0); // Default rating is 0
-  const [hoverRating, setHoverRating] = useState(0); // Track hovered rating
+  const [description, setDescription] = useState("");
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
 
-  // Function to handle star click and update rating
   const handleRatingClick = (newRating) => {
     setRating(newRating);
   };
 
-  // Function to handle star hover
   const handleRatingHover = (newRating) => {
     setHoverRating(newRating);
   };
 
-  // Function to reset hover when mouse leaves stars
   const handleRatingHoverOut = () => {
     setHoverRating(0);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Prepare the feedback data
+    const feedbackData = {
+      description: description,
+      rate: rating,
+      user_id: 1, // Assuming you have user ID logic in place
+      doctor_id: "DOC123" // Replace with the actual doctor ID
+    };
+
+    try {
+      const response = await axios.post("http://localhost:3001/api/feedback", feedbackData);
+      console.log("Feedback submitted:", response.data);
+      // Reset the form
+      setDescription("");
+      setRating(0);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+    }
+  };
+
   return (
-    <div>
+    <div className="feedback-container">
+      <h1>FEEDBACK</h1>
+      <p>Help us improve by sending us feedback</p>
 
-      <div className="feedback-container">
-        <h1>FEEDBACK</h1>
-        <p>Help us improve by sending us feedback</p>
-
-        {/* Textarea for the description */}
+      <form onSubmit={handleSubmit}>
         <textarea
           placeholder="Description"
-        ></textarea>
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
-        {/* Star rating system */}
         <div className="rating">
           {[...Array(5)].map((_, index) => (
             <span
@@ -44,15 +64,13 @@ const Feedback = () => {
               onMouseEnter={() => handleRatingHover(index + 1)}
               onMouseLeave={handleRatingHoverOut}
             >
-              &#9733;
+              &#9733; {/* Star character */}
             </span>
           ))}
         </div>
         <p>Rate us!</p>
-
-        {/* Submit Button */}
-        <button className="submit-btn">Submit</button>
-      </div>
+        <button type="submit" className="submit-btn">Submit</button>
+      </form>
     </div>
   );
 };

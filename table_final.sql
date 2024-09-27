@@ -249,15 +249,23 @@ CREATE TABLE Admin (
     phone_no VARCHAR(255)
 );
 
-CREATE TABLE Feedback (
-    feedback_id INT PRIMARY KEY,
-    description VARCHAR(255),
+/*FEEDBACK STARTS*/
+
+CREATE TABLE Feedbacks (
+    feedback_id INT DEFAULT FEEDBACK_SEQ.NEXTVAL , 
+    des clob,
     rate INT,
     user_id INT,
-    doctor_id INT,
-    FOREIGN KEY (user_id) REFERENCES User(user_id),
-    FOREIGN KEY (doctor_id) REFERENCES Doctor(BMDC_no)
+    doctor_id VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES Users(userid),
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(BMDC)
 );
+
+CREATE SEQUENCE FEEDBACK_SEQ
+START WITH 1
+INCREMENT BY 1
+NOCYCLE
+
 
 CREATE TABLE cart (
   productid NUMBER,
