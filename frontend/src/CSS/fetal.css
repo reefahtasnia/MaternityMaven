@@ -1,0 +1,98 @@
+/* FetalMovement.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 10px;
+  }
+  
+  /* Add padding to bring the form lower */
+  h3 {
+    text-align: center;
+    color: #d5006d; /* Dark pink */
+    margin-bottom: 70px; /* Add bottom margin for spacing */
+  }
+  
+  /* Add padding-top to the form container to lower it */
+  form {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 20px auto; /* Added margin-top to create space above the form */
+  }
+  
+  /* Keep existing styles for label and input fields */
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: #d5006d; /* Dark pink */
+  }
+  
+  input[type="text"],
+  input[type="number"],
+  input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 2px solid #d5006d; /* Dark pink */
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="date"]:focus {
+    border-color: #ff4081; /* Lighter pink */
+  }
+  
+  /* Button styles */
+  button {
+    background-color: #d5006d; /* Dark pink */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    margin-right: 10px; /* Spacing between buttons */
+  }
+  
+  button:hover {
+    background-color: #ff4081; /* Lighter pink */
+  }
+  
+  /* Table styles */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th, td {
+    border: 1px solid #d5006d; /* Dark pink */
+    padding: 10px;
+    text-align: center;
+  }
+  
+  th {
+    background-color: #ff4081; /* Lighter pink */
+    color: white;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tbody tr:hover {
+    background-color: #ffeef8; /* Light pink on hover */
+  }
+  
+  p {
+    text-align: center;
+    color: green;
+  }
+  

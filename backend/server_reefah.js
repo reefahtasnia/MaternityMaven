@@ -1086,7 +1086,14 @@ app.get('/api/fetal-movement/history', async (req, res) => {
       "SELECT * FROM Fetal_Movement WHERE user_id = :userid",
       [userid]
     );
-    res.json(result.rows || []);
+    console.log('Query Result:',result);
+    if (result.rows && result.rows.length > 0) {
+      console.log('Fetched Rows:', result.rows);
+      res.json(result.rows); // Send rows directly if they exist
+    } else {
+      console.log('No data found for this user.');
+      res.json([]); // Return empty array if no data is found
+    }
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching data");
