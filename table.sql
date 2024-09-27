@@ -9,6 +9,9 @@ select * from MEDICINETRACKER;
 select * from doctors;
 select * from appointments;
 select * from MedicalHistoryView;
+SELECT * FROM USER_IMAGES;
+SELECT * FROM doctor_images;
+select * from admin;
 
 drop table products;
 drop TRIGGER medicine_trigger;
@@ -135,9 +138,15 @@ INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
 INSERT INTO Admin (admin_id, name, email, hashed_password, phone_no)
 VALUES (2, 'JOHN DOE', 'JOHN.DOE@EXAMPLE.COM', 'plaintext', '1234567890');
 
+CREATE TABLE doctor_images (
+    image_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    BMDC VARCHAR(255) NOT NULL,
+    filename VARCHAR2(255) NOT NULL,
+    mime_type VARCHAR2(100) NOT NULL,
+    image_data BLOB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk__image_bmdc FOREIGN KEY (BMDC) REFERENCES Doctors(BMDC)
+);
+SELECT MAX(PRODUCTID) AS maxId FROM products;
 
-
-SELECT * FROM USER_IMAGES;
-
-
-SELECT image_data, mime_type FROM user_images WHERE user_id = 21 AND ROWNUM = 1
+ROLLBACK;

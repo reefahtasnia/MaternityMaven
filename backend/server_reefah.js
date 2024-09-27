@@ -1371,6 +1371,88 @@ app.post("/api/order", async (req, res) => {
   }
 });
 
+app.post("/api/add-products", async (req, res) => {
+  const { productName, price, stock, productImage, category } = req.body;
+  let conn;
+
+  try {
+    console.log("Received request to add product:", req.body);
+    conn = await connection();
+
+    // Get the maximum productId to calculate the next productId
+    const result = await conn.execute(
+      `SELECT MAX(PRODUCTID) AS maxId FROM products`
+    );
+    const maxId = result.rows[0].MAXID || 0; // Default to 0 if no products are found
+    const Id=maxId+1;
+    console.log(Id);
+    // Insert the new product with productId incremented by 1
+    const insertQuery = `
+      INSERT INTO products (productId, product_name, price, stock, image, ctgr)
+      VALUES (:productId, :productName, :price, :stock, :productImage, :ctgr)
+    `;
+    await conn.execute(insertQuery, {
+      productId: Id,
+      productName,
+      price,
+      stock,
+      productImage,
+      ctgr: category,
+    }, { autoCommit: true });
+
+    res.status(201).json({ message: "Product added successfully" });
+  } catch (error) {
+    console.error("Error during product addition:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection:", err);
+      }
+    }
+  }
+});
+
+app.post("/api/update-quantity", async (req, res) => {
+  const { productName, stock } = req.body;
+  let conn;
+  console.log(req.body);
+  try {
+    conn = await connection();
+
+    // Update the stock of the specified product
+    const updateQuery = `
+      UPDATE products
+      SET stock = :stock
+      WHERE product_name = :productName
+    `;
+    const result = await conn.execute(updateQuery, {
+      productName,
+      stock,
+    }, { autoCommit: true });
+
+    if (result.rowsAffected === 0) {
+      res.status(404).json({ message: "Product not found" });
+    } else {
+      res.status(200).json({ message: "Stock updated successfully" });
+    }
+  } catch (error) {
+    console.error("Error during stock update:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection:", err);
+      }
+    }
+  }
+});
+
+
 //Endpoint for searching fooditems
 app.get("/search-food-items", async (req, res) => {
   const { query } = req.query;

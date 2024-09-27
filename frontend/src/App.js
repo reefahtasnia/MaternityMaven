@@ -22,6 +22,7 @@ import Dashboard from "./dashboard.js";
 import Admin from "./admin_profile.js";
 import Secret from "./adminLogin.js";
 import AdminPrivateComponent from "./AdminPrivateComponent.js";
+import AddProduct from "./addProduct.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
           </Route>
           <Route element={<AdminPrivateComponent />}>
             <Route path="/Admin" element={<Admin />} />
+            <Route path="/add-product" element={<AddProduct />} />
           </Route>
           <Route path="/secret" element={<Secret />} />
           <Route path="/signup" element={<Signup />} />

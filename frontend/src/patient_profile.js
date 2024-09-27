@@ -91,22 +91,22 @@ const UserProfile = () => {
           console.error("Failed to fetch medical history:", error.message);
         }
       };
-      const checkProfileImage = async () => {
-        const possibleExtensions = [".jpg", ".jpeg", ".png", ".gif"];
-        for (const ext of possibleExtensions) {
-          const imagePath = `/assets/${auth.userId}_profile_pic${ext}`;
-          try {
-            const response = await fetch(imagePath);
-            if (response.ok) {
-              setProfileImage(imagePath);
-              alert("Profile image found" + imagePath);
-              break;
-            }
-          } catch (error) {
-            console.error("Error checking profile image:", error);
-          }
-        }
-      };
+      // const checkProfileImage = async () => {
+      //   const possibleExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+      //   for (const ext of possibleExtensions) {
+      //     const imagePath = `/assets/${auth.userId}_profile_pic${ext}`;
+      //     try {
+      //       const response = await fetch(imagePath);
+      //       if (response.ok) {
+      //         setProfileImage(imagePath);
+      //         alert("Profile image found" + imagePath);
+      //         break;
+      //       }
+      //     } catch (error) {
+      //       console.error("Error checking profile image:", error);
+      //     }
+      //   }
+      // };
       fetchProfileImage();
       //checkProfileImage();
       fetchUserData();

@@ -12,6 +12,7 @@ const DoctorProfile = () => {
   const [experience, setExperience] = useState(0);
   const [pracChamber, setPracChamber] = useState("");
   const [hosp, setHosp] = useState("");
+  const [storedauth, setAuth] = useState(null);
   const triggerFileInput = () => {
     document.getElementById("fileInput").click();
   };
@@ -22,6 +23,7 @@ const DoctorProfile = () => {
   };
   useEffect(() => {
     const auth = JSON.parse(localStorage.getItem("user"));
+    setAuth(auth);
     if (auth && auth.BMDC) {
       const url = `http://localhost:5000/api/doctoruser?BMDC=${auth.BMDC}`;
       fetch(url)
@@ -41,19 +43,60 @@ const DoctorProfile = () => {
           setExperience(data.EXPERIENCE || 0);
           setPracChamber(capitalizeWords(data.CHAMBER) || "");
           setHosp(capitalizeWords(data.HOSP) || "");
-          setProfileImage(data.profileImage || "https://via.placeholder.com/150");
         })
         .catch((error) => {
           console.error("Failed to fetch doctor data:", error);
           alert(`Failed to load doctor data: ${error.message}`);
         });
+        fetchProfileImage(auth.BMDC);
     }
   }, []);
 
-  const handleFileChange = (event) => {
+  const fetchProfileImage = async (bmdc) => {
+    try {
+      const imageUrl = `http://localhost:3001/api/doctor-image/${bmdc}`;
+      const response = await fetch(imageUrl);
+      if (response.ok) {
+        console.log("Profile image found:", imageUrl);
+        setProfileImage(imageUrl);
+      } else {
+        console.log('No profile image found, using default');
+        setProfileImage("https://via.placeholder.com/150");
+      }
+    } catch (error) {
+      console.error("Error fetching profile image:", error);
+      setProfileImage("https://via.placeholder.com/150");
+    }
+  };
+
+  const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      setProfileImage(URL.createObjectURL(file));
+      if (file.name.toLowerCase().endsWith('.jpg')) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("bmdc", storedauth.BMDC);
+
+        try {
+          const response = await fetch("http://localhost:3001/api/upload-doctor-image", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to upload image: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          if (result) alert("Doctor profile image uploaded successfully");
+          fetchProfileImage(storedauth.BMDC); // Fetch the new image after successful upload
+        } catch (error) {
+          console.error("Error uploading file:", error);
+          alert("Error uploading file: " + error.message);
+        }
+      } else {
+        alert("Please select a .jpg file for upload.");
+      }
     }
   };
 

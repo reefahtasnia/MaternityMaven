@@ -89,7 +89,15 @@ CREATE TABLE user_images (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES Users(userid)
 );
-
+CREATE TABLE doctor_images (
+    image_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    BMDC VARCHAR(255) NOT NULL,
+    filename VARCHAR2(255) NOT NULL,
+    mime_type VARCHAR2(100) NOT NULL,
+    image_data BLOB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk__image_bmdc FOREIGN KEY (BMDC) REFERENCES Doctors(BMDC)
+);
 --new additions end up to above~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CREATE TABLE Doctors (
@@ -242,9 +250,9 @@ CREATE TABLE Feedback (
     description VARCHAR(255),
     rate INT,
     user_id INT,
-    doctor_id INT,
-    FOREIGN KEY (user_id) REFERENCES User(user_id),
-    FOREIGN KEY (doctor_id) REFERENCES Doctor(BMDC_no)
+    doctor_id VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(BMDC)
 );
 
 CREATE TABLE cart (

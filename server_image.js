@@ -123,53 +123,6 @@ app.get("/api/user-image/:userId", async (req, res) => {
       console.log('No image found for user:', req.params.userId);
       res.status(404).send("Image not found");
     }
-    // if (result.rows.length > 0) {
-    //   const [lob, mimeType] = result.rows[0];
-      
-    //   console.log('Image data type:', typeof lob);
-    //   console.log('MIME type:', mimeType);
-
-    //   if (!(lob instanceof Lob)) {
-    //     console.error('Image data is not a LOB object');
-    //     return res.status(500).send("Invalid image data format");
-    //   }
-
-    //   if (!mimeType) {
-    //     console.warn('MIME type is undefined, defaulting to application/octet-stream');
-    //     res.contentType('application/octet-stream');
-    //   } else {
-    //     res.contentType(mimeType);
-    //   }
-
-    //   // Stream the LOB data to the response
-    //   lob.setEncoding('binary');
-    //   lob.on('error', (err) => {
-    //     console.error('LOB stream error:', err);
-    //     res.status(500).end("Failed to retrieve image");
-    //   });
-    //   lob.on('end', async () => {
-    //     res.end();
-    //     // Close the connection after streaming is complete
-    //     if (conn) {
-    //       try {
-    //         await conn.close();
-    //       } catch (err) {
-    //         console.error("Error closing connection: ", err);
-    //       }
-    //     }
-    //   });
-    //   lob.pipe(res);
-    // } else {
-    //   res.status(404).send("Image not found");
-    //   // Close the connection if no image found
-    //   if (conn) {
-    //     try {
-    //       await conn.close();
-    //     } catch (err) {
-    //       console.error("Error closing connection: ", err);
-    //     }
-    //   }
-    // }
   } catch (err) {
     console.error("Database error: ", err);
     res.status(500).send("Server error");
@@ -181,6 +134,183 @@ app.get("/api/user-image/:userId", async (req, res) => {
         console.error("Error closing connection: ", err);
       }
     }
+  }
+});
+async function insertDoctorImageIntoDatabase(bmdc, filename, mimeType, imagePath) {
+  let conn;
+  try {
+    conn = await connection();
+    const imageBuffer = await fs.promises.readFile(imagePath);
+
+    const sql = `
+      INSERT INTO doctor_images (bmdc, filename, mime_type, image_data)
+      VALUES (:bmdc, :filename, :mimeType, :imageData)
+    `;
+
+    const result = await conn.execute(
+      sql,
+      {
+        bmdc: bmdc,
+        filename: filename,
+        mimeType: mimeType,
+        imageData: { val: imageBuffer, type: oracledb.BLOB },
+      },
+      { autoCommit: true }
+    );
+
+    console.log("Doctor image inserted into database successfully");
+  } catch (err) {
+    console.error("Error inserting doctor image into database:", err);
+    throw err;
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing database connection:", err);
+      }
+    }
+  }
+}
+
+// Doctor image upload route
+app.post("/api/upload-doctor-image", upload.single("file"), async (req, res) => {
+  console.log("Request body:", req.body);
+  console.log("Uploaded file:", req.file);
+
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const bmdc = req.body.bmdc;
+  const oldPath = req.file.path;
+  const fileExt = path.extname(req.file.originalname);
+  const newFilename = `${bmdc}_profile_pic${fileExt}`;
+  const newPath = path.join(path.dirname(oldPath), newFilename);
+
+  try {
+    await fs.promises.rename(oldPath, newPath);
+    const filePath = `/assets/${newFilename}`;
+    console.log("Doctor file uploaded and renamed successfully:", filePath);
+
+    // Insert doctor image into Oracle database
+    await insertDoctorImageIntoDatabase(
+      bmdc,
+      newFilename,
+      req.file.mimetype,
+      newPath
+    );
+
+    res.json({ filePath: filePath });
+  } catch (err) {
+    console.error("Error processing doctor file:", err);
+    res.status(500).json({ message: "Error processing doctor file" });
+  }
+});
+
+// Get doctor image route
+app.get("/api/doctor-image/:bmdc", async (req, res) => {
+  let conn;
+  try {
+    conn = await connection();
+    const sql = `SELECT image_data, mime_type FROM doctor_images WHERE bmdc = :bmdc AND ROWNUM = 1`;
+    const binds = { bmdc: req.params.bmdc };
+    const result = await conn.execute(sql, binds);
+    if (result.rows.length > 0) {
+      const [lob, mimeType] = result.rows[0];
+      console.log('Sending doctor image with MIME type:', mimeType);
+      
+      res.setHeader('Content-Type', mimeType || 'application/octet-stream');
+      res.setHeader('Content-Disposition', 'inline');
+  
+      lob.on('end', () => console.log('Finished sending doctor image data'));
+      lob.pipe(res);
+    } else {
+      console.log('No doctor image found for BMDC:', req.params.bmdc);
+      res.status(404).send("Doctor image not found");
+    }
+  } catch (err) {
+    console.error("Database error: ", err);
+    res.status(500).send("Server error");
+    // Close the connection if an error occurred
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection: ", err);
+      }
+    }
+  }
+});
+async function insertProductImageIntoDatabase(productId, filename, mimeType, imagePath) {
+  let conn;
+  try {
+    conn = await connection();
+    const imageBuffer = await fs.promises.readFile(imagePath);
+
+    const sql = `
+      INSERT INTO product_images (product_id, filename, mime_type, image_data)
+      VALUES (:productId, :filename, :mimeType, :imageData)
+    `;
+
+    const result = await conn.execute(
+      sql,
+      {
+        productId: productId,
+        filename: filename,
+        mimeType: mimeType,
+        imageData: { val: imageBuffer, type: oracledb.BLOB },
+      },
+      { autoCommit: true }
+    );
+
+    console.log("Product image inserted into database successfully");
+  } catch (err) {
+    console.error("Error inserting product image into database:", err);
+    throw err;
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing database connection:", err);
+      }
+    }
+  }
+}
+
+// Product image upload route
+app.post("/api/product-image", upload.single("file"), async (req, res) => {
+  console.log("Request body:", req.body);
+  console.log("Uploaded file:", req.file);
+
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const productId = req.body.productId;
+  const oldPath = req.file.path;
+  const fileExt = path.extname(req.file.originalname);
+  const newFilename = `${productId}_product_image${fileExt}`;
+  const newPath = path.join(path.dirname(oldPath), newFilename);
+
+  try {
+    await fs.promises.rename(oldPath, newPath);
+    const filePath = `/assets/${newFilename}`;
+    console.log("Product file uploaded and renamed successfully:", filePath);
+
+    // Insert product image into Oracle database
+    await insertProductImageIntoDatabase(
+      productId,
+      newFilename,
+      req.file.mimetype,
+      newPath
+    );
+
+    res.json({ filePath: filePath });
+  } catch (err) {
+    console.error("Error processing product file:", err);
+    res.status(500).json({ message: "Error processing product file" });
   }
 });
 
