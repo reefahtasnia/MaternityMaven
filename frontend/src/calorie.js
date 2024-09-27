@@ -157,13 +157,17 @@ const CalorieTracker = () => {
           userId,
           servings,
           calories: totalCaloriesForFood,
-          mealtype,
+          mealtype, // Send mealtype to backend
           date,
         }),
       });
 
       if (responsePost.ok) {
         updateCalorieDisplay(date);
+        setFoodList((prevList) => [
+          ...prevList,
+          { foodItem, calories: totalCaloriesForFood, mealtype }, // Store mealtype in frontend state
+        ]);
         clearForm();
       } else {
         alert("Error submitting data.");
@@ -226,18 +230,74 @@ const CalorieTracker = () => {
     }
   };
 
-  const handleDelete = async (foodItem) => {
+  const handleDelete = async (foodItem, mealtype) => {
+    //console.log(mealtype);
+    // Find the mealtype of the foodItem from the foodList
+    // const itemToDelete = foodList.find((item) => item.foodItem === foodItem);
+    //const mealtype = itemToDelete?.mealtype || ""; // Ensure mealtype exists
+
     try {
-      const response = await fetch("http://localhost:5000/user-data", {
+      // Fetch the nutritional information for the food item before deletion
+      const response = await fetch(
+        `http://localhost:5000/getnutri/${foodItem.toLowerCase()}`
+      );
+
+      if (response.ok) {
+        const nutritionData = await response.json();
+
+        if (Array.isArray(nutritionData) && nutritionData.length > 0) {
+          const {
+            protein: deletedProtein,
+            carbohydrates: deletedCarbs,
+            fat: deletedLipids,
+          } = nutritionData[0]; // Access the first item in the array
+
+          // Update the state for protein, carbs, and lipids after deletion
+          setProtein((prevProtein) => {
+            const updatedProtein = prevProtein - deletedProtein * servings;
+            localStorage.setItem("protein", updatedProtein); // Save to localStorage
+            return updatedProtein;
+          });
+
+          setCarbs((prevCarbs) => {
+            const updatedCarbs = prevCarbs - deletedCarbs * servings;
+            localStorage.setItem("carbs", updatedCarbs); // Save to localStorage
+            return updatedCarbs;
+          });
+
+          setLipids((prevLipids) => {
+            const updatedLipids = prevLipids - deletedLipids * servings;
+            localStorage.setItem("lipids", updatedLipids); // Save to localStorage
+            return updatedLipids;
+          });
+        } else {
+          console.error(
+            "No nutritional data found for the item being deleted."
+          );
+        }
+      } else {
+        console.error("Failed to fetch nutritional data for deletion.");
+      }
+
+      // Now delete the food item entry
+      const deleteResponse = await fetch(`http://localhost:5000/delfood`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ date_of_entry: date, foodItem }),
+        body: JSON.stringify({
+          date,
+          foodItem,
+          //mealtype, // Pass mealtype along with foodItem, date, and userId
+          userId,
+        }),
       });
 
-      if (response.ok) {
-        updateCalorieDisplay(date);
+      if (deleteResponse.ok) {
+        updateCalorieDisplay(date); // Update the displayed calorie data
+        setFoodList((prevList) =>
+          prevList.filter((item) => item.foodItem !== foodItem)
+        ); // Remove the deleted item from the state
       } else {
         alert("Error deleting data.");
       }
@@ -250,12 +310,12 @@ const CalorieTracker = () => {
     setFoodItem("");
     setCalories(0);
     setServings(1);
-    setMealtype("");
     setShowSuggestions(false);
+    setMealtype("");
   };
 
   const handleMealtypeChange = (event) => {
-    setMealtype(event.target.value);
+    setMealtype(event.target.value); // Update the state when the user selects a meal type
   };
 
   // Debugging logs
@@ -277,20 +337,7 @@ const CalorieTracker = () => {
       <div className="container">
         <h1>Calorie Counter</h1>
         <form id="calorie-form" onSubmit={handleSubmit}>
-          {/* <label htmlFor="trimester">Which trimester are you in? </label>
-          <select
-            id="trimester"
-            name="trimester"
-            value={trimester}
-            onChange={handleMealtypeChange}
-            required
-          >
-            <option value="">Select Meal Type</option>
-            <option value="Breakfast">Breakfast</option>
-            <option value="Lunch">Lunch</option>
-            <option value="Dinner">Dinner</option>
-          </select> */}
-          <label htmlFor="date">Date:</label>
+          {/* <label htmlFor="date">Date:</label>
           <input
             type="date"
             id="date"
@@ -301,7 +348,7 @@ const CalorieTracker = () => {
               updateCalorieDisplay(e.target.value);
             }}
             required
-          />
+          /> */}
 
           <label htmlFor="food-item">Food Item:</label>
           <div className="search-box">
@@ -354,6 +401,7 @@ const CalorieTracker = () => {
           <button type="submit">Add</button>
           <button type="button">Plan a Custom Diet</button>
         </form>
+
         {/* Circular Multi-Progress Bar for Protein, Carbs, Lipids and Calories */}
         <div className="progress-circle-wrapper">
           <div
@@ -460,16 +508,16 @@ const CalorieTracker = () => {
             </div>
           </div>
         </div>
+
         <div className="food-list">
           <h3>Food Log</h3>
           {foodList.length > 0 ? (
             <ul>
               {foodList.map((item, index) => (
-                //key={`${item.food_name}-${index}`}
                 <li key={`${item.foodItem}-${index}`}>
-                  {item.foodItem} ({item.calories} calories)
+                  {item.foodItem} ({item.calories} calories) - {item.mealtype}
                   <button
-                    onClick={() => handleDelete(item.foodItem)}
+                    onClick={() => handleDelete(item.foodItem)} // Only pass foodItem; mealtype is derived in handleDelete
                     className="delete-btn"
                   >
                     &#x2715; {/* Cross mark */}

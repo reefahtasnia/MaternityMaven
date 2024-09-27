@@ -112,7 +112,7 @@ app.post("/api/signup", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
-  try { 
+  try {
     const userResults = await run_query(
       "SELECT userid FROM users WHERE email = UPPER(:email)",
       { email }
@@ -154,7 +154,7 @@ app.post("/api/login", async (req, res) => {
 });
 app.post("/api/secret", async (req, res) => {
   const { email, password } = req.body;
-  try{
+  try {
     const adminResults = await run_query(
       "SELECT email FROM Admin WHERE email = UPPER(:email)",
       { email }
@@ -182,7 +182,7 @@ app.post("/api/secret", async (req, res) => {
     } else {
       res.status(401).json({ message: "Incorrect password" });
     }
-  }catch(error){
+  } catch (error) {
     console.error("Error during admin login process:", error);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -198,7 +198,7 @@ app.get("/api/secret", async (req, res) => {
       return res.status(404).json({ message: "Admin not found" });
     }
     console.log(adminResults);
-    const data=adminResults;
+    const data = adminResults;
     console.log("Fetching admin data");
     console.log(data);
     res.json(data);
@@ -363,7 +363,7 @@ app.post("/api/doctorSignup", async (req, res) => {
       .status(400)
       .json({ message: "Missing required fields or invalid input" });
   }
-  
+
   console.log("Received signup request for", req.body);
   let conn;
   try {
@@ -397,9 +397,17 @@ app.post("/api/doctorSignup", async (req, res) => {
     // Start a transaction to ensure both operations are executed successfully
     try {
       await conn.execute(insertQuery, bindVars, { autoCommit: false });
-      await conn.execute("BEGIN CalculateExperience(:BMDC); END;", { BMDC: regno }, { autoCommit: false });
+      await conn.execute(
+        "BEGIN CalculateExperience(:BMDC); END;",
+        { BMDC: regno },
+        { autoCommit: false }
+      );
       const hash = await bcrypt.hash(password, saltRounds);
-      await conn.execute("INSERT INTO Passwords (BMDC, hashed_password) VALUES (:BMDC, :hashedPassword)", { BMDC: regno, hashedPassword: hash }, { autoCommit: false });
+      await conn.execute(
+        "INSERT INTO Passwords (BMDC, hashed_password) VALUES (:BMDC, :hashedPassword)",
+        { BMDC: regno, hashedPassword: hash },
+        { autoCommit: false }
+      );
       await conn.commit(); // Commit both the insertion and the experience calculation together
       res.status(201).json({ message: "Doctor registered successfully" });
     } catch (error) {
@@ -424,7 +432,6 @@ app.post("/api/doctorSignup", async (req, res) => {
     }
   }
 });
-
 
 app.post("/api/doctorLogin", async (req, res) => {
   const { email, password } = req.body;
@@ -1704,5 +1711,47 @@ app.get("/api/orders/:userId", async (req, res) => {
         console.error("Error closing connection", err);
       }
     }
+  }
+});
+app.delete("/delfood", async (req, res) => {
+  let conn;
+  try {
+    conn = await connection();
+    //const { date, foodItem, mealtype, userId } = req.body;
+    const { date, foodItem, userId } = req.body;
+    console.log("Del ", req.body);
+
+    const sql = `DELETE FROM calorietracker 
+    WHERE LOWER(food_item) = LOWER(:food_item) 
+    AND entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD') 
+    AND user_id = :user_id`;
+    // const sql = `DELETE FROM calorietracker
+    //                WHERE LOWER(food_item) = LOWER(:food_item)
+    //                AND entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD')
+    //                AND user_id = :user_id
+    //                AND meal_type = :meal_type`;
+
+    // Use valid variable names that follow Oracle's conventions
+    const binds = {
+      food_item: foodItem, // Bind variable name with underscore
+      entry_date: date, // Bind variable name with underscore
+      user_id: userId,
+      //meal_type: mealtype, // Bind variable name with underscore
+    };
+
+    // Establish a database connection
+
+    const result = await conn.execute(sql, binds, { autoCommit: true });
+
+    if (result.rowsAffected > 0) {
+      res.status(200).send("Food entry deleted successfully");
+    } else {
+      res.status(404).send("No food entry found to delete");
+    }
+
+    await conn.close();
+  } catch (err) {
+    console.error("Error during deletion: ", err);
+    res.status(500).send("Error deleting the food entry");
   }
 });
