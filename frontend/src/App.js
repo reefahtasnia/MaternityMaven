@@ -22,6 +22,7 @@ import OrderDetails from "./order_history.js";
 import Dashboard from "./dashboard.js";
 import Admin from "./admin_profile.js";
 import Secret from "./adminLogin.js";
+import Feedback from "./feedback.js";
 import AdminPrivateComponent from "./AdminPrivateComponent.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
@@ -47,6 +48,7 @@ function App() {
             <Route path="/Medicalhistory" element={<Medical />} />
             <Route path="/fetal" element={<Fetal />} />
             <Route path="/Appointment" element={<Appointment />} />
+            <Route path="/feedback" element={<Feedback/>}/>
             <Route
               path="/book-appointment/:email"
               element={<BookAppointment />}

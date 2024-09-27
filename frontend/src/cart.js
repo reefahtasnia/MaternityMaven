@@ -162,13 +162,13 @@ const Cart = () => {
                       <div className="input-group quantity mx-auto" style={{ width: '100px' }}>
                         <div className="input-group-btn">
                           <button className="btn btn-sm btn-primary btn-minus" onClick={() => handleQuantityChange(product.PRODUCTID, -1)} disabled={buttonsDisabled}>
-                            <i className="fa fa-minus"></i> -
+                            <i className="fa fa-minus"></i> 
                           </button>
                         </div>
                         <input type="text" className="form-control form-control-sm bg-secondary text-center" value={product.QUANTITY} readOnly />
                         <div className="input-group-btn">
                           <button className="btn btn-sm btn-primary btn-plus" onClick={() => handleQuantityChange(product.PRODUCTID, 1)} disabled={buttonsDisabled}>
-                            <i className="fa fa-plus"></i> +
+                            <i className="fa fa-plus"></i> 
                           </button>
                         </div>
                       </div>
@@ -176,7 +176,7 @@ const Cart = () => {
                     <td className="align-middle">Tk {product.PRICE * product.QUANTITY}</td>
                     <td className="align-middle">
                       <button className="btn btn-sm btn-primary" onClick={() => handleRemove(product.PRODUCTID)} disabled={buttonsDisabled}>
-                        <i className="fa fa-times"></i> X
+                        <i className="fa fa-times"></i> 
                       </button>
                     </td>
                   </tr>

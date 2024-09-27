@@ -1754,7 +1754,7 @@ app.get("/api/orders/:userId", async (req, res) => {
 
     // Query to get orders from the Places table
     const result = await conn.execute(
-      `SELECT order_id, TO_CHAR(date_t, 'YYYY-MM-DD') as date_t, bill 
+      `SELECT ORDER_ID, TO_CHAR(DATE_T, 'YYYY-MM-DD') as date_t, bill 
        FROM Places 
        WHERE user_id = :userId`,
       [userId]
