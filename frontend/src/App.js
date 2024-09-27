@@ -26,7 +26,7 @@ import AdminPrivateComponent from "./AdminPrivateComponent.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
-  const isAuthenticated = localStorage.getItem('user'); // You may need a more complex logic here, based on how authentication is handled
+  const isAuthenticated = localStorage.getItem("user"); // You may need a more complex logic here, based on how authentication is handled
 
   return (
     <div className="App">
@@ -47,7 +47,10 @@ function App() {
             <Route path="/Medicalhistory" element={<Medical />} />
             <Route path="/fetal" element={<Fetal />} />
             <Route path="/Appointment" element={<Appointment />} />
-            <Route path="/book-appointment/:email" element={<BookAppointment />} />
+            <Route
+              path="/book-appointment/:email"
+              element={<BookAppointment />}
+            />
             <Route path="/orderdetails" element={<OrderDetails />} />
           </Route>
           <Route element={<AdminPrivateComponent />}>
