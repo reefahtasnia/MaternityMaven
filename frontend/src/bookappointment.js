@@ -73,10 +73,10 @@ const BookAppointment = () => {
   };
 
   return (
-    <div>
+    <div className="appointment-form">
       <h1>Book an Appointment</h1>
       <form onSubmit={handleSubmit}>
-        <div>
+        <div className="form-group">
           <label htmlFor="date">Appointment Date:</label>
           <input
             type="date"
@@ -87,7 +87,7 @@ const BookAppointment = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="time">Appointment Time:</label>
           <input
             type="time"
@@ -98,7 +98,7 @@ const BookAppointment = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="day">Day of the Week:</label>
           <select
             name="day"
@@ -117,7 +117,9 @@ const BookAppointment = () => {
             <option value="Sunday">Sunday</option>
           </select>
         </div>
-        <button type="submit">Book Appointment</button>
+        <button type="submit" className="submit-btn">
+          Book Appointment
+        </button>
       </form>
     </div>
   );
