@@ -8,7 +8,19 @@ const OrderHistory = () => {
   const [error, setError] = useState(null);
 
   // Fetch userId from local storage
-  const userId = JSON.parse(localStorage.getItem('user'))?.userId;
+  const getUserFromLocalStorage = () => {
+    const userString = localStorage.getItem("user");
+    try {
+      return userString ? JSON.parse(userString) : null;
+    } catch (error) {
+      console.error("Failed to parse user from local storage:", error);
+      return null;
+    }
+  };
+
+  const auth = getUserFromLocalStorage();
+  const userId = auth ? auth.userId : null;
+  console.log("Retrieved userId:", userId);
 
   useEffect(() => {
     const fetchOrderHistory = async () => {
@@ -36,12 +48,12 @@ const OrderHistory = () => {
       <div className="order-grid">
         {orders.length > 0 ? (
           orders.map(order => (
-            <div key={order.order_id} className="order-card">
+            <div /*key={order.order_id}*/ className="order-card">
               <img src="./assets/delivery.png" alt="Delivery Icon" className="order-image" />
               <div className="order-details">
-                <h2>Order Id: {order.order_id}</h2>
-                <p>Date: {new Date(order.date_t).toLocaleDateString()}</p>
-                <p>Total Bill: Tk {order.bill}</p>
+                <h2>Order Id: {order.ORDER_ID}</h2>
+                <p>Date: {new Date(order.DATE_T).toLocaleDateString()}</p>
+                <p>Total Bill: Tk {order.BILL}</p>
                 <button className="details-button">Details</button>
               </div>
             </div>

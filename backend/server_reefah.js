@@ -112,7 +112,7 @@ app.post("/api/signup", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
-  try { 
+  try {
     const userResults = await run_query(
       "SELECT userid FROM users WHERE email = UPPER(:email)",
       { email }
@@ -154,7 +154,7 @@ app.post("/api/login", async (req, res) => {
 });
 app.post("/api/secret", async (req, res) => {
   const { email, password } = req.body;
-  try{
+  try {
     const adminResults = await run_query(
       "SELECT email FROM Admin WHERE email = UPPER(:email)",
       { email }
@@ -182,7 +182,7 @@ app.post("/api/secret", async (req, res) => {
     } else {
       res.status(401).json({ message: "Incorrect password" });
     }
-  }catch(error){
+  } catch (error) {
     console.error("Error during admin login process:", error);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -198,7 +198,7 @@ app.get("/api/secret", async (req, res) => {
       return res.status(404).json({ message: "Admin not found" });
     }
     console.log(adminResults);
-    const data=adminResults;
+    const data = adminResults;
     console.log("Fetching admin data");
     console.log(data);
     res.json(data);
@@ -363,7 +363,7 @@ app.post("/api/doctorSignup", async (req, res) => {
       .status(400)
       .json({ message: "Missing required fields or invalid input" });
   }
-  
+
   console.log("Received signup request for", req.body);
   let conn;
   try {
@@ -397,9 +397,17 @@ app.post("/api/doctorSignup", async (req, res) => {
     // Start a transaction to ensure both operations are executed successfully
     try {
       await conn.execute(insertQuery, bindVars, { autoCommit: false });
-      await conn.execute("BEGIN CalculateExperience(:BMDC); END;", { BMDC: regno }, { autoCommit: false });
+      await conn.execute(
+        "BEGIN CalculateExperience(:BMDC); END;",
+        { BMDC: regno },
+        { autoCommit: false }
+      );
       const hash = await bcrypt.hash(password, saltRounds);
-      await conn.execute("INSERT INTO Passwords (BMDC, hashed_password) VALUES (:BMDC, :hashedPassword)", { BMDC: regno, hashedPassword: hash }, { autoCommit: false });
+      await conn.execute(
+        "INSERT INTO Passwords (BMDC, hashed_password) VALUES (:BMDC, :hashedPassword)",
+        { BMDC: regno, hashedPassword: hash },
+        { autoCommit: false }
+      );
       await conn.commit(); // Commit both the insertion and the experience calculation together
       res.status(201).json({ message: "Doctor registered successfully" });
     } catch (error) {
@@ -424,7 +432,6 @@ app.post("/api/doctorSignup", async (req, res) => {
     }
   }
 });
-
 
 app.post("/api/doctorLogin", async (req, res) => {
   const { email, password } = req.body;
@@ -1035,6 +1042,72 @@ app.post("/api/medical-history/delete", async (req, res) => {
     }
   }
 });
+// Endpoint to add fetal movement data
+app.post("/api/fetal-movement", async (req, res) => {
+  console.log("Received fetal movement data :", req.body);
+  const { user_id, baby_movement, duration, movement_date } = req.body;
+  let conn;
+  try {
+    conn = await connection();
+    await conn.execute(
+      `INSERT INTO Fetal_Movement (user_id, baby_movement, duration, movement_date) 
+       VALUES (:user_id, :baby_movement, :duration, TO_DATE(:movement_date, 'YYYY-MM-DD'))`,
+      {
+        user_id: user_id,
+        baby_movement: baby_movement,
+        duration: duration,
+        movement_date: movement_date,
+      },
+      { autoCommit: true }
+    );
+    res.status(200).send("Fetal movement data inserted successfully");
+  } catch (err) {
+    console.error("Error inserting fetal movement data:", err);
+    res.status(500).send("Error inserting data");
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection:", err);
+      }
+    }
+  }
+});
+
+// Endpoint to fetch fetal movement history
+app.get("/api/fetal-movement/history", async (req, res) => {
+  const { userid } = req.query;
+  console.log(userid);
+  let conn;
+  try {
+    conn = await connection();
+    const result = await conn.execute(
+      "SELECT * FROM Fetal_Movement WHERE user_id = :userid",
+      [userid]
+    );
+    console.log('Query Result:',result);
+    if (result.rows && result.rows.length > 0) {
+      console.log('Fetched Rows:', result.rows);
+      res.json(result.rows); // Send rows directly if they exist
+    } else {
+      console.log('No data found for this user.');
+      res.json([]); // Return empty array if no data is found
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching data");
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+});
+
 app.get("/api/doctors", async (req, res) => {
   const { search, sort } = req.query;
   let conn;
@@ -1768,7 +1841,7 @@ app.get("/api/orders/:userId", async (req, res) => {
 
     // Query to get orders from the Places table
     const result = await conn.execute(
-      `SELECT order_id, TO_CHAR(date_t, 'YYYY-MM-DD') as date_t, bill 
+      `SELECT ORDER_ID, TO_CHAR(DATE_T, 'YYYY-MM-DD') as date_t, bill 
        FROM Places 
        WHERE user_id = :userId`,
       [userId]
@@ -1784,6 +1857,180 @@ app.get("/api/orders/:userId", async (req, res) => {
         await conn.close();
       } catch (err) {
         console.error("Error closing connection", err);
+      }
+    }
+  }
+});
+app.delete("/delfood", async (req, res) => {
+  let conn;
+  try {
+    conn = await connection();
+    //const { date, foodItem, mealtype, userId } = req.body;
+    const { date, foodItem, userId } = req.body;
+    console.log("Del ", req.body);
+
+    const sql = `DELETE FROM calorietracker 
+    WHERE LOWER(food_item) = LOWER(:food_item) 
+    AND entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD') 
+    AND user_id = :user_id`;
+    // const sql = `DELETE FROM calorietracker
+    //                WHERE LOWER(food_item) = LOWER(:food_item)
+    //                AND entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD')
+    //                AND user_id = :user_id
+    //                AND meal_type = :meal_type`;
+
+    // Use valid variable names that follow Oracle's conventions
+    const binds = {
+      food_item: foodItem, // Bind variable name with underscore
+      entry_date: date, // Bind variable name with underscore
+      user_id: userId,
+      //meal_type: mealtype, // Bind variable name with underscore
+    };
+
+    // Establish a database connection
+
+    const result = await conn.execute(sql, binds, { autoCommit: true });
+
+    if (result.rowsAffected > 0) {
+      res.status(200).send("Food entry deleted successfully");
+    } else {
+      res.status(404).send("No food entry found to delete");
+    }
+
+    await conn.close();
+  } catch (err) {
+    console.error("Error during deletion: ", err);
+    res.status(500).send("Error deleting the food entry");
+  }
+});
+app.post("/book-appointment", async (req, res) => {
+  const { email, date, time, day, userId } = req.body;
+  let conn;
+  console.log(req.body);
+  try {
+    // Establish connection to the Oracle database
+    conn = await connection();
+
+    // Fetch the BMDC number from the Doctors table using the provided email
+    const doctorResult = await conn.execute(
+      `SELECT BMDC FROM Doctors WHERE email = :email`,
+      { email: email }
+    );
+
+    if (doctorResult.rows.length === 0) {
+      res
+        .status(404)
+        .json({ message: "Doctor not found with the given email" });
+      return; // Stop further execution if no doctor is found
+    }
+
+    const bmdc = doctorResult.rows[0]?.BMDC; // Using optional chaining
+    // Assuming BMDC is the first column
+    // Combine `date` and `time` into a single `TIMESTAMP` for `appointment_timestamp`
+    const appointmentTimestamp = `${date} ${time}`; // Combine date and time into 'YYYY-MM-DD HH24:MI:SS' format
+
+    // Insert the new appointment into the Appointment table
+    const sql = `
+      INSERT INTO Appointment (appointment_id, user_id, BMDC_no, appointment_timestamp, day_of_week)
+      VALUES (appointment_seq.nextval, :user_id, :bmdc, TO_TIMESTAMP(:appointment_timestamp, 'YYYY-MM-DD HH24:MI:SS'), :day_of_week)
+    `;
+
+    // Execute the query with correct bind variables
+    await conn.execute(
+      sql,
+      {
+        user_id: userId,
+        bmdc: bmdc,
+        appointment_timestamp: appointmentTimestamp, // Correctly formatted TIMESTAMP input
+        day_of_week: day, // Day of the week
+      },
+      { autoCommit: true } // Commit the transaction
+    );
+
+    res.status(201).json({ message: "Appointment booked successfully" });
+  } catch (error) {
+    console.error("Error booking appointment:", error);
+    res.status(500).json({ error: "Database query failed" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing the connection:", err);
+      }
+    }
+  }
+});
+app.post("/check-appointment", async (req, res) => {
+  const { date, time, email, day, userId } = req.body;
+
+  let conn;
+  try {
+    // Establish connection to the database
+    conn = await connection();
+
+    // Combine date and time into a single TIMESTAMP for querying
+    const appointmentTimestamp = `${date} ${time}`;
+
+    // Fetch the BMDC number using the provided email
+    const doctorResult = await conn.execute(
+      `SELECT BMDC FROM Doctors WHERE email = :email`,
+      { email: email }
+    );
+
+    if (doctorResult.rows.length === 0) {
+      res
+        .status(404)
+        .json({ message: "Doctor not found with the given email" });
+      return; // Stop further execution if no doctor is found
+    }
+
+    const bmdc = doctorResult.rows[0]?.BMDC; // Accessing the BMDC value directly
+    console.log("Check", bmdc);
+    console.log(userId);
+
+    // Query to check if the appointment slot is already booked
+    const sql = `
+      SELECT COUNT(*) as count
+      FROM Appointment
+      WHERE appointment_timestamp = TO_TIMESTAMP(:appointmentTimestamp, 'YYYY-MM-DD HH24:MI:SS')
+      AND user_id = :userId
+      AND BMDC_NO = :bmdc
+      AND day_of_week = :day
+    `;
+
+    // Execute the query
+    const result = await conn.execute(sql, {
+      appointmentTimestamp,
+      userId,
+      bmdc,
+      day,
+    });
+
+    // Check the result
+    const count = result.rows[0].COUNT; // Use COUNT instead of count for Oracle
+    if (count > 0) {
+      // Slot is not available
+      res
+        .status(409)
+        .json({ message: "The selected appointment slot is not available." });
+    } else {
+      // Slot is available
+      res
+        .status(200)
+        .json({ message: "The selected appointment slot is available." });
+    }
+  } catch (error) {
+    console.error("Error checking appointment availability:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while checking availability." });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close(); // Ensure the connection is closed
+      } catch (err) {
+        console.error("Error closing the connection:", err);
       }
     }
   }

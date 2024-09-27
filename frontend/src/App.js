@@ -17,10 +17,12 @@ import Appointment from "./Appointment.js";
 import BookAppointment from "./bookappointment.js";
 import Shop from "./shop.js";
 import Cart from "./cart.js";
+import Fetal from "./fetal.js";
 import OrderDetails from "./order_history.js";
 import Dashboard from "./dashboard.js";
 import Admin from "./admin_profile.js";
 import Secret from "./adminLogin.js";
+import Feedback from "./feedback.js";
 import AdminPrivateComponent from "./AdminPrivateComponent.js";
 import AddProduct from "./addProduct.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -45,8 +47,13 @@ function App() {
             <Route path="/Medicinetracker" element={<MedicineTracker />} />
             <Route path="/Calorietracker" element={<CalorieTracker />} />
             <Route path="/Medicalhistory" element={<Medical />} />
+            <Route path="/fetal" element={<Fetal />} />
             <Route path="/Appointment" element={<Appointment />} />
-            <Route path="/Bookappointment" element={<BookAppointment />} />
+            <Route path="/feedback" element={<Feedback/>}/>
+            <Route
+              path="/book-appointment/:email"
+              element={<BookAppointment />}
+            />
             <Route path="/orderdetails" element={<OrderDetails />} />
           </Route>
           <Route element={<AdminPrivateComponent />}>

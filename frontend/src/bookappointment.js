@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import "./CSS/bookAppointment.css";
-//book appointment.css CSS folder e move korsi - reefah
+
 const BookAppointment = () => {
   const { email } = useParams();
   const [appointmentDetails, setAppointmentDetails] = useState({
@@ -9,51 +9,106 @@ const BookAppointment = () => {
     date: "",
     time: "",
     day: "",
+    userId: "", // Initially empty, will be set later
   });
 
+  const getUserFromLocalStorage = () => {
+    const userString = localStorage.getItem("user");
+    try {
+      return userString ? JSON.parse(userString) : null;
+    } catch (error) {
+      console.error("Failed to parse user from local storage:", error);
+      return null;
+    }
+  };
+
+  const auth = getUserFromLocalStorage();
+  const userId = auth ? auth.userId : null;
+
   const handleInputChange = (event) => {
+    const { name, value } = event.target;
     setAppointmentDetails((prev) => ({
       ...prev,
-      [event.target.name]: event.target.value,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const checkAvailability = async () => {
     try {
-      const response = await fetch("http://localhost:3000/book-appointment", {
+      const response = await fetch("http://localhost:5000/check-appointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(appointmentDetails),
+        body: JSON.stringify({
+          date: appointmentDetails.date,
+          time: appointmentDetails.time,
+          email: appointmentDetails.email,
+          day: appointmentDetails.day,
+          userId: userId,
+        }),
       });
 
-      if (response.ok) {
-        alert("Appointment booked successfully!");
-        setAppointmentDetails({
-          email: decodeURIComponent(email),
-          date: "",
-          time: "",
-          day: "",
-        });
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to book the appointment: ${errorData.message}`);
-      }
+      return response.ok; // Return true if the slot is available
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error checking availability:", error);
+      return false; // If there's an error, assume the slot is not available
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    // Set userId in appointmentDetails before checking availability
+    const newAppointmentDetails = {
+      ...appointmentDetails,
+      userId: userId, // Add userId here
+    };
+
+    // Check availability of the appointment slot
+    const isAvailable = await checkAvailability();
+
+    if (isAvailable) {
+      try {
+        const response = await fetch("http://localhost:5000/book-appointment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newAppointmentDetails),
+        });
+
+        if (response.ok) {
+          alert("Appointment booked successfully!");
+          setAppointmentDetails({
+            email: decodeURIComponent(email),
+            date: "",
+            time: "",
+            day: "",
+            userId: "", // Reset userId after booking
+          });
+        } else {
+          const errorData = await response.json();
+          alert(`Failed to book the appointment: ${errorData.message}`);
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        alert(
+          "An error occurred while booking the appointment. Please try again later."
+        );
+      }
+    } else {
       alert(
-        "An error occurred while booking the appointment. Please try again later."
+        "The selected appointment slot is not available. Please choose another time."
       );
     }
   };
 
   return (
-    <div>
+    <div className="appointment-form">
       <h1>Book an Appointment</h1>
       <form onSubmit={handleSubmit}>
-        <div>
+        <div className="form-group">
           <label htmlFor="date">Appointment Date:</label>
           <input
             type="date"
@@ -64,7 +119,7 @@ const BookAppointment = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="time">Appointment Time:</label>
           <input
             type="time"
@@ -75,7 +130,7 @@ const BookAppointment = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="day">Day of the Week:</label>
           <select
             name="day"
@@ -94,7 +149,9 @@ const BookAppointment = () => {
             <option value="Sunday">Sunday</option>
           </select>
         </div>
-        <button type="submit">Book Appointment</button>
+        <button type="submit" className="submit-btn">
+          Book Appointment
+        </button>
       </form>
     </div>
   );

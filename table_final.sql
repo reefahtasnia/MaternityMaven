@@ -137,6 +137,13 @@ CREATE TABLE Medical_History (
     treatment VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES Users(userid)
 );
+CREATE TABLE Fetal_Movement (
+    user_id INT,
+    baby_movement VARCHAR(255),
+    duration INT,
+    movement_date DATE,
+    FOREIGN KEY (user_id) REFERENCES Users(userid)
+);
 // Medicine Tracker er shob 
 create table medicine (
 medicine_code int,
@@ -172,12 +179,17 @@ ALTER TRIGGER C##ZAFIRA.MEDICINE_TRIGGER COMPILE;
 --change made by reefah up
 CREATE TABLE Appointment (
     appointment_id INT PRIMARY KEY,
+    user_id INT, 
     BMDC_no INT,
     date DATE,
     time TIME,
     day VARCHAR(255),
-    FOREIGN KEY (BMDC_no) REFERENCES Doctor(BMDC_no)
+    FOREIGN KEY (BMDC_no) REFERENCES Doctors(BMDC)
+    FOREIGN KEY (user_id) REFERENCES Users(userid),
 );
+ CREATE SEQUENCE  "DBMS"."APPOINTMENT_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 41 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE  GLOBAL ;
+
+// books lagtesena 
 CREATE TABLE Books (
     booking_id INT PRIMARY KEY,
     user_id INT,
