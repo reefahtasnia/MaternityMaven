@@ -26,7 +26,7 @@ import AdminPrivateComponent from "./AdminPrivateComponent.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
-  const isAuthenticated = localStorage.getItem("user"); // You may need a more complex logic here, based on how authentication is handled
+  const isAuthenticated = localStorage.getItem('user'); // You may need a more complex logic here, based on how authentication is handled
 
   return (
     <div className="App">
