@@ -1043,8 +1043,8 @@ app.post("/api/medical-history/delete", async (req, res) => {
   }
 });
 // Endpoint to add fetal movement data
-app.post('/api/fetal-movement', async (req, res) => {
-  console.log('Received fetal movement data :',req.body);
+app.post("/api/fetal-movement", async (req, res) => {
+  console.log("Received fetal movement data :", req.body);
   const { user_id, baby_movement, duration, movement_date } = req.body;
   let conn;
   try {
@@ -1056,27 +1056,27 @@ app.post('/api/fetal-movement', async (req, res) => {
         user_id: user_id,
         baby_movement: baby_movement,
         duration: duration,
-        movement_date: movement_date
+        movement_date: movement_date,
       },
       { autoCommit: true }
     );
-    res.status(200).send('Fetal movement data inserted successfully');
+    res.status(200).send("Fetal movement data inserted successfully");
   } catch (err) {
-    console.error('Error inserting fetal movement data:', err);
-    res.status(500).send('Error inserting data');
+    console.error("Error inserting fetal movement data:", err);
+    res.status(500).send("Error inserting data");
   } finally {
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        console.error('Error closing connection:', err);
+        console.error("Error closing connection:", err);
       }
     }
   }
 });
 
 // Endpoint to fetch fetal movement history
-app.get('/api/fetal-movement/history', async (req, res) => {
+app.get("/api/fetal-movement/history", async (req, res) => {
   const { userid } = req.query;
   console.log(userid);
   let conn;
@@ -1101,8 +1101,6 @@ app.get('/api/fetal-movement/history', async (req, res) => {
   }
 });
 
-
- 
 app.get("/api/doctors", async (req, res) => {
   const { search, sort } = req.query;
   let conn;
@@ -1839,9 +1837,6 @@ app.post("/book-appointment", async (req, res) => {
 
     const bmdc = doctorResult.rows[0]?.BMDC; // Using optional chaining
     // Assuming BMDC is the first column
-    console.log(bmdc);
-    console.log(userId);
-
     // Combine `date` and `time` into a single `TIMESTAMP` for `appointment_timestamp`
     const appointmentTimestamp = `${date} ${time}`; // Combine date and time into 'YYYY-MM-DD HH24:MI:SS' format
 
@@ -1871,6 +1866,80 @@ app.post("/book-appointment", async (req, res) => {
     if (conn) {
       try {
         await conn.close();
+      } catch (err) {
+        console.error("Error closing the connection:", err);
+      }
+    }
+  }
+});
+app.post("/check-appointment", async (req, res) => {
+  const { date, time, email, day, userId } = req.body;
+
+  let conn;
+  try {
+    // Establish connection to the database
+    conn = await connection();
+
+    // Combine date and time into a single TIMESTAMP for querying
+    const appointmentTimestamp = `${date} ${time}`;
+
+    // Fetch the BMDC number using the provided email
+    const doctorResult = await conn.execute(
+      `SELECT BMDC FROM Doctors WHERE email = :email`,
+      { email: email }
+    );
+
+    if (doctorResult.rows.length === 0) {
+      res
+        .status(404)
+        .json({ message: "Doctor not found with the given email" });
+      return; // Stop further execution if no doctor is found
+    }
+
+    const bmdc = doctorResult.rows[0]?.BMDC; // Accessing the BMDC value directly
+    console.log("Check", bmdc);
+    console.log(userId);
+
+    // Query to check if the appointment slot is already booked
+    const sql = `
+      SELECT COUNT(*) as count
+      FROM Appointment
+      WHERE appointment_timestamp = TO_TIMESTAMP(:appointmentTimestamp, 'YYYY-MM-DD HH24:MI:SS')
+      AND user_id = :userId
+      AND BMDC_NO = :bmdc
+      AND day_of_week = :day
+    `;
+
+    // Execute the query
+    const result = await conn.execute(sql, {
+      appointmentTimestamp,
+      userId,
+      bmdc,
+      day,
+    });
+
+    // Check the result
+    const count = result.rows[0].COUNT; // Use COUNT instead of count for Oracle
+    if (count > 0) {
+      // Slot is not available
+      res
+        .status(409)
+        .json({ message: "The selected appointment slot is not available." });
+    } else {
+      // Slot is available
+      res
+        .status(200)
+        .json({ message: "The selected appointment slot is available." });
+    }
+  } catch (error) {
+    console.error("Error checking appointment availability:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while checking availability." });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close(); // Ensure the connection is closed
       } catch (err) {
         console.error("Error closing the connection:", err);
       }
