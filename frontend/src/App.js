@@ -17,6 +17,7 @@ import Appointment from "./Appointment.js";
 import BookAppointment from "./bookappointment.js";
 import Shop from "./shop.js";
 import Cart from "./cart.js";
+import Fetal from "./fetal.js";
 import OrderDetails from "./order_history.js";
 import Dashboard from "./dashboard.js";
 import Admin from "./admin_profile.js";
@@ -44,6 +45,7 @@ function App() {
             <Route path="/Medicinetracker" element={<MedicineTracker />} />
             <Route path="/Calorietracker" element={<CalorieTracker />} />
             <Route path="/Medicalhistory" element={<Medical />} />
+            <Route path="/fetal" element={<Fetal />} />
             <Route path="/Appointment" element={<Appointment />} />
             <Route path="/book-appointment/:email" element={<BookAppointment />} />
             <Route path="/orderdetails" element={<OrderDetails />} />

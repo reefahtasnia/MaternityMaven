@@ -1042,6 +1042,67 @@ app.post("/api/medical-history/delete", async (req, res) => {
     }
   }
 });
+// Endpoint to add fetal movement data
+app.post('/api/fetal-movement', async (req, res) => {
+  console.log('Received fetal movement data :',req.body);
+  const { user_id, baby_movement, duration, movement_date } = req.body;
+  let conn;
+  try {
+    conn = await connection();
+    await conn.execute(
+      `INSERT INTO Fetal_Movement (user_id, baby_movement, duration, movement_date) 
+       VALUES (:user_id, :baby_movement, :duration, TO_DATE(:movement_date, 'YYYY-MM-DD'))`,
+      {
+        user_id: user_id,
+        baby_movement: baby_movement,
+        duration: duration,
+        movement_date: movement_date
+      },
+      { autoCommit: true }
+    );
+    res.status(200).send('Fetal movement data inserted successfully');
+  } catch (err) {
+    console.error('Error inserting fetal movement data:', err);
+    res.status(500).send('Error inserting data');
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error('Error closing connection:', err);
+      }
+    }
+  }
+});
+
+// Endpoint to fetch fetal movement history
+app.get('/api/fetal-movement/history', async (req, res) => {
+  const { userid } = req.query;
+  console.log(userid);
+  let conn;
+  try {
+    conn = await connection();
+    const result = await conn.execute(
+      "SELECT * FROM Fetal_Movement WHERE user_id = :userid",
+      [userid]
+    );
+    res.json(result.rows || []);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching data");
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+});
+
+
+ 
 app.get("/api/doctors", async (req, res) => {
   const { search, sort } = req.query;
   let conn;
