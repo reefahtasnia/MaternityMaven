@@ -1526,7 +1526,7 @@ app.get("/api/orderdetails/:orderId", async (req, res) => {
     // Establish a connection
     conn = await connection();
 
-    // Query to fetch order details
+    // Query to fetch order and product details
     const result = await conn.execute(
       `SELECT 
           o.productid, 
@@ -1550,7 +1550,28 @@ app.get("/api/orderdetails/:orderId", async (req, res) => {
     );
 
     if (result.rows.length > 0) {
-      res.json({ success: true, data: result.rows });
+      // Separate order details (assuming all rows will have the same order-level details)
+      const orderInfo = {
+        order_id: result.rows[0].ORDER_ID,
+        date_t: result.rows[0].DATE_T,
+        bill: result.rows[0].BILL,
+      };
+
+      // Collect all product details
+      const orderItems = result.rows.map(row => ({
+        productid: row.PRODUCTID,
+        title: row.TITLE,
+        price: row.PRICE,
+        quantity: row.QUANTITY,
+        image: row.IMAGE,
+      }));
+
+      // Send response with order info and items
+      res.json({
+        success: true,
+        order: orderInfo,
+        orderItems: orderItems
+      });
     } else {
       res.status(404).json({ success: false, message: "Order not found" });
     }
@@ -1567,6 +1588,7 @@ app.get("/api/orderdetails/:orderId", async (req, res) => {
     }
   }
 });
+
 
 
 

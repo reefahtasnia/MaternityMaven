@@ -7,7 +7,7 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState(null); // Holds the order for which details are shown
+  const [selectedOrder, setSelectedOrder] = useState(null); // Holds the selected order
   const [orderDetails, setOrderDetails] = useState([]); // Holds the details of a specific order
   const [modalVisible, setModalVisible] = useState(false); // Controls modal visibility
 
@@ -47,8 +47,11 @@ const OrderHistory = () => {
   const fetchOrderDetails = async (orderId) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/orderdetails/${orderId}`);
-      setOrderDetails(response.data.data);
-      setSelectedOrder(orderId);
+      const { order, orderItems } = response.data; // Deconstruct response
+
+      // Set selected order details including order-level information
+      setSelectedOrder(order);
+      setOrderDetails(orderItems); // Set items separately
       setModalVisible(true); // Show modal
     } catch (err) {
       console.error("Error fetching order details:", err);
@@ -89,38 +92,38 @@ const OrderHistory = () => {
       </div>
 
       {/* Modal */}
-      {modalVisible && (
+      {modalVisible && selectedOrder && (
         <div className="order-modal">
-        <div className="modal-content">
-          <h2>Order ID: {selectedOrder.ORDER_ID}</h2>
-          <p>Date: {orderDetails.length > 0 && new Date(orderDetails[0].DATE_T).toLocaleDateString()}</p>
-      
-          <table className="order-table">
-            <thead>
-              <tr>
-                <th>Product Name</th>
-                <th>Quantity</th>
-                <th>Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orderDetails.map(item => (
-                <tr key={item.PRODUCT_ID}>
-                  <td>{item.TITLE}</td>
-                  <td>{item.QUANTITY}</td>
-                  <td>Tk {item.PRICE}</td>
+          <div className="modal-content">
+            <h2>Order ID: {selectedOrder.order_id}</h2>
+            <p>Date: {new Date(selectedOrder.date_t).toLocaleDateString()}</p>
+            
+            
+            <table className="order-table">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-      
-          <p>Shipping: Tk 50</p>
-          <p>Total Bill: Tk {selectedOrder.BILL}</p>
-      
-          <button className="close-button" onClick={closeModal}>Close</button>
+              </thead>
+              <tbody>
+                {orderDetails.map(item => (
+                  <tr key={item.productid}>
+                    <td>{item.title}</td>
+                    <td>{item.quantity}</td>
+                    <td>Tk {item.price*item.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <p>Shipping: Tk 50</p>
+            <p>Total Bill: Tk {selectedOrder.bill}</p>
+
+            <button className="close-button" onClick={closeModal}>Close</button>
+          </div>
         </div>
-      </div>
-      
       )}
     </div>
   );
