@@ -1086,12 +1086,12 @@ app.get("/api/fetal-movement/history", async (req, res) => {
       "SELECT * FROM Fetal_Movement WHERE user_id = :userid",
       [userid]
     );
-    console.log('Query Result:',result);
+    console.log("Query Result:", result);
     if (result.rows && result.rows.length > 0) {
-      console.log('Fetched Rows:', result.rows);
+      console.log("Fetched Rows:", result.rows);
       res.json(result.rows); // Send rows directly if they exist
     } else {
-      console.log('No data found for this user.');
+      console.log("No data found for this user.");
       res.json([]); // Return empty array if no data is found
     }
   } catch (err) {
@@ -1471,7 +1471,6 @@ app.post("/api/order", async (req, res) => {
   }
 });
 
-
 app.post("/api/add-products", async (req, res) => {
   const { productName, price, stock, productImage, category } = req.body;
   let conn;
@@ -1485,26 +1484,32 @@ app.post("/api/add-products", async (req, res) => {
       `SELECT MAX(PRODUCTID) AS maxId FROM products`
     );
     const maxId = result.rows[0].MAXID || 0; // Default to 0 if no products are found
-    const Id=maxId+1;
+    const Id = maxId + 1;
     console.log(Id);
     // Insert the new product with productId incremented by 1
     const insertQuery = `
       INSERT INTO products (productId, product_name, price, stock, image, ctgr)
       VALUES (:productId, :productName, :price, :stock, :productImage, :ctgr)
     `;
-    await conn.execute(insertQuery, {
-      productId: Id,
-      productName,
-      price,
-      stock,
-      productImage,
-      ctgr: category,
-    }, { autoCommit: true });
+    await conn.execute(
+      insertQuery,
+      {
+        productId: Id,
+        productName,
+        price,
+        stock,
+        productImage,
+        ctgr: category,
+      },
+      { autoCommit: true }
+    );
 
     res.status(201).json({ message: "Product added successfully" });
   } catch (error) {
     console.error("Error during product addition:", error);
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   } finally {
     if (conn) {
       try {
@@ -1558,7 +1563,7 @@ app.get("/api/orderdetails/:orderId", async (req, res) => {
       };
 
       // Collect all product details
-      const orderItems = result.rows.map(row => ({
+      const orderItems = result.rows.map((row) => ({
         productid: row.PRODUCTID,
         title: row.TITLE,
         price: row.PRICE,
@@ -1570,14 +1575,16 @@ app.get("/api/orderdetails/:orderId", async (req, res) => {
       res.json({
         success: true,
         order: orderInfo,
-        orderItems: orderItems
+        orderItems: orderItems,
       });
     } else {
       res.status(404).json({ success: false, message: "Order not found" });
     }
   } catch (error) {
     console.error("Error fetching order details:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch order details" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch order details" });
   } finally {
     if (conn) {
       try {
@@ -1588,9 +1595,6 @@ app.get("/api/orderdetails/:orderId", async (req, res) => {
     }
   }
 });
-
-
-
 
 app.post("/api/update-quantity", async (req, res) => {
   const { productName, stock } = req.body;
@@ -1605,10 +1609,14 @@ app.post("/api/update-quantity", async (req, res) => {
       SET stock = :stock
       WHERE product_name = :productName
     `;
-    const result = await conn.execute(updateQuery, {
-      productName,
-      stock,
-    }, { autoCommit: true });
+    const result = await conn.execute(
+      updateQuery,
+      {
+        productName,
+        stock,
+      },
+      { autoCommit: true }
+    );
 
     if (result.rowsAffected === 0) {
       res.status(404).json({ message: "Product not found" });
@@ -1617,7 +1625,9 @@ app.post("/api/update-quantity", async (req, res) => {
     }
   } catch (error) {
     console.error("Error during stock update:", error);
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   } finally {
     if (conn) {
       try {
@@ -1628,7 +1638,6 @@ app.post("/api/update-quantity", async (req, res) => {
     }
   }
 });
-
 
 //Endpoint for searching fooditems
 app.get("/search-food-items", async (req, res) => {
@@ -2140,10 +2149,9 @@ app.post("/check-appointment", async (req, res) => {
   }
 });
 
+///FEEDBACK ER API done
 
-///FEEDBACK ER API done 
-
-app.post('/api/feedback', async (req, res) => {
+app.post("/api/feedback", async (req, res) => {
   const { description, rate, user_id, doctor_id } = req.body;
   console.log("Received feedback:", req.body);
   let conn;
@@ -2153,18 +2161,25 @@ app.post('/api/feedback', async (req, res) => {
       INSERT INTO Feedbacks (des, rate, user_id, doctor_id) 
       VALUES (:description, :rate, :user_id, :doctor_id)
     `;
-    const result=await conn.execute(insertFeedbackQuery, {
-      description,
-      rate,
-      user_id: user_id || null,  // Ensure that null is passed if user_id is not set
-      doctor_id: doctor_id || null  // Ensure that null is passed if doctor_id is not set
-    }, { autoCommit: true });
-    if(result) console.log("Feedback inserted successfully");
+    const result = await conn.execute(
+      insertFeedbackQuery,
+      {
+        description,
+        rate,
+        user_id: user_id || null, // Ensure that null is passed if user_id is not set
+        doctor_id: doctor_id || null, // Ensure that null is passed if doctor_id is not set
+      },
+      { autoCommit: true }
+    );
+    if (result) console.log("Feedback inserted successfully");
     else console.log("Feedback not inserted");
     res.status(201).json({ message: "Feedback submitted successfully!" });
   } catch (error) {
     console.error("Error inserting feedback:", error);
-    res.status(500).json({ message: "An error occurred while submitting feedback.", error: error.message });
+    res.status(500).json({
+      message: "An error occurred while submitting feedback.",
+      error: error.message,
+    });
   }
 });
 //display feedback in admin profile
@@ -2172,23 +2187,29 @@ app.post('/api/feedback', async (req, res) => {
 // Utility to read CLOB data
 async function readClob(clob) {
   return new Promise((resolve, reject) => {
-    let data = '';
-    clob.setEncoding('utf8');
-    clob.on('data', chunk => { data += chunk; });
-    clob.on('end', () => { resolve(data); });
-    clob.on('error', err => { reject(err); });
+    let data = "";
+    clob.setEncoding("utf8");
+    clob.on("data", (chunk) => {
+      data += chunk;
+    });
+    clob.on("end", () => {
+      resolve(data);
+    });
+    clob.on("error", (err) => {
+      reject(err);
+    });
   });
 }
-app.get('/api/feedback/details', async (req, res) => {
+app.get("/api/feedback/details", async (req, res) => {
   const { type } = req.query;
-  let query = '';
-  if (type === 'user') {
+  let query = "";
+  if (type === "user") {
     query = `
       SELECT f.feedback_id, f.des AS description, f.rate, f.user_id, u.fullname, u.email
       FROM Feedbacks f
       JOIN Users u ON f.user_id = u.userid
     `;
-  } else if (type === 'doctor') {
+  } else if (type === "doctor") {
     query = `
       SELECT f.feedback_id, f.des AS description, f.rate, f.doctor_id, d.fullname, d.email
       FROM Feedbacks f
@@ -2201,21 +2222,23 @@ app.get('/api/feedback/details', async (req, res) => {
   try {
     const conn = await connection();
     const result = await conn.execute(query);
-    const feedback = await Promise.all(result.rows.map(async row => {
-      let description = '';
-      if (row.DESCRIPTION) {
-        // Assuming DESCRIPTION is a CLOB
-        description = await readClob(row.DESCRIPTION);
-      }
-      return {
-        feedback_id: row.FEEDBACK_ID,
-        description,
-        rate: row.RATE,
-        user_or_doctor_id: type === 'user' ? row.USER_ID : row.DOCTOR_ID,
-        fullname: row.FULLNAME,
-        email: row.EMAIL
-      };
-    }));
+    const feedback = await Promise.all(
+      result.rows.map(async (row) => {
+        let description = "";
+        if (row.DESCRIPTION) {
+          // Assuming DESCRIPTION is a CLOB
+          description = await readClob(row.DESCRIPTION);
+        }
+        return {
+          feedback_id: row.FEEDBACK_ID,
+          description,
+          rate: row.RATE,
+          user_or_doctor_id: type === "user" ? row.USER_ID : row.DOCTOR_ID,
+          fullname: row.FULLNAME,
+          email: row.EMAIL,
+        };
+      })
+    );
     res.status(200).json(feedback);
   } catch (error) {
     console.error("Error fetching feedback details:", error);
@@ -2223,5 +2246,44 @@ app.get('/api/feedback/details', async (req, res) => {
   }
 });
 
+app.get("/search-medicines", async (req, res) => {
+  const { searchQuery } = req.query; // Use 'searchQuery' instead of 'query' for clarity
+  console.log("Search Query:", searchQuery);
 
+  // Check if the search query is provided and not empty
+  if (!searchQuery || searchQuery.trim().length === 0) {
+    return res.json([]); // Return an empty array if no search query is provided
+  }
 
+  let conn;
+  try {
+    // Assuming 'connection' is a function that returns a connected database client
+    conn = await connection();
+
+    // Using named parameters for safer queries
+    const result = await conn.execute(
+      `SELECT medicine_name 
+       FROM medicine 
+       WHERE LOWER(medicine_name) LIKE LOWER(:query)`,
+      { query: `%${searchQuery}%` } // Ensure the '%' wildcards are included for partial matching
+    );
+
+    console.log("Fetched Medicines:", result.rows);
+
+    // Extracting medicine names and returning them
+    const medicines = result.rows.map((row) => row.MEDICINE_NAME);
+    res.json(medicines); // Send back the list of medicine names
+  } catch (error) {
+    console.error("Failed to fetch medicines:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    if (conn) {
+      try {
+        // Make sure to close the database connection
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection:", err);
+      }
+    }
+  }
+});
