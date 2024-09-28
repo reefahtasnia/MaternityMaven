@@ -1,38 +1,41 @@
-const cron = require("node-cron");
-const { sendEmail } = require("./emailService");
+import cron from "node-cron";
+import { emailService } from "./emailService.js";
 import dotenv from "dotenv";
-import { connection } from "./connection";
-const dbConnection = require("./server_reefah"); // Your database connection file
+import { connection } from "./connection.js";
 dotenv.config();
 // Schedule a job to run every minute
+console.log("Initializing reminder service...");
 cron.schedule("* * * * *", async () => {
   let conn;
   try {
     conn = await connection(); // Get your database connection
+    console.log("Running cron job");
 
     // Fetch users and their prescriptions in one query
     const query = `
-      SELECT u.userId, u.email, m.medicine_name, m.dosage, m.time 
-      FROM users u, medicine m 
+      SELECT u.userId, u.email, m.name, m.dosage, m.time 
+      FROM users u, medicinetracker m 
       where 
       u.userid = m.user_id`;
 
-    console.log(query);
-
     const result = await conn.execute(query);
     const rows = result.rows; // Assuming this returns an array of user and prescription data
+    //console.log(rows);
 
     const currentTime = new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
 
-    console.log(currentTime);
+    console.log("Current time", currentTime);
+    console.log("Prescription time: ", time);
 
     // Group prescriptions by userId
     const prescriptionsByUser = {};
     rows.forEach((row) => {
       const { userId, email, medicine_name, dosage, time } = row;
+      console.log("Bhitorer row", row);
+      console.log(email);
 
       if (!prescriptionsByUser[userId]) {
         prescriptionsByUser[userId] = {
@@ -61,7 +64,7 @@ cron.schedule("* * * * *", async () => {
           const subject = "Medicine Reminder";
           const text = `Hi, it's time to take your medicine: ${medicine_name}. Dosage: ${dosage}. Time: ${time}.`;
 
-          sendEmail(email, subject, text)
+          emailService(email, subject, text)
             .then(() => console.log(`Reminder sent to ${email}`))
             .catch((error) => console.error(`Failed to send email: ${error}`));
         }
