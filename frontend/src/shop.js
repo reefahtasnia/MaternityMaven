@@ -166,6 +166,10 @@ const Shop = () => {
                 <label className="custom-control-label" htmlFor="price-4">Clothes</label>
               </div>
             </form>
+            {/* Show Order History Button */}
+            <Link to="/orderdetails">
+              <button className="btn btn-primary w-100">Show Order History</button>
+            </Link>
           </div>
         </div>
 
