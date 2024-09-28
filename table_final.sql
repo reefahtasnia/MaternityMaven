@@ -302,5 +302,13 @@ CREATE TABLE Places (
     bill NUMBER
 );
 
+/*
+CREATE TABLE Placy (
+    user_id INT,
+    order_id INT,
+    date_t DATE DEFAULT SYSDATE,
+    bill NUMBER
+); */
+
 commit;
 

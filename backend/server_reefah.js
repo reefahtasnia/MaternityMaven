@@ -1381,6 +1381,10 @@ app.post("/api/order", async (req, res) => {
   console.log("cartItems:", cartItems); // Log cart items
   console.log("userId:", userId);
 
+  if (!cartItems || cartItems.length === 0) {
+    return res.status(400).json({ success: false, message: "Cart is empty" });
+  }
+
   let conn;
   console.log(cartItems, userId); // Optional logging for debugging
 
@@ -1407,6 +1411,29 @@ app.post("/api/order", async (req, res) => {
         { autoCommit: false } // Commit will be done later
       );
     }
+
+    // Calculate total bill by summing price * quantity for each item in the order
+    const result = await conn.execute(
+      `SELECT SUM(price * quantity+50) AS total_bill
+       FROM orders
+       WHERE order_id = :orderId`,
+      { orderId },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    const totalBill = result.rows[0].TOTAL_BILL;
+    console.log("Total Bill:", totalBill);
+
+    // Insert userId, orderId, and total bill into the Places table
+    await conn.execute(
+      "INSERT INTO Places (user_id, order_id, date_t, bill) VALUES (:userId, :orderId, SYSDATE, :totalBill)",
+      {
+        userId,
+        orderId,
+        totalBill,
+      },
+      { autoCommit: false }
+    );
 
     // Commit the transaction
     await conn.commit();
@@ -1443,6 +1470,7 @@ app.post("/api/order", async (req, res) => {
     }
   }
 });
+
 
 app.post("/api/add-products", async (req, res) => {
   const { productName, price, stock, productImage, category } = req.body;
@@ -1487,6 +1515,60 @@ app.post("/api/add-products", async (req, res) => {
     }
   }
 });
+
+//orderhistory modal??
+
+app.get("/api/orderdetails/:orderId", async (req, res) => {
+  const { orderId } = req.params;
+
+  let conn;
+  try {
+    // Establish a connection
+    conn = await connection();
+
+    // Query to fetch order details
+    const result = await conn.execute(
+      `SELECT 
+          o.productid, 
+          o.title, 
+          o.price, 
+          o.quantity, 
+          p.image, 
+          pl.order_id, 
+          pl.date_t, 
+          pl.bill
+       FROM 
+          places pl
+       JOIN 
+          orders o ON pl.order_id = o.order_id
+       JOIN 
+          products p ON o.productid = p.productid
+       WHERE 
+          pl.order_id = :orderId`,
+      { orderId },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (result.rows.length > 0) {
+      res.json({ success: true, data: result.rows });
+    } else {
+      res.status(404).json({ success: false, message: "Order not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch order details" });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection:", err);
+      }
+    }
+  }
+});
+
+
 
 app.post("/api/update-quantity", async (req, res) => {
   const { productName, stock } = req.body;
