@@ -5,6 +5,7 @@ import cors from "cors";
 import bcrypt from "bcrypt";
 import { connection, run_query } from "./connection.js";
 import { sendEmail } from "./sendEmail.js";
+import { emailService } from "./emailService.js";
 import oracledb from "oracledb";
 
 dotenv.config();
