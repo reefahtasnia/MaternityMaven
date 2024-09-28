@@ -7,12 +7,13 @@ select * from products;
 select * from medicine;
 select * from MEDICINETRACKER;
 select * from doctors;
-select * from appointments;
 select * from MedicalHistoryView;
 SELECT * FROM USER_IMAGES;
 SELECT * FROM doctor_images;
 select * from admin;
 select * from feedbacks;
+select * from appointment;
+select * from Fetal_Movement;
 
 drop table products;
 drop TRIGGER medicine_trigger;
@@ -139,30 +140,7 @@ INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
 INSERT INTO Admin (admin_id, name, email, hashed_password, phone_no)
 VALUES (2, 'JOHN DOE', 'JOHN.DOE@EXAMPLE.COM', 'plaintext', '1234567890');
 
-CREATE TABLE doctor_images (
-    image_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    BMDC VARCHAR(255) NOT NULL,
-    filename VARCHAR2(255) NOT NULL,
-    mime_type VARCHAR2(100) NOT NULL,
-    image_data BLOB,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk__image_bmdc FOREIGN KEY (BMDC) REFERENCES Doctors(BMDC)
-);
-SELECT MAX(PRODUCTID) AS maxId FROM products;
+INSERT INTO Appointment (appointment_id,user_id, BMDC_no, appointment_timestamp, day_of_week)
+VALUES (APPOINTMENT_SEQ.NEXTVAL, 8, 'B10078', TO_TIMESTAMP('2023-09-25 14:30:00', 'YYYY-MM-DD HH24:MI:SS'), 'Monday');
 
-CREATE TABLE Feedbacks (
-    feedback_id INT DEFAULT FEEDBACK_SEQ.NEXTVAL , 
-    des clob,
-    rate INT,
-    user_id INT,
-    doctor_id VARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES Users(userid),
-    FOREIGN KEY (doctor_id) REFERENCES Doctors(BMDC)
-);
-
-CREATE SEQUENCE FEEDBACK_SEQ
-START WITH 1
-INCREMENT BY 1
-NOCYCLE;
-/
 COMMIT;

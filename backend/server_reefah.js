@@ -2140,6 +2140,76 @@ app.post("/check-appointment", async (req, res) => {
   }
 });
 
+app.get("/api/appointments/:userId", async (req, res) => {
+  const userId = req.params.userId;
+
+  let conn;
+  try {
+    conn = await connection();
+    const result = await conn.execute(
+      `SELECT a.appointment_id, a.appointment_timestamp, a.day_of_week, d.fullname, d.email
+       FROM Appointment a
+       JOIN Doctors d ON a.BMDC_no = d.BMDC
+       WHERE a.user_id = :userId`,
+      { userId }
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching appointments", err);
+    res.status(500).send("Error fetching appointments");
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection", err);
+      }
+    }
+  }
+});
+// Fetch upcoming appointments
+app.get("/api/upcoming-appointments", async (req, res) => {
+  const { BMDC } = req.query;
+  const query = `
+    SELECT a.appointment_id, a.appointment_timestamp, a.day_of_week, u.fullname, u.email
+    FROM Appointment a
+    JOIN Users u ON a.user_id = u.userid
+    WHERE a.BMDC_no = :BMDC AND a.appointment_timestamp > SYSDATE
+    ORDER BY a.appointment_timestamp ASC
+  `;
+  try {
+    let conn;
+    conn=await connection();
+    const result = await conn.execute(query, { BMDC });
+    console.log(result.rows);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching upcoming appointments", err);
+    res.status(500).send("Server error while fetching appointments");
+  }
+});
+
+// Fetch past appointments
+app.get("/api/past-appointments", async (req, res) => {
+  const { BMDC } = req.query;
+  const query = `
+    SELECT a.appointment_id, a.appointment_timestamp, a.day_of_week, u.fullname, u.email
+    FROM Appointment a
+    JOIN Users u ON a.user_id = u.userid
+    WHERE a.BMDC_no = :BMDC AND a.appointment_timestamp <= SYSDATE
+    ORDER BY a.appointment_timestamp DESC
+  `;
+  try {
+    let conn;
+    conn=await connection();
+    const result = await conn.execute(query, { BMDC });
+    console.log(result.rows);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching past appointments", err);
+    res.status(500).send("Server error while fetching appointments");
+  }
+});
 
 ///FEEDBACK ER API done 
 
