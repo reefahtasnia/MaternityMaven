@@ -1186,28 +1186,36 @@ app.get("/api/departments", async (req, res) => {
 });
 
 // Route to get products
-app.get("/api/products", async (req, res) => {
+app.get('/api/products', async (req, res) => {
   let conn;
   try {
-    conn = await connection();
+    conn = await connection(); 
 
-    const result = await conn.execute("SELECT * FROM products");
-    console.log("Fetching products");
-    console.log(result.rows[0]);
-    return res.json(result.rows);
+    let result = await conn.execute(
+      `BEGIN
+         OPEN :cursor FOR
+         SELECT * FROM PRODUCTS;
+       END;`,
+      {
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT },
+      }
+    );
+
+    let cursor = result.outBinds.cursor;
+    let rows = [];
+    let row;
+    while ((row = await cursor.getRow())) {
+      rows.push(row);
+    }
+    await cursor.close();
+    res.json(rows);
+    console.log("Fetched products using cursor:", rows);
   } catch (err) {
     console.error("Database query error:", err);
-    throw err;
-  } finally {
-    if (connection) {
-      try {
-        await conn.close();
-      } catch (err) {
-        console.error("Error closing database connection:", err);
-      }
-    }
+    res.status(500).json({ error: "Internal server error" });
   }
-});
+  } 
+);
 app.get("/api/products-order", async (req, res) => {
   let conn;
   try {

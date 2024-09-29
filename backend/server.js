@@ -17,7 +17,7 @@ const dbConfig = {
   connectString: 'localhost:1521/ORCL'
 };
 
-// Fetch Products from Oracle DB
+Fetch Products from Oracle DB
 app.get('/api/products', async (req, res) => {
   let connection;
   try {
