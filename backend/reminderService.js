@@ -23,6 +23,7 @@ cron.schedule("* * * * *", async () => {
     const currentTime = new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
+      hourCycle: "h23", // This forces 24-hour format
     });
 
     console.log("Current time", currentTime);
@@ -52,6 +53,8 @@ cron.schedule("* * * * *", async () => {
 
       prescriptions.forEach((prescription) => {
         const { medicine_name, dosage, time } = prescription;
+
+        console.log("Prescription time: ", time);
 
         // Check if the prescription time matches the current time
         if (time === currentTime) {
