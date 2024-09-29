@@ -2382,3 +2382,50 @@ app.get("/search-medicines", async (req, res) => {
     }
   }
 });
+app.get("/api/multiple-appointments", async (req, res) => {
+  // Extract the BMDC of the logged-in doctor from the request
+  const { BMDC } = req.query;
+
+  if (!BMDC) {
+      return res.status(400).json({ message: "BMDC number is required" });
+  }
+
+  let conn;
+  try {
+      conn = await connection();  // Make sure to establish a database connection
+
+      // SQL query to find user IDs who have had more than one appointment with the doctor
+      const sql = `
+          SELECT u.userid, u.fullname, u.email, COUNT(*) as appointment_count
+          FROM Users u
+          JOIN Appointment a ON u.userid = a.user_id
+          WHERE a.BMDC_no = :BMDC
+          GROUP BY u.userid, u.fullname, u.email
+          HAVING COUNT(*) > 1
+      `;
+
+      const result = await conn.execute(sql, { BMDC }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+      console.log("Fetched Results: " + JSON.stringify(result.rows, null, 2));
+
+      if (result.rows.length > 0) {
+          res.json({
+              message: "Found users with multiple appointments",
+              data: result.rows
+          });
+      } else {
+          res.status(404).json({ message: "No users found with multiple appointments with this doctor" });
+      }
+  } catch (error) {
+      console.error("Failed to fetch data:", error);
+      res.status(500).json({ message: "Internal server error", error });
+  } finally {
+      if (conn) {
+          try {
+              await conn.close(); // Always ensure connections are closed after use
+          } catch (err) {
+              console.error("Error closing connection:", err);
+          }
+      }
+  }
+});
+

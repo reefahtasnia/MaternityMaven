@@ -183,15 +183,9 @@ LEFT JOIN (
 WHERE u.userid IN (SELECT user_id FROM Appointment WHERE BMDC_no = 'B10078');
 
 
-CREATE TABLE doctor_nid_images (
-    image_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    BMDC VARCHAR(255) NOT NULL,
-    filename VARCHAR2(255) NOT NULL,
-    mime_type VARCHAR2(100) NOT NULL,
-    image_data BLOB,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_nid_bmdc FOREIGN KEY (BMDC) REFERENCES Doctors(BMDC)
-);
-
-
-d
+SELECT u.userid, u.fullname, u.email, COUNT(*) as appointment_count
+          FROM Users u
+          JOIN Appointment a ON u.userid = a.user_id
+          WHERE a.BMDC_no = 'B10078'
+          GROUP BY u.userid, u.fullname, u.email
+          HAVING COUNT(*) > 1

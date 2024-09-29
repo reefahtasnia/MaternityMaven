@@ -17,6 +17,7 @@ const DoctorProfile = () => {
   const [storedauth, setAuth] = useState(null);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [pastAppointments, setPastAppointments] = useState([]);
+  const [multipleAppointments, setMultipleAppointments] = useState([]);
 
   const triggerFileInput = () => {
     document.getElementById("fileInput").click();
@@ -56,8 +57,10 @@ const DoctorProfile = () => {
       fetchProfileImage(auth.BMDC);
       fetchUpcomingAppointments(auth.BMDC);
       fetchPastAppointments(auth.BMDC);
+      fetchMultipleAppointments(auth.BMDC);
     }
   }, []);
+
   const fetchUpcomingAppointments = async (BMDC) => {
     try {
       const response = await fetch(
@@ -151,11 +154,24 @@ const DoctorProfile = () => {
       }
     }
   };
-  const generateUniqueKey = (appointment, index) => {
-    if (appointment && appointment.appointment_id) {
-      return `appointment-${appointment.appointment_id}`;
+  const fetchMultipleAppointments = async (BMDC) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/multiple-appointments?BMDC=${BMDC}`
+      );
+      if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+      const data = await response.json();
+      console.log("Fetched multiple appintments"+data.data);
+      setMultipleAppointments(data.data || []);
+    } catch (error) {
+      console.error("Failed to fetch multiple appointments:", error);
+      alert(`Failed to load multiple appointments data: ${error.message}`);
     }
-    return `appointment-${index}`;
+  };
+
+  const showDetails = (userid) => {
+    // Placeholder for functionality to show details
+    console.log("Showing details for UserID:", userid);
   };
   const handleSave = () => {
     const auth = JSON.parse(localStorage.getItem("user"));
@@ -334,10 +350,37 @@ const DoctorProfile = () => {
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Current Patients</h3>
-          <button className="profile-section-button">Edit</button>
-          <div className="profile-section-content">
-            <p>Currently empty.</p>
-          </div>
+          {multipleAppointments.length > 0 ? (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Number of Appointments</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {multipleAppointments.map((appointment, index) => (
+                  <tr key={`multi-app-${index}`}>
+                    <td>{capitalizeWords(appointment.FULLNAME)}</td>
+                    <td>{capitalizeWords(appointment.EMAIL)}</td>
+                    <td>{appointment.APPOINTMENT_COUNT}</td>
+                    <td>
+                      <button
+                        onClick={() => showDetails(appointment.userid)}
+                        className="detail-button"
+                      >
+                        Show Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No current patients with multiple appointments.</p>
+          )}
         </div>
         <div className="profile-section">
           <h3 className="profile-section-title">Upcoming Appointments</h3>
