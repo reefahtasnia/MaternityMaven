@@ -14,6 +14,7 @@ select * from admin;
 select * from feedbacks;
 select * from appointment;
 select * from Fetal_Movement;
+select * from calorietracker;
 
 drop table products;
 drop TRIGGER medicine_trigger;
@@ -144,3 +145,53 @@ INSERT INTO Appointment (appointment_id,user_id, BMDC_no, appointment_timestamp,
 VALUES (APPOINTMENT_SEQ.NEXTVAL, 8, 'B10078', TO_TIMESTAMP('2023-09-25 14:30:00', 'YYYY-MM-DD HH24:MI:SS'), 'Monday');
 
 COMMIT;
+
+-- Fetch medical history, fetal movements, medicine, and calorie intake
+SELECT 
+    u.userid,
+    u.fullname,
+    u.email,
+    u.date_of_birth,
+    u.blood_group,
+    u.phone_number,
+    mh.medical_history_details,
+    fm.fetal_movement_details,
+    mt.medicine_details,
+    ct.calorie_details
+FROM Users u
+LEFT JOIN (
+    SELECT user_id, LISTAGG(incident || ' - ' || treatment, '; ') WITHIN GROUP (ORDER BY year) AS medical_history_details
+    FROM Medical_History
+    GROUP BY user_id
+) mh ON mh.user_id = u.userid
+LEFT JOIN (
+    SELECT user_id, LISTAGG(baby_movement || ' for ' || duration || ' minutes on ' || TO_CHAR(movement_date, 'YYYY-MM-DD'), '; ') WITHIN GROUP (ORDER BY movement_date DESC) AS fetal_movement_details
+    FROM Fetal_Movement
+    GROUP BY user_id
+) fm ON fm.user_id = u.userid
+LEFT JOIN (
+    SELECT user_id, LISTAGG(medicine_name || ' - ' || dosage || ' at ' || time, '; ') WITHIN GROUP (ORDER BY medicine_name) AS medicine_details
+    FROM Medicinetracker
+    JOIN Medicine ON Medicinetracker.medicine_code = Medicine.medicine_code
+    GROUP BY user_id
+) mt ON mt.user_id = u.userid
+LEFT JOIN (
+    SELECT user_id, AVG(calories) AS calorie_details
+    FROM Calorietracker
+    GROUP BY user_id
+) ct ON ct.user_id = u.userid
+WHERE u.userid IN (SELECT user_id FROM Appointment WHERE BMDC_no = 'B10078');
+
+
+CREATE TABLE doctor_nid_images (
+    image_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    BMDC VARCHAR(255) NOT NULL,
+    filename VARCHAR2(255) NOT NULL,
+    mime_type VARCHAR2(100) NOT NULL,
+    image_data BLOB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_nid_bmdc FOREIGN KEY (BMDC) REFERENCES Doctors(BMDC)
+);
+
+
+d

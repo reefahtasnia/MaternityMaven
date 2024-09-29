@@ -1,0 +1,40 @@
+/* Full-screen background image and centering styles */
+.waiting-page {
+    height: 100vh; /* Full viewport height */
+    background-image: url('./assets/dasboardbg.png'); /* Set your background image URL here */
+    background-size: cover; /* Make the background cover the entire page */
+    background-position: center; /* Center the background */
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+  }
+  
+  /* Styling for the loading text */
+  .waiting-text {
+    font-size: 2rem; /* Adjust the text size as needed */
+    color: rgb(0, 0, 0); /* Change color to make the text visible */
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  /* Animation for the dots */
+  .dots {
+    display: inline-block;
+    animation: dots 1.5s steps(5, end) infinite;
+  }
+  
+  @keyframes dots {
+    0%, 20% {
+      content: '';
+    }
+    40% {
+      content: '.';
+    }
+    60% {
+      content: '..';
+    }
+    80%, 100% {
+      content: '...';
+    }
+  }
+  

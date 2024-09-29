@@ -1206,6 +1206,28 @@ app.get("/api/products", async (req, res) => {
     }
   }
 });
+app.get("/api/products-order", async (req, res) => {
+  let conn;
+  try {
+    conn = await connection();
+
+    const result = await conn.execute("SELECT * FROM products ORDER BY PRODUCTID ASC");
+    console.log("Fetching products");
+    console.log(result.rows[0]);
+    return res.json(result.rows);
+  } catch (err) {
+    console.error("Database query error:", err);
+    throw err;
+  } finally {
+    if (connection) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing database connection:", err);
+      }
+    }
+  }
+});
 
 app.post("/api/cart", async (req, res) => {
   const { productId, title, price, quantity, userid } = req.body;

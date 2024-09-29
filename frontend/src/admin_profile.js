@@ -34,7 +34,7 @@ const AdminProfile = () => {
       };
       const fetchProductData = async () => {
         try {
-          const productDataUrl = `http://localhost:5000/api/products`;
+          const productDataUrl = `http://localhost:5000/api/products-order`;
           const productResponse = await fetch(productDataUrl);
           if (!productResponse.ok) {
             throw new Error(`HTTP status ${productResponse.status}`);

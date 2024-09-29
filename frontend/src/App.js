@@ -25,6 +25,7 @@ import Secret from "./adminLogin.js";
 import Feedback from "./feedback.js";
 import AdminPrivateComponent from "./AdminPrivateComponent.js";
 import AddProduct from "./addProduct.js";
+import WaitingPage from "./Waiting.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
@@ -79,6 +80,7 @@ function App() {
             <Route path="/Admin" element={<Admin />} />
             <Route path="/add-product" element={<AddProduct />} />
           </Route>
+          <Route path="/waiting" element={<WaitingPage />} />
           <Route path="/secret" element={<Secret />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
