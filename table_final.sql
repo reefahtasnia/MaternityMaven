@@ -302,7 +302,7 @@ CREATE TABLE Places (
     bill NUMBER
 );
 
-/*
+/* extraa
 CREATE TABLE Placy (
     user_id INT,
     order_id INT,

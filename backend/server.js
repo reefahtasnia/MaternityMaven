@@ -22,8 +22,40 @@ app.get('/api/products', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection(dbConfig);
-    const result = await connection.execute(`SELECT * FROM products`);
-    res.json(result.rows);
+
+    const result = await connection.execute(`
+      DECLARE
+        cur SYS_REFCURSOR;
+        v_productid NUMBER;
+        v_product_name VARCHAR2(100);
+        v_price NUMBER;
+        v_stock NUMBER;
+        v_image VARCHAR2(200);
+        v_ctgr VARCHAR2(50);
+      BEGIN
+        OPEN cur FOR 
+          SELECT PRODUCTID, PRODUCT_NAME, PRICE, STOCK, IMAGE, CTGR 
+          FROM products;
+        :1 := cur;
+      END;
+    `, {
+      outFormat: oracledb.OBJECT, 
+      resultSet: true
+    });
+
+    const resultSet = result.outBinds[0];
+    const rows = [];
+    let row;
+    
+    // Fetch rows from the result set
+    while ((row = await resultSet.getRow())) {
+      rows.push(row);
+    }
+
+    // Close the resultSet cursor
+    await resultSet.close();
+
+    res.json(rows); // Send fetched rows as the response
   } catch (err) {
     console.error(err);
     res.status(500).send('Database Error');
@@ -37,6 +69,7 @@ app.get('/api/products', async (req, res) => {
     }
   }
 });
+
 
 // Add product to cart
 app.post('/api/cart', async (req, res) => {
