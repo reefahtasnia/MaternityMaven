@@ -13,14 +13,12 @@ cron.schedule("* * * * *", async () => {
 
     // Fetch users and their prescriptions in one query
     const query = `
-      SELECT u.userId, u.email, m.name, m.dosage, m.time 
+      SELECT u.userId, u.email, m.name as medicine_name, m.dosage, m.time 
       FROM users u, medicinetracker m 
-      where 
-      u.userid = m.user_id`;
+      where u.userid = m.user_id`;
 
     const result = await conn.execute(query);
     const rows = result.rows; // Assuming this returns an array of user and prescription data
-    //console.log(rows);
 
     const currentTime = new Date().toLocaleTimeString([], {
       hour: "2-digit",
@@ -28,26 +26,22 @@ cron.schedule("* * * * *", async () => {
     });
 
     console.log("Current time", currentTime);
-    console.log("Prescription time: ", time);
-
-    // Group prescriptions by userId
     const prescriptionsByUser = {};
+    // Group prescriptions by userId
     rows.forEach((row) => {
-      const { userId, email, medicine_name, dosage, time } = row;
-      console.log("Bhitorer row", row);
-      console.log(email);
+      const { USERID, EMAIL, MEDICINE_NAME, DOSAGE, TIME } = row; // Use the exact uppercase keys here
 
-      if (!prescriptionsByUser[userId]) {
-        prescriptionsByUser[userId] = {
-          email,
+      if (!prescriptionsByUser[row.USERID]) {
+        prescriptionsByUser[row.USERID] = {
+          email: row.EMAIL,
           prescriptions: [],
         };
       }
 
-      prescriptionsByUser[userId].prescriptions.push({
-        medicine_name,
-        dosage,
-        time,
+      prescriptionsByUser[row.USERID].prescriptions.push({
+        medicine_name: row.MEDICINE_NAME,
+        dosage: row.DOSAGE,
+        time: row.TIME,
       });
     });
 
