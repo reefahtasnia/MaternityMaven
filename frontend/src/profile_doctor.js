@@ -18,6 +18,8 @@ const DoctorProfile = () => {
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [pastAppointments, setPastAppointments] = useState([]);
   const [multipleAppointments, setMultipleAppointments] = useState([]);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [patientDetails, setPatientDetails] = useState({});
 
   const triggerFileInput = () => {
     document.getElementById("fileInput").click();
@@ -154,6 +156,21 @@ const DoctorProfile = () => {
       }
     }
   };
+  const fetchPatientDetails = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/patient-details/${userId}`
+      );
+      const data = await response.json();
+      console.log("Fetched patient details:", data[0]);
+      setPatientDetails(data[0]); // Assuming the endpoint returns an array
+      setShowDetailsModal(true);
+    } catch (error) {
+      console.error("Failed to fetch patient details:", error);
+      alert("Failed to load patient details.");
+    }
+  };
+
   const fetchMultipleAppointments = async (BMDC) => {
     try {
       const response = await fetch(
@@ -161,7 +178,7 @@ const DoctorProfile = () => {
       );
       if (!response.ok) throw new Error(`HTTP status ${response.status}`);
       const data = await response.json();
-      console.log("Fetched multiple appintments"+data.data);
+      console.log("Fetched multiple appintments" + data.data);
       setMultipleAppointments(data.data || []);
     } catch (error) {
       console.error("Failed to fetch multiple appointments:", error);
@@ -213,9 +230,156 @@ const DoctorProfile = () => {
         });
     }
   };
+  const PatientDetailsModal = () => {
+    if (!showDetailsModal) return null;
+    const parseDataToRows = (dataString) => {
+      return dataString.split(";").map((entry) => {
+        const details = entry.split("-");
+        return details.map((detail) => detail.trim());
+      });
+    };
+
+    const medicalHistoryRows = parseDataToRows(
+      patientDetails.MEDICAL_HISTORY_DETAILS || ""
+    );
+    const medicineDetailsRows = parseDataToRows(
+      patientDetails.MEDICINE_DETAILS || ""
+    );
+    const fetalMovementsRows = parseDataToRows(
+      patientDetails.FETAL_MOVEMENT_DETAILS || ""
+    );
+    return (
+      <div
+        style={{
+          display: showDetailsModal ? "block" : "none",
+          position: "fixed",
+          zIndex: "1",
+          left: "0",
+          top: "0",
+          width: "100%",
+          height: "100%",
+          overflow: "auto",
+          backgroundColor: "rgba(0,0,0,0.4)",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#fefefe",
+            margin: "15% auto",
+            padding: "20px",
+            border: "1px solid #888",
+            width: "80%",
+            fontSize:"20px",
+          }}
+        >
+          <span
+            onClick={() => setShowDetailsModal(false)}
+            style={{
+              float: "right",
+              color: "#aaa",
+              fontSize: "28px",
+              fontWeight: "bold",
+            }}
+          >
+            &times;
+          </span>
+          <h2>Patient Details</h2>
+          <p>
+            <strong>Name:</strong> {capitalizeWords(patientDetails.FULLNAME)}
+          </p>
+          <p>
+            <strong>Email:</strong> {patientDetails.EMAIL.toLowerCase()}
+          </p>
+          <p>
+            <strong>DOB:</strong> {patientDetails.DATE_OF_BIRTH}
+          </p>
+          <p>
+            <strong>Blood Group:</strong> {patientDetails.BLOOD_GROUP}
+          </p>
+          <p>
+            <strong>Phone Number:</strong> {patientDetails.PHONE_NUMBER}
+          </p>
+          <div>
+            <h3>Medical History</h3>
+            <div className="profile-section-content">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Incident</th>
+                    <th>Treatment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {medicalHistoryRows.map((row, index) => (
+                    <tr key={index}>
+                      {row.map((col, colIndex) => (
+                        <td key={colIndex}>{col}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h3>Medicine Details</h3>
+            <div className="profile-section-content">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Medicine</th>
+                    <th>Dosage</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {medicineDetailsRows.map((row, index) => (
+                    <tr key={index}>
+                      {row.map((col, colIndex) => (
+                        <td key={colIndex}>{col}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h3>Fetal Movements</h3>
+            <div className="profile-section-content">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Movement</th>
+                    <th>Duration</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fetalMovementsRows.map((row, index) => (
+                    <tr key={index}>
+                      {row.map((col, colIndex) => (
+                        <td key={colIndex}>{col}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>
+            <strong>Average Calories:</strong> {patientDetails.CALORIE_DETAILS}
+          </p>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="profile-container">
+      <PatientDetailsModal />
       <div className="profile-content">
         <div className="profile-header">
           <div className="profile-image-container">
@@ -364,11 +528,11 @@ const DoctorProfile = () => {
                 {multipleAppointments.map((appointment, index) => (
                   <tr key={`multi-app-${index}`}>
                     <td>{capitalizeWords(appointment.FULLNAME)}</td>
-                    <td>{capitalizeWords(appointment.EMAIL)}</td>
+                    <td>{appointment.EMAIL.toLowerCase()}</td>
                     <td>{appointment.APPOINTMENT_COUNT}</td>
                     <td>
                       <button
-                        onClick={() => showDetails(appointment.userid)}
+                        onClick={() => fetchPatientDetails(appointment.USERID)}
                         className="detail-button"
                       >
                         Show Details

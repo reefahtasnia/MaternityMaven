@@ -2428,4 +2428,58 @@ app.get("/api/multiple-appointments", async (req, res) => {
       }
   }
 });
+app.get("/api/patient-details/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    const conn = await connection();
+    const query = `
+      SELECT 
+        u.userid,
+        u.fullname,
+        u.email,
+        u.date_of_birth,
+        u.blood_group,
+        u.phone_number,
+        mh.medical_history_details,
+        fm.fetal_movement_details,
+        mt.medicine_details,
+        ct.calorie_details
+      FROM Users u
+      LEFT JOIN (
+        SELECT user_id, LISTAGG(incident || ' - ' || treatment, '; ') WITHIN GROUP (ORDER BY year) AS medical_history_details
+        FROM Medical_History
+        GROUP BY user_id
+      ) mh ON mh.user_id = u.userid
+      LEFT JOIN (
+        SELECT user_id, LISTAGG(baby_movement || ' - ' || duration || ' - ' || TO_CHAR(movement_date, 'DD/MM/YYYY'), '; ') WITHIN GROUP (ORDER BY movement_date DESC) AS fetal_movement_details
+        FROM Fetal_Movement
+        GROUP BY user_id
+      ) fm ON fm.user_id = u.userid
+      LEFT JOIN (
+        SELECT user_id, LISTAGG(medicine_name || ' - ' || dosage || ' - ' || time, '; ') WITHIN GROUP (ORDER BY medicine_name) AS medicine_details
+        FROM Medicinetracker
+        JOIN Medicine ON Medicinetracker.medicine_code = Medicine.medicine_code
+        GROUP BY user_id
+      ) mt ON mt.user_id = u.userid
+      LEFT JOIN (
+        SELECT user_id, AVG(calories) AS calorie_details
+        FROM Calorietracker
+        GROUP BY user_id
+      ) ct ON ct.user_id = u.userid
+      WHERE u.userid = :userId`;
+
+    const result = await conn.execute(query, { userId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    console.log(result.rows.data);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching patient details:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  } 
+});
+
 
