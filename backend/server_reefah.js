@@ -5,6 +5,8 @@ import cors from "cors";
 import bcrypt from "bcrypt";
 import { connection, run_query } from "./connection.js";
 import { sendEmail } from "./sendEmail.js";
+import { emailService } from "./emailService.js";
+import "./reminderService.js";
 import oracledb from "oracledb";
 
 dotenv.config();
@@ -2210,7 +2212,7 @@ app.get("/api/upcoming-appointments", async (req, res) => {
   `;
   try {
     let conn;
-    conn=await connection();
+    conn = await connection();
     const result = await conn.execute(query, { BMDC });
     console.log(result.rows);
     res.json(result.rows);
@@ -2232,7 +2234,7 @@ app.get("/api/past-appointments", async (req, res) => {
   `;
   try {
     let conn;
-    conn=await connection();
+    conn = await connection();
     const result = await conn.execute(query, { BMDC });
     console.log(result.rows);
     res.json(result.rows);
