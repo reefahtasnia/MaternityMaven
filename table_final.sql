@@ -126,9 +126,9 @@ CREATE TABLE Passwords (
     CONSTRAINT FK_BMDC FOREIGN KEY (BMDC) REFERENCES Doctors(BMDC) ON DELETE CASCADE
 );
 
-/**
- The above are the modifications done on user table. run it sequentially.
- */
+
+ --The above are the modifications done on user table. run it sequentially.
+ 
 
 CREATE TABLE Medical_History (
     user_id INT,
@@ -178,27 +178,16 @@ END;
 ALTER TRIGGER C##ZAFIRA.MEDICINE_TRIGGER COMPILE; 
 --change made by reefah up
 CREATE TABLE Appointment (
-    appointment_id INT PRIMARY KEY,
-    user_id INT, 
-    BMDC_no INT,
-    date DATE,
-    time TIME,
-    day VARCHAR(255),
-    FOREIGN KEY (BMDC_no) REFERENCES Doctors(BMDC)
+    appointment_id NUMBER(38, 0) PRIMARY KEY,
+    user_id NUMBER,
+    BMDC_no VARCHAR2(100 BYTE),
+    appointment_timestamp TIMESTAMP(6),
+    day_of_week VARCHAR2(255 BYTE),
     FOREIGN KEY (user_id) REFERENCES Users(userid),
+    FOREIGN KEY (BMDC_no) REFERENCES Doctors(BMDC)
 );
  CREATE SEQUENCE  "DBMS"."APPOINTMENT_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 41 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE  GLOBAL ;
 
-// books lagtesena 
-CREATE TABLE Books (
-    booking_id INT PRIMARY KEY,
-    user_id INT,
-    appointment_id INT,
-    date DATE,
-    time TIME,
-    FOREIGN KEY (user_id) REFERENCES User(user_id),
-    FOREIGN KEY (appointment_id) REFERENCES Appointment(appointment_id)
-);
 --Calorie Tracker needs two tables.
 
 CREATE TYPE nutrition_facts AS OBJECT (
@@ -302,7 +291,7 @@ CREATE TABLE Places (
     bill NUMBER
 );
 
-/* extraa
+/*
 CREATE TABLE Placy (
     user_id INT,
     order_id INT,

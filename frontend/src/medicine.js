@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import "./CSS/medicine.css";
 
 const MedicineTracker = () => {
-  const [isFormVisible, setIsFormVisible] = useState(false); // Changed to handle form visibility
+  const [isFormVisible, setIsFormVisible] = useState(false);
   const [medicines, setMedicines] = useState([
     { name: "", dosage: "", time: "" },
   ]);
   const [submitted, setSubmitted] = useState(false);
-  const [medicineOptions, setMedicineOptions] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
@@ -24,25 +23,13 @@ const MedicineTracker = () => {
 
   const auth = getUserFromLocalStorage();
   const userId = auth ? auth.userId : null;
-  console.log("Retrieved userId:", userId); // Debug log the userId
+  console.log("Retrieved userId:", userId);
 
   useEffect(() => {
     console.log("UseEffect retrieved userId:", userId);
-    populateMedicines();
   }, [userId]);
 
-  const populateMedicines = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/medicine-options");
-      const data = await response.json();
-      setMedicineOptions(data);
-      console.log("Medicine options fetched:", data);
-    } catch (error) {
-      console.log("Error fetching data:", error);
-    }
-  };
-
-  const handleMedicineChange = (index, event) => {
+  const handleMedicineChange = async (index, event) => {
     const { name, value } = event.target;
     const newMedicines = medicines.map((medicine, i) => {
       if (i !== index) return medicine;
@@ -50,17 +37,36 @@ const MedicineTracker = () => {
     });
     setMedicines(newMedicines);
 
-    if (name === "name") {
-      const query = value.toLowerCase();
-      if (query.length > 0) {
-        const filteredSuggestions = medicineOptions.filter((option) =>
-          option.name.toLowerCase().includes(query)
+    const searchQuery = value; // The current input value
+    console.log("Search Query:", searchQuery);
+
+    if (name === "name" && searchQuery.length > 1) {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/search-medicines?searchQuery=${searchQuery}`
         );
-        setSuggestions(filteredSuggestions);
-      } else {
+        const data = await response.json();
+        console.log("Fetched medicine suggestions:", data);
+        setSuggestions(data.map((item) => item.medicine_name)); // Ensure correct key
+      } catch (error) {
+        console.error("Error fetching medicine suggestions:", error);
         setSuggestions([]);
       }
+    } else {
+      setSuggestions([]);
     }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setMedicines((prevMedicines) =>
+      prevMedicines.map((medicine, index) => {
+        if (index === editIndex) {
+          return { ...medicine, name: suggestion };
+        }
+        return medicine;
+      })
+    );
+    setSuggestions([]); // Clear suggestions after selection
   };
 
   const handleAddMedicine = () => {
@@ -75,10 +81,28 @@ const MedicineTracker = () => {
     setMedicines(newMedicines);
   };
 
+  const handleEditPrescription = (index) => {
+    const prescriptionToEdit = prescriptions[index];
+    setMedicines([
+      {
+        name: prescriptionToEdit.name,
+        dosage: prescriptionToEdit.dosage,
+        time: prescriptionToEdit.time,
+      },
+    ]);
+    setEditIndex(index);
+    setIsFormVisible(true);
+  };
+
+  const handleRemovePrescription = (index) => {
+    const updatedPrescriptions = prescriptions.filter((_, i) => i !== index);
+    setPrescriptions(updatedPrescriptions);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const payload = { userId: userId, medicines: medicines };
-    console.log(payload);
+    console.log("Submitting payload:", payload);
 
     try {
       const responsePost = await fetch("http://localhost:5000/medicine", {
@@ -92,7 +116,7 @@ const MedicineTracker = () => {
         setPrescriptions([...prescriptions, ...data]);
         setSubmitted(true);
         clearForm();
-        setIsFormVisible(false); // Hide form after submission
+        setIsFormVisible(false);
       } else {
         alert("Error submitting data.");
       }
@@ -106,87 +130,6 @@ const MedicineTracker = () => {
     setSuggestions([]);
   };
 
-  const removePrescription = async (index) => {
-    const prescription = prescriptions[index];
-    console.log("Deleting prescription with ID:", prescription.id);
-    if (prescription) {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/medicine/${prescription.id}`,
-          {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId }),
-          }
-        );
-
-        if (response.ok) {
-          const updatedPrescriptions = prescriptions.filter(
-            (_, i) => i !== index
-          );
-          setPrescriptions(updatedPrescriptions);
-        } else {
-          alert("Failed to delete the prescription.");
-        }
-      } catch (error) {
-        console.error("Error deleting prescription:", error);
-      }
-    } else {
-      console.error("Invalid prescription or missing ID");
-    }
-  };
-
-  const editPrescription = (index) => {
-    const prescription = prescriptions[index];
-    setEditIndex(index);
-    setMedicines([
-      {
-        name: prescription.name,
-        dosage: prescription.dosage,
-        time: prescription.time,
-        userid: userId,
-      },
-    ]);
-    setIsFormVisible(true); // Show form when editing
-  };
-
-  const handleEditSubmit = async (event) => {
-    event.preventDefault();
-    if (editIndex === null) return;
-
-    const prescription = { ...medicines[0], userId };
-    const prescriptionId = prescriptions[editIndex].id;
-
-    try {
-      const response = await fetch(
-        `http://localhost:5000/medicine/${prescriptionId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(prescription),
-        }
-      );
-
-      if (response.ok) {
-        const updatedPrescriptions = prescriptions.map((item, i) =>
-          i === editIndex ? { ...item, ...prescription } : item
-        );
-        setPrescriptions(updatedPrescriptions);
-        clearForm();
-        setIsFormVisible(false); // Hide form after editing
-        setEditIndex(null);
-      } else {
-        alert("Failed to update the prescription.");
-      }
-    } catch (error) {
-      console.error("Error updating prescription:", error);
-    }
-  };
-
-  const closePopup = () => {
-    setSubmitted(false);
-  };
-
   return (
     <div className="medicine-tracker-bg">
       <div className="appointment-form">
@@ -195,8 +138,7 @@ const MedicineTracker = () => {
           className="check-availability"
           onClick={() => {
             setIsFormVisible(!isFormVisible);
-            clearForm(); // Clear form when opening to add a new prescription
-            setEditIndex(null); // Clear edit index when adding new prescription
+            clearForm();
           }}
         >
           +
@@ -205,10 +147,7 @@ const MedicineTracker = () => {
 
       {isFormVisible && (
         <div className="form-container">
-          <form
-            id="prescription-form"
-            onSubmit={editIndex !== null ? handleEditSubmit : handleSubmit}
-          >
+          <form onSubmit={handleSubmit}>
             <h2>
               {editIndex !== null ? "Edit Prescription" : "Add Prescription"}
             </h2>
@@ -225,17 +164,21 @@ const MedicineTracker = () => {
                       name="name"
                       value={medicine.name}
                       onChange={(event) => handleMedicineChange(index, event)}
-                      list={`medicine-suggestions-${index}`}
                       autoComplete="off"
                       required
                     />
-                    <datalist id={`medicine-suggestions-${index}`}>
-                      {suggestions.map((item) => (
-                        <option key={item.id} value={item.name}>
-                          {item.name}
-                        </option>
-                      ))}
-                    </datalist>
+                    {suggestions.length > 0 && (
+                      <ul className="suggestions-list">
+                        {suggestions.map((item) => (
+                          <li
+                            key={item}
+                            onClick={() => handleSuggestionClick(item)}
+                          >
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                   <div className="form-group">
                     <label htmlFor={`dosage-${index}`}>Dosage:</label>
@@ -277,18 +220,13 @@ const MedicineTracker = () => {
               Add Another Medicine
             </button>
             <button type="submit" className="submit-btn">
-              {editIndex !== null ? "Save Changes" : "Submit"}
-            </button>
-            <button
-              type="button"
-              className="close-btn"
-              onClick={() => setIsFormVisible(false)}
-            >
-              Close
+              Submit
             </button>
           </form>
         </div>
       )}
+
+      {/* Render Prescriptions */}
       {prescriptions.length > 0 && (
         <div className="prescriptions-list">
           <h2>Your Prescriptions:</h2>
@@ -305,15 +243,15 @@ const MedicineTracker = () => {
               </div>
               <button
                 className="remove-prescription-btn"
-                onClick={() => removePrescription(index)}
+                onClick={() => handleRemovePrescription(index)}
               >
-                &times;
+                Remove
               </button>
               <button
                 className="edit-prescription-btn"
-                onClick={() => editPrescription(index)}
+                onClick={() => handleEditPrescription(index)}
               >
-                ✎
+                Edit
               </button>
             </div>
           ))}

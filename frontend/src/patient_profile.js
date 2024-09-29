@@ -20,6 +20,9 @@ const UserProfile = () => {
   const [hasFetchedCalorieData, setHasFetchedCalorieData] = useState(false);
   const [medicineReminders, setMedicineReminders] = useState([]);
   const [medicalHistory, setMedicalHistory] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [fetalMovements, setFetalMovements] = useState([]);
+
   const capitalizeWords = (string) => {
     return string.toLowerCase().replace(/(?:^|\s)\S/g, function (a) {
       return a.toUpperCase();
@@ -91,24 +94,39 @@ const UserProfile = () => {
           console.error("Failed to fetch medical history:", error.message);
         }
       };
-      // const checkProfileImage = async () => {
-      //   const possibleExtensions = [".jpg", ".jpeg", ".png", ".gif"];
-      //   for (const ext of possibleExtensions) {
-      //     const imagePath = `/assets/${auth.userId}_profile_pic${ext}`;
-      //     try {
-      //       const response = await fetch(imagePath);
-      //       if (response.ok) {
-      //         setProfileImage(imagePath);
-      //         alert("Profile image found" + imagePath);
-      //         break;
-      //       }
-      //     } catch (error) {
-      //       console.error("Error checking profile image:", error);
-      //     }
-      //   }
-      // };
+      const fetchAppointments = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/appointments/${auth.userId}`
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+          }
+          const data = await response.json();
+          console.log("Fetched appointments:", data);
+          setAppointments(data);
+        } catch (error) {
+          console.error("Failed to fetch appointments:", error.message);
+        }
+      };
+      const fetchFetalMovements = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/fetal-movement/history?userid=${auth.userId}`
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+          }
+          const data = await response.json();
+          console.log("Fetched fetal movements:", data);
+          setFetalMovements(data);
+        } catch (error) {
+          console.error("Failed to fetch fetal movements:", error.message);
+        }
+      };
+      fetchFetalMovements();
       fetchProfileImage();
-      //checkProfileImage();
+      fetchAppointments();
       fetchUserData();
       fetchMedicineReminders();
       fetchMedicalHistory();
@@ -153,7 +171,7 @@ const UserProfile = () => {
         console.log("Profile image found:", imageUrl);
         setProfileImage(imageUrl);
       } else {
-        console.log('No profile image found, using default');
+        console.log("No profile image found, using default");
         setProfileImage("https://via.placeholder.com/150");
       }
     } catch (error) {
@@ -165,16 +183,19 @@ const UserProfile = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (file.name.toLowerCase().endsWith('.jpg')) {
+      if (file.name.toLowerCase().endsWith(".jpg")) {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("userId", auth.userId);
 
         try {
-          const response = await fetch("http://localhost:3001/api/upload-image", {
-            method: "POST",
-            body: formData,
-          });
+          const response = await fetch(
+            "http://localhost:3001/api/upload-image",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
 
           if (!response.ok) {
             throw new Error(`Failed to upload image: ${response.statusText}`);
@@ -206,17 +227,17 @@ const UserProfile = () => {
   //       for (var pair of formData.entries()) {
   //         console.log(`${pair[0]}: ${pair[1]}`);
   //       }
-  
+
   //       try {
   //         const response = await fetch("http://localhost:3001/api/upload-image", {
   //           method: "POST",
   //           body: formData,
   //         });
-  
+
   //         if (!response.ok) {
   //           throw new Error(`Failed to upload image: ${response.statusText}`);
   //         }
-  
+
   //         const result = await response.json();
   //         if (result) alert("Image uploaded successfully");
   //         const newImagePath = `http://localhost:3001${result.filePath}`;
@@ -544,7 +565,71 @@ const UserProfile = () => {
             Add
           </button>
           <div className="profile-section-content">
-            <p>No upcoming appointments.</p>
+            {appointments.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Appointment ID</th>
+                    <th>Date & Time</th>
+                    <th>Day of Week</th>
+                    <th>Doctor Name</th>
+                    <th>Doctor Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {appointments.map((appointment, index) => (
+                    <tr key={index}>
+                      <td>{appointment.APPOINTMENT_ID}</td>
+                      <td>
+                        {new Date(
+                          appointment.APPOINTMENT_TIMESTAMP
+                        ).toLocaleString()}
+                      </td>
+                      <td>{appointment.DAY_OF_WEEK}</td>
+                      <td>{capitalizeWords(appointment.FULLNAME)}</td>
+                      <td>{appointment.EMAIL.toLowerCase()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No upcoming appointments.</p>
+            )}
+          </div>
+        </div>
+        <div className="profile-section">
+          <h3 className="profile-section-title">Fetal Movement</h3>
+          <button
+            className="profile-section-button"
+            onClick={() => (window.location.href = "/fetal")}
+          >
+            Add
+          </button>
+          <div className="profile-section-content">
+            {fetalMovements.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Baby Movement</th>
+                    <th>Duration</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fetalMovements.map((movement, index) => (
+                    <tr key={index}>
+                      <td>{movement.BABY_MOVEMENT}</td>
+                      <td>{movement.DURATION} minutes</td>
+                      <td>
+                        {new Date(movement.MOVEMENT_DATE).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No fetal movement records found.</p>
+            )}
           </div>
         </div>
         <div className="profile-actions">

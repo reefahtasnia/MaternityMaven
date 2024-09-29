@@ -242,21 +242,47 @@ app.get("/api/doctor-image/:bmdc", async (req, res) => {
     }
   }
 });
-async function insertProductImageIntoDatabase(productId, filename, mimeType, imagePath) {
+
+app.post("/api/upload-doctor-nid-image", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const bmdc = req.body.bmdc;
+  const oldPath = req.file.path;
+  const fileExt = path.extname(req.file.originalname);
+  const newFilename = `${bmdc}_NID_image${fileExt}`;
+  const newPath = path.join(path.dirname(oldPath), newFilename);
+
+  try {
+    await fs.promises.rename(oldPath, newPath);
+    console.log("NID file uploaded and renamed successfully:", newPath);
+
+    // Insert NID image into Oracle database in the doctor_nid_images table
+    await insertNIDImageIntoDatabase(bmdc, newFilename, req.file.mimetype, newPath);
+
+    res.json({ filePath: `/assets/${newFilename}` });
+  } catch (err) {
+    console.error("Error processing NID file:", err);
+    res.status(500).json({ message: "Error processing NID file" });
+  }
+});
+
+async function insertNIDImageIntoDatabase(bmdc, filename, mimeType, imagePath) {
   let conn;
   try {
     conn = await connection();
     const imageBuffer = await fs.promises.readFile(imagePath);
 
     const sql = `
-      INSERT INTO product_images (product_id, filename, mime_type, image_data)
-      VALUES (:productId, :filename, :mimeType, :imageData)
+      INSERT INTO doctor_nid_images (bmdc, filename, mime_type, image_data)
+      VALUES (:bmdc, :filename, :mimeType, :imageData)
     `;
 
     const result = await conn.execute(
       sql,
       {
-        productId: productId,
+        bmdc: bmdc,
         filename: filename,
         mimeType: mimeType,
         imageData: { val: imageBuffer, type: oracledb.BLOB },
@@ -264,9 +290,9 @@ async function insertProductImageIntoDatabase(productId, filename, mimeType, ima
       { autoCommit: true }
     );
 
-    console.log("Product image inserted into database successfully");
+    console.log("NID image inserted into database successfully");
   } catch (err) {
-    console.error("Error inserting product image into database:", err);
+    console.error("Error inserting NID image into database:", err);
     throw err;
   } finally {
     if (conn) {
@@ -278,39 +304,37 @@ async function insertProductImageIntoDatabase(productId, filename, mimeType, ima
     }
   }
 }
-
-// Product image upload route
-app.post("/api/product-image", upload.single("file"), async (req, res) => {
-  console.log("Request body:", req.body);
-  console.log("Uploaded file:", req.file);
-
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-
-  const productId = req.body.productId;
-  const oldPath = req.file.path;
-  const fileExt = path.extname(req.file.originalname);
-  const newFilename = `${productId}_product_image${fileExt}`;
-  const newPath = path.join(path.dirname(oldPath), newFilename);
-
+app.get("/api/doctor-nid-image/:bmdc", async (req, res) => {
+  let conn;
   try {
-    await fs.promises.rename(oldPath, newPath);
-    const filePath = `/assets/${newFilename}`;
-    console.log("Product file uploaded and renamed successfully:", filePath);
-
-    // Insert product image into Oracle database
-    await insertProductImageIntoDatabase(
-      productId,
-      newFilename,
-      req.file.mimetype,
-      newPath
-    );
-
-    res.json({ filePath: filePath });
+    conn = await connection();
+    const sql = `SELECT image_data, mime_type FROM doctor_nid_images WHERE bmdc = :bmdc AND ROWNUM = 1`;
+    const binds = { bmdc: req.params.bmdc };
+    const result = await conn.execute(sql, binds);
+    if (result.rows.length > 0) {
+      const [lob, mimeType] = result.rows[0];
+      console.log('Sending NID image with MIME type:', mimeType);
+      
+      res.setHeader('Content-Type', mimeType || 'application/octet-stream');
+      res.setHeader('Content-Disposition', 'inline');
+  
+      lob.on('end', () => console.log('Finished sending NID image data'));
+      lob.pipe(res);
+    } else {
+      console.log('No NID image found for BMDC:', req.params.bmdc);
+      res.status(404).send("NID image not found");
+    }
   } catch (err) {
-    console.error("Error processing product file:", err);
-    res.status(500).json({ message: "Error processing product file" });
+    console.error("Database error: ", err);
+    res.status(500).send("Server error");
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error("Error closing connection: ", err);
+      }
+    }
   }
 });
 

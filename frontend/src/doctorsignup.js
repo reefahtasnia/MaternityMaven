@@ -142,19 +142,6 @@ const DoctorSignup = () => {
             </div>
           </div>
           <div className="user-input-box">
-            <label htmlFor="imagenid">
-              Upload proof of identification (NID / Birth Certificate)
-            </label>
-            <input
-              type="file"
-              id="imagenid"
-              name="imagenid"
-              onChange={handleFileChange}
-              accept="image/*"
-              required
-            />
-          </div>
-          <div className="user-input-box">
             <label htmlFor="dept">Department</label>
             <input
               type="text"
@@ -187,19 +174,6 @@ const DoctorSignup = () => {
               onChange={handleChange}
               placeholder="Enter your MBBS complete year"
               required
-            />
-          </div>
-          <div className="user-input-box">
-            <label htmlFor="imagecert1">
-              Upload image of your visiting card
-            </label>
-            <p>(If you have one)</p>
-            <input
-              type="file"
-              id="imagecert1"
-              name="imagecert1"
-              onChange={handleFileChange}
-              accept="image/*"
             />
           </div>
           <div className="user-input-box">

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import "./CSS/userprofile.css";
 
 const DoctorProfile = () => {
-  const [profileImage, setProfileImage] = useState("https://via.placeholder.com/150");
+  const [profileImage, setProfileImage] = useState(
+    "https://via.placeholder.com/150"
+  );
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -13,6 +15,9 @@ const DoctorProfile = () => {
   const [pracChamber, setPracChamber] = useState("");
   const [hosp, setHosp] = useState("");
   const [storedauth, setAuth] = useState(null);
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [pastAppointments, setPastAppointments] = useState([]);
+
   const triggerFileInput = () => {
     document.getElementById("fileInput").click();
   };
@@ -48,10 +53,54 @@ const DoctorProfile = () => {
           console.error("Failed to fetch doctor data:", error);
           alert(`Failed to load doctor data: ${error.message}`);
         });
-        fetchProfileImage(auth.BMDC);
+      fetchProfileImage(auth.BMDC);
+      fetchUpcomingAppointments(auth.BMDC);
+      fetchPastAppointments(auth.BMDC);
     }
   }, []);
+  const fetchUpcomingAppointments = async (BMDC) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/upcoming-appointments?BMDC=${BMDC}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP status ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Upcoming appointments:", data);
+      setUpcomingAppointments(data);
+    } catch (error) {
+      console.error("Failed to fetch upcoming appointments:", error);
+      // You may want to handle this error in the UI
+    }
+  };
 
+  const fetchPastAppointments = async (BMDC) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/past-appointments?BMDC=${BMDC}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP status ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Past appointments:", data);
+      setPastAppointments(data);
+    } catch (error) {
+      console.error("Failed to fetch past appointments:", error);
+      // You may want to handle this error in the UI
+    }
+  };
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
   const fetchProfileImage = async (bmdc) => {
     try {
       const imageUrl = `http://localhost:3001/api/doctor-image/${bmdc}`;
@@ -60,7 +109,7 @@ const DoctorProfile = () => {
         console.log("Profile image found:", imageUrl);
         setProfileImage(imageUrl);
       } else {
-        console.log('No profile image found, using default');
+        console.log("No profile image found, using default");
         setProfileImage("https://via.placeholder.com/150");
       }
     } catch (error) {
@@ -72,16 +121,19 @@ const DoctorProfile = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (file.name.toLowerCase().endsWith('.jpg')) {
+      if (file.name.toLowerCase().endsWith(".jpg")) {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("bmdc", storedauth.BMDC);
 
         try {
-          const response = await fetch("http://localhost:3001/api/upload-doctor-image", {
-            method: "POST",
-            body: formData,
-          });
+          const response = await fetch(
+            "http://localhost:3001/api/upload-doctor-image",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
 
           if (!response.ok) {
             throw new Error(`Failed to upload image: ${response.statusText}`);
@@ -99,7 +151,12 @@ const DoctorProfile = () => {
       }
     }
   };
-
+  const generateUniqueKey = (appointment, index) => {
+    if (appointment && appointment.appointment_id) {
+      return `appointment-${appointment.appointment_id}`;
+    }
+    return `appointment-${index}`;
+  };
   const handleSave = () => {
     const auth = JSON.parse(localStorage.getItem("user"));
     if (auth && auth.BMDC) {
@@ -110,7 +167,7 @@ const DoctorProfile = () => {
         phone: phone,
         dept: dept,
         mbbsYear: mbbsYear,
-        totalOperations: totalOperations, 
+        totalOperations: totalOperations,
         hosp: hosp,
         chamber: pracChamber,
       };
@@ -254,23 +311,25 @@ const DoctorProfile = () => {
               />
             </div>
             <div className="profile-detail">
-          <label className="profile-detail-label">Total Operations</label>
-          <input
-            type="number"
-            className="profile-detail-input"
-            value={totalOperations}
-            onChange={(e) => setTotalOperations(e.target.value)}
-          />
-        </div>
-        <div className="profile-detail">
-          <label className="profile-detail-label">Years of Experience</label>
-          <input
-            type="number"
-            className="profile-detail-input"
-            value={experience}
-            readOnly // This field should be read-only
-          />
-        </div>
+              <label className="profile-detail-label">Total Operations</label>
+              <input
+                type="number"
+                className="profile-detail-input"
+                value={totalOperations}
+                onChange={(e) => setTotalOperations(e.target.value)}
+              />
+            </div>
+            <div className="profile-detail">
+              <label className="profile-detail-label">
+                Years of Experience
+              </label>
+              <input
+                type="number"
+                className="profile-detail-input"
+                value={experience}
+                readOnly // This field should be read-only
+              />
+            </div>
           </div>
         </div>
         <div className="profile-section">
@@ -284,7 +343,55 @@ const DoctorProfile = () => {
           <h3 className="profile-section-title">Upcoming Appointments</h3>
           <button className="profile-section-button">Add</button>
           <div className="profile-section-content">
-            <p>No upcoming appointments.</p>
+            {upcomingAppointments && upcomingAppointments.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Patient Name</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {upcomingAppointments.map((appointment, index) => (
+                    <tr key={`upcoming-${appointment.APPOINTMENT_ID || index}`}>
+                      <td>{formatDate(appointment.APPOINTMENT_TIMESTAMP)}</td>
+                      <td>{capitalizeWords(appointment.FULLNAME)}</td>
+                      <td>{appointment.EMAIL.toLowerCase()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No upcoming appointments.</p>
+            )}
+          </div>
+        </div>
+        <div className="profile-section">
+          <h3 className="profile-section-title">Past Appointments</h3>
+          <div className="profile-section-content">
+            {pastAppointments && pastAppointments.length > 0 ? (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Patient Name</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pastAppointments.map((appointment, index) => (
+                    <tr key={`past-${appointment.APPOINTMENT_ID || index}`}>
+                      <td>{formatDate(appointment.APPOINTMENT_TIMESTAMP)}</td>
+                      <td>{capitalizeWords(appointment.FULLNAME)}</td>
+                      <td>{appointment.EMAIL.toLowerCase()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No past appointments.</p>
+            )}
           </div>
         </div>
 
