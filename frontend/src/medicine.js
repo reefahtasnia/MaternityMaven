@@ -47,7 +47,7 @@ const MedicineTracker = () => {
         );
         const data = await response.json();
         console.log("Fetched medicine suggestions:", data);
-        setSuggestions(data.map((item) => item.medicine_name)); // Ensure correct key
+        setSuggestions(data.map((item) => item[0])); // Ensure correct key
       } catch (error) {
         console.error("Error fetching medicine suggestions:", error);
         setSuggestions([]);
@@ -170,12 +170,13 @@ const MedicineTracker = () => {
                     {suggestions.length > 0 && (
                       <ul className="suggestions-list">
                         {suggestions.map((item) => (
-                          <li
+                          <option
+                  
                             key={item}
                             onClick={() => handleSuggestionClick(item)}
                           >
                             {item}
-                          </li>
+                          </option>
                         ))}
                       </ul>
                     )}
