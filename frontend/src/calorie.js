@@ -63,7 +63,7 @@ const CalorieTracker = () => {
   const updateCalorieDisplay = async (selectedDate) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/calorie-data/${selectedDate}`
+        `http://localhost:5000/calorie-data/${selectedDate}?userId=${userId}`
       );
       const data = await response.json();
       console.log("Fetched food data:", data);
