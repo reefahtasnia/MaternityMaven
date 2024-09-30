@@ -21,6 +21,7 @@ import babyShoes from "./CSS/assets/shoes2.jpg";
 import babyClothes from "./CSS/assets/onesie.jpg";
 import babyToys from "./CSS/assets/hanging_toy2.jpg";
 import calorieTracker from "./CSS/assets/calorietracker.png";
+import fetal from "./CSS/assets/fetal.png";
 
 const Home = () => {
   return (
@@ -281,10 +282,10 @@ const features = [
     description: "Keep track of calories consumed in a day.",
   },
   {
-    image: pregnancyResources,
-    title: "Information",
+    image: fetal,
+    title: "Fetal Movement",
     description:
-      "Find advice and information on your and your newborn's health",
+      "Track the movement of your child during your preganancy",
   },
 ];
 

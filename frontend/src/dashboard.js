@@ -1,5 +1,6 @@
 import React from "react";
 import "./CSS/home.css";
+import { Link } from "react-router-dom"; 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -20,6 +21,7 @@ import babyClothes from "./CSS/assets/onesie.jpg";
 import babyToys from "./CSS/assets/hanging_toy2.jpg";
 import calorieTracker from "./CSS/assets/calorietracker.png";
 import backgroundSVG from './CSS/assets/dasboardbg2.png';
+import fetal from "./CSS/assets/fetal.png";
 
 const Dashboard = () => {
   return (
@@ -40,6 +42,7 @@ const Dashboard = () => {
             {features.map((feature, index) => (
               <div className="col-md-6 col-lg-4 mb-4" key={index}>
                 <div className="card border-0 h-100">
+                <Link to={feature.route} className="card border-0 h-100">
                   <div className="card-body text-center">
                     <img
                       src={feature.image}
@@ -55,6 +58,7 @@ const Dashboard = () => {
                     <h5>{feature.title}</h5>
                     <p>{feature.description}</p>
                   </div>
+                </Link>
                 </div>
               </div>
             ))}
@@ -163,8 +167,9 @@ const Dashboard = () => {
             </div>
           </div>
         </Carousel>
-        ;
-        <button>View More</button>
+        <Link to="/shop">
+        <button className="dashboard-shop-button">View More</button>
+        </Link>
       </div>
     </div>
   );
@@ -175,35 +180,40 @@ const features = [
     image: medicalHistory,
     title: "Medical History",
     description: "Log your medical history into your own account.",
+    route: "/Medicalhistory"
   },
   {
     image: doctorPatient,
     title: "Book Appointments",
     description: "Schedule an appointment with your doctor.",
+    route: "/Appointment"
   },
   {
     image: reminders,
     title: "Medicine Reminders",
     description: "Set reminders so your memory gap doesn't affect your health.",
+    route: "/Medicinetracker"
   },
   {
     image: pregnancyShop,
     title: "Shop for Supplies",
-    description:
-      "Find all your necessities related to your and your newborn's health",
+    description: "Find all your necessities related to your and your newborn's health.",
+    route: "/shop"
   },
   {
     image: calorieTracker,
     title: "Calorie Tracker",
     description: "Keep track of calories consumed in a day.",
+    route: "/Calorietracker"
   },
   {
-    image: pregnancyResources,
-    title: "Information",
-    description:
-      "Find advice and information on your and your newborn's health",
-  },
+    image: fetal,
+    title: "Fetal Movement",
+    description: "Track the movement of your child during your pregnancy.",
+    route: "/fetal"
+  }
 ];
+
 
 const products = [
   [

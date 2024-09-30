@@ -203,3 +203,32 @@ CREATE TABLE "C##ZAFIRA"."FEEDBACKS"
 	 FOREIGN KEY ("DOCTOR_ID")
 	  REFERENCES "C##ZAFIRA"."DOCTORS" ("BMDC") ENABLE
    ) ;
+
+   INSERT INTO Products (productId, product_name, price, stock, image, ctgr)
+VALUES
+
+(6, 'Maternity Frock', 750.00, 1, '/assets/maternity_frock.jpg', 'clothes')
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr)
+VALUES
+
+(7, 'Baby onesie', 300.00, 1, '/assets/onesie.jpg', 'clothes')
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr)
+VALUES
+
+(8, 'baby shoes', 470.00, 1, '/assets/shoes.jpg', 'clothes')
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr)
+VALUES
+
+(9, 'Baby teether', 150.00, 1, '/assets/teether.jpg', 'Baby')
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr)
+VALUES
+
+(10, 'Baby pampers', 300.00, 1, '/assets/pampers.jpg', 'Baby')
+
+INSERT INTO Products (productId, product_name, price, stock, image, ctgr)
+VALUES
+
+(11, 'Iron tablets', 650.00, 1, '/assets/medicine1.jpg', 'Maternity')
