@@ -231,7 +231,7 @@ const CalorieTracker = () => {
   };
 
   const handleDelete = async (foodItem, mealtype) => {
-    //console.log(mealtype);
+    console.log(mealtype);
     // Find the mealtype of the foodItem from the foodList
     // const itemToDelete = foodList.find((item) => item.foodItem === foodItem);
     //const mealtype = itemToDelete?.mealtype || ""; // Ensure mealtype exists

@@ -799,7 +799,7 @@ app.post("/medicine", async (req, res) => {
   }
 });
 
-app.put("/medicine/:id", async (req, res) => {
+app.put("/medicine-update/:id", async (req, res) => {
   const prescriptionId = req.params.id; // ID of the prescription to update
   const { name, dosage, time, userId } = req.body; // Extract userId from the request body
   console.log("Received request to update prescription:", req.body); // Debugging
@@ -859,17 +859,18 @@ app.put("/medicine/:id", async (req, res) => {
 app.delete("/medicine/:id", async (req, res) => {
   const { id } = req.params; // ID of the prescription to delete
   const { userId } = req.body; // Extract userId from the request body
+  console.log(req.body);
   console.log(
     `Received request to delete prescription with ID: ${id}, for user: ${userId}`
   ); // Debugging
 
   // Validate input
-  if (!userId) {
-    console.error("Missing userId in request body");
-    return res
-      .status(400)
-      .json({ message: "Missing 'userId' in request body." });
-  }
+  // if (!userId) {
+  //   console.error("Missing userId in request body");
+  //   return res
+  //     .status(400)
+  //     .json({ message: "Missing 'userId' in request body." });
+  // }
 
   let conn;
   try {
@@ -878,11 +879,11 @@ app.delete("/medicine/:id", async (req, res) => {
     // Delete prescription only if it matches the id and user_id
     const deleteQuery = `
       DELETE FROM medicinetracker 
-      WHERE id = :id AND user_id = :userId`;
+      WHERE id = :id`;
 
     const result = await conn.execute(
       deleteQuery,
-      { id, userId },
+      { id },
       { autoCommit: false } // Turn off auto commit to manage transactions manually
     );
 
@@ -1186,10 +1187,10 @@ app.get("/api/departments", async (req, res) => {
 });
 
 // Route to get products
-app.get('/api/products', async (req, res) => {
+app.get("/api/products", async (req, res) => {
   let conn;
   try {
-    conn = await connection(); 
+    conn = await connection();
 
     let result = await conn.execute(
       `BEGIN
@@ -1214,14 +1215,15 @@ app.get('/api/products', async (req, res) => {
     console.error("Database query error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
-  } 
-);
+});
 app.get("/api/products-order", async (req, res) => {
   let conn;
   try {
     conn = await connection();
 
-    const result = await conn.execute("SELECT * FROM products ORDER BY PRODUCTID ASC");
+    const result = await conn.execute(
+      "SELECT * FROM products ORDER BY PRODUCTID ASC"
+    );
     console.log("Fetching products");
     console.log(result.rows[0]);
     return res.json(result.rows);
@@ -2395,15 +2397,15 @@ app.get("/api/multiple-appointments", async (req, res) => {
   const { BMDC } = req.query;
 
   if (!BMDC) {
-      return res.status(400).json({ message: "BMDC number is required" });
+    return res.status(400).json({ message: "BMDC number is required" });
   }
 
   let conn;
   try {
-      conn = await connection();  // Make sure to establish a database connection
+    conn = await connection(); // Make sure to establish a database connection
 
-      // SQL query to find user IDs who have had more than one appointment with the doctor
-      const sql = `
+    // SQL query to find user IDs who have had more than one appointment with the doctor
+    const sql = `
           SELECT u.userid, u.fullname, u.email, COUNT(*) as appointment_count
           FROM Users u
           JOIN Appointment a ON u.userid = a.user_id
@@ -2412,28 +2414,34 @@ app.get("/api/multiple-appointments", async (req, res) => {
           HAVING COUNT(*) > 1
       `;
 
-      const result = await conn.execute(sql, { BMDC }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
-      console.log("Fetched Results: " + JSON.stringify(result.rows, null, 2));
+    const result = await conn.execute(
+      sql,
+      { BMDC },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+    console.log("Fetched Results: " + JSON.stringify(result.rows, null, 2));
 
-      if (result.rows.length > 0) {
-          res.json({
-              message: "Found users with multiple appointments",
-              data: result.rows
-          });
-      } else {
-          res.status(404).json({ message: "No users found with multiple appointments with this doctor" });
-      }
+    if (result.rows.length > 0) {
+      res.json({
+        message: "Found users with multiple appointments",
+        data: result.rows,
+      });
+    } else {
+      res.status(404).json({
+        message: "No users found with multiple appointments with this doctor",
+      });
+    }
   } catch (error) {
-      console.error("Failed to fetch data:", error);
-      res.status(500).json({ message: "Internal server error", error });
+    console.error("Failed to fetch data:", error);
+    res.status(500).json({ message: "Internal server error", error });
   } finally {
-      if (conn) {
-          try {
-              await conn.close(); // Always ensure connections are closed after use
-          } catch (err) {
-              console.error("Error closing connection:", err);
-          }
+    if (conn) {
+      try {
+        await conn.close(); // Always ensure connections are closed after use
+      } catch (err) {
+        console.error("Error closing connection:", err);
       }
+    }
   }
 });
 app.get("/api/patient-details/:userId", async (req, res) => {
@@ -2481,13 +2489,69 @@ app.get("/api/patient-details/:userId", async (req, res) => {
       ) ct ON ct.user_id = u.userid
       WHERE u.userid = :userId`;
 
-    const result = await conn.execute(query, { userId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    const result = await conn.execute(
+      query,
+      { userId },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
     console.log(result.rows.data);
     res.json(result.rows);
   } catch (error) {
     console.error("Error fetching patient details:", error);
     res.status(500).json({ error: "Internal Server Error" });
-  } 
+  }
 });
+app.get("/medicine-tracker", async (req, res) => {
+  const { userId } = req.query; // Extract userId from query parameters
+  console.log("Fetching prescriptions for user:", userId);
 
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ message: "Missing 'userId' query parameter" });
+  }
 
+  let conn;
+  try {
+    conn = await connection(); // Establish database connection
+
+    // Query to fetch all prescriptions for the given userId
+    const fetchQuery = `
+      SELECT id, medicine_code, name, dosage, time 
+      FROM medicinetracker 
+      WHERE user_id = :userId
+      `;
+
+    const result = await conn.execute(fetchQuery, { userId });
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No prescriptions found for this user." });
+    }
+
+    //console.log(result);
+    const prescriptions = result.rows.map((row) => ({
+      id: row.ID,
+      medicine_code: row.MEDICINE_CODE,
+      name: row.NAME,
+      dosage: row.DOSAGE,
+      time: row.TIME,
+    }));
+    //console.log(prescriptions);
+    res.status(200).json(prescriptions); // Return the fetched prescriptions
+  } catch (error) {
+    console.error("Error fetching prescriptions:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  } finally {
+    if (conn) {
+      try {
+        await conn.close(); // Close the connection
+      } catch (error) {
+        console.error("Error closing connection:", error);
+      }
+    }
+  }
+});
