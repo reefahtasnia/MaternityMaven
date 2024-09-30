@@ -1,0 +1,298 @@
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Grilled Chicken Breast', nutrition_facts(165.00, 31.00, 0.00, 3.60));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Spaghetti Bolognese', nutrition_facts(280.00, 12.00, 35.00, 10.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Stew', nutrition_facts(220.00, 25.00, 15.00, 8.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Stir-Fry', nutrition_facts(180.00, 4.00, 25.00, 8.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Caesar Salad', nutrition_facts(350.00, 30.00, 10.00, 20.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Lentil Soup', nutrition_facts(150.00, 12.00, 28.00, 3.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Shrimp Fried Rice', nutrition_facts(320.00, 18.00, 45.00, 8.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Tacos with Beef', nutrition_facts(290.00, 15.00, 25.00, 15.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Curry', nutrition_facts(300.00, 28.00, 12.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Pasta Alfredo', nutrition_facts(400.00, 14.00, 45.00, 20.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Mushroom Risotto', nutrition_facts(320.00, 8.00, 45.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Parmesan', nutrition_facts(450.00, 36.00, 20.00, 22.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Fish and Chips', nutrition_facts(670.00, 30.00, 65.00, 32.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Tacos', nutrition_facts(340.00, 18.00, 25.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Falafel Wrap', nutrition_facts(400.00, 12.00, 45.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Roasted Turkey', nutrition_facts(210.00, 35.00, 0.00, 6.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Pad Thai', nutrition_facts(400.00, 18.00, 55.00, 14.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Shepherd\'s Pie', nutrition_facts(340.00, 18.00, 40.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Stuffed Bell Peppers', nutrition_facts(280.00, 18.00, 20.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Baked Salmon', nutrition_facts(250.00, 30.00, 0.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Tikka Masala', nutrition_facts(320.00, 28.00, 10.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Fried Chicken', nutrition_facts(480.00, 35.00, 16.00, 30.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Eggplant Parmesan', nutrition_facts(350.00, 15.00, 40.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Burrito', nutrition_facts(420.00, 22.00, 48.00, 16.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Veggie Burger', nutrition_facts(300.00, 15.00, 40.00, 10.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chili Con Carne', nutrition_facts(350.00, 28.00, 30.00, 15.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Lasagna', nutrition_facts(400.00, 15.00, 50.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Pot Pie', nutrition_facts(450.00, 24.00, 35.00, 25.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Shrimp Scampi', nutrition_facts(360.00, 24.00, 30.00, 16.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Stroganoff', nutrition_facts(420.00, 28.00, 35.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Lamb Curry', nutrition_facts(390.00, 32.00, 8.00, 25.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Quesadilla', nutrition_facts(500.00, 30.00, 40.00, 22.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Minestrone Soup', nutrition_facts(150.00, 5.00, 28.00, 2.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Butter Chicken', nutrition_facts(450.00, 30.00, 12.00, 30.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Steak and Potatoes', nutrition_facts(600.00, 40.00, 50.00, 28.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Fajitas', nutrition_facts(350.00, 28.00, 20.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Spaghetti Carbonara', nutrition_facts(500.00, 20.00, 60.00, 22.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Ramen', nutrition_facts(420.00, 22.00, 55.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Sweet and Sour Chicken', nutrition_facts(400.00, 20.00, 45.00, 16.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Fried Steak', nutrition_facts(580.00, 30.00, 45.00, 28.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Curry', nutrition_facts(300.00, 6.00, 40.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Chili', nutrition_facts(360.00, 25.00, 25.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Baked Ziti', nutrition_facts(450.00, 20.00, 50.00, 20.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Enchiladas', nutrition_facts(380.00, 28.00, 30.00, 16.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Turkey Sandwich', nutrition_facts(350.00, 24.00, 40.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Fajitas', nutrition_facts(380.00, 25.00, 30.00, 16.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Soup', nutrition_facts(140.00, 4.00, 20.00, 5.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Sausage and Peppers', nutrition_facts(380.00, 22.00, 15.00, 28.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Pho', nutrition_facts(300.00, 20.00, 40.00, 6.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Korma', nutrition_facts(350.00, 8.00, 35.00, 20.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Goulash', nutrition_facts(400.00, 28.00, 30.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Shawarma', nutrition_facts(450.00, 32.00, 40.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetarian Chili', nutrition_facts(290.00, 10.00, 40.00, 8.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Lo Mein', nutrition_facts(450.00, 25.00, 50.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Lamb Kebabs', nutrition_facts(320.00, 25.00, 5.00, 20.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('BBQ Pulled Pork Sandwich', nutrition_facts(600.00, 35.00, 45.00, 25.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Marsala', nutrition_facts(380.00, 28.00, 10.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Paella', nutrition_facts(350.00, 10.00, 50.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Lamb Rogan Josh', nutrition_facts(450.00, 32.00, 10.00, 25.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Kiev', nutrition_facts(420.00, 30.00, 20.00, 25.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Samosas', nutrition_facts(250.00, 6.00, 30.00, 10.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Pork Schnitzel', nutrition_facts(480.00, 28.00, 40.00, 22.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetarian Pizza', nutrition_facts(400.00, 15.00, 45.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Tuna Casserole', nutrition_facts(450.00, 25.00, 50.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Tagine', nutrition_facts(380.00, 28.00, 20.00, 16.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Burrito', nutrition_facts(400.00, 12.00, 55.00, 14.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Wellington', nutrition_facts(600.00, 40.00, 45.00, 30.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Seafood Paella', nutrition_facts(420.00, 25.00, 50.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Spaghetti with Meatballs', nutrition_facts(480.00, 20.00, 60.00, 16.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Tacos', nutrition_facts(280.00, 18.00, 25.00, 10.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Fettuccine Alfredo', nutrition_facts(600.00, 20.00, 70.00, 30.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Sushi (California Roll)', nutrition_facts(250.00, 8.00, 38.00, 6.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Lobster Bisque', nutrition_facts(300.00, 18.00, 15.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Souvlaki', nutrition_facts(320.00, 28.00, 10.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Biryani', nutrition_facts(350.00, 8.00, 50.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Turkey Meatloaf', nutrition_facts(320.00, 28.00, 20.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Grilled Lamb Chops', nutrition_facts(450.00, 35.00, 5.00, 30.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Fish Tacos', nutrition_facts(320.00, 20.00, 30.00, 14.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Pork Tenderloin', nutrition_facts(220.00, 32.00, 0.00, 10.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Gumbo', nutrition_facts(380.00, 25.00, 30.00, 15.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetarian Moussaka', nutrition_facts(320.00, 12.00, 45.00, 10.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Pasta Primavera', nutrition_facts(400.00, 12.00, 60.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Salmon Sushi', nutrition_facts(180.00, 12.00, 25.00, 6.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Lamb Stew', nutrition_facts(450.00, 32.00, 25.00, 25.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Fried Rice', nutrition_facts(350.00, 20.00, 45.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Tofu Stir-Fry', nutrition_facts(300.00, 14.00, 35.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Seafood Chowder', nutrition_facts(320.00, 22.00, 25.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Burrito', nutrition_facts(420.00, 25.00, 45.00, 16.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Stir-Fry with Tofu', nutrition_facts(320.00, 15.00, 35.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Pulled Pork Tacos', nutrition_facts(380.00, 22.00, 35.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetarian Tacos', nutrition_facts(250.00, 8.00, 35.00, 10.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Thighs (Grilled)', nutrition_facts(250.00, 22.00, 0.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetarian Enchiladas', nutrition_facts(340.00, 12.00, 45.00, 14.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Beef Kebabs', nutrition_facts(320.00, 28.00, 10.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Wings', nutrition_facts(450.00, 30.00, 5.00, 32.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetarian Pasta', nutrition_facts(400.00, 10.00, 60.00, 12.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Chicken Fried Noodles', nutrition_facts(380.00, 22.00, 45.00, 14.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Lamb Kofta', nutrition_facts(350.00, 30.00, 8.00, 18.00));
+
+INSERT INTO foodlist (food_name, nutrition_details)
+VALUES ('Vegetable Chow Mein', nutrition_facts(350.00, 10.00, 50.00, 12.00));
+
+

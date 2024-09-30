@@ -737,7 +737,7 @@ app.post("/medicine", async (req, res) => {
       console.log(`Processing medicine: ${medicine.name}`); // Debugging
 
       // Fetch the medicine_code for the given medicine name
-      const queryMedicineCode = `SELECT medicine_code FROM medicine WHERE medicine_name = :name`;
+      const queryMedicineCode = `SELECT medicine_code FROM medicine WHERE lower(medicine_name) = lower(:name)`;
       const medicineCodeResult = await run_query(queryMedicineCode, {
         name: medicine.name,
       });
