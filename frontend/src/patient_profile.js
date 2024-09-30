@@ -464,11 +464,7 @@ const UserProfile = () => {
                     <tr key={index}>
                       <td>{item.MEDICINE_NAME}</td>
                       <td>{item.DOSAGE}</td>
-                      <td>
-                        {new Date(
-                          "1970-01-01T" + item.TIME + "Z"
-                        ).toLocaleTimeString("en-US", { timeStyle: "short" })}
-                      </td>
+                      <td>{item.TIME.slice(0, 5)}</td> {/* Displays HH:MM */}
                     </tr>
                   ))}
                 </tbody>
