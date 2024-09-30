@@ -51,6 +51,7 @@ SELECT m.user_id, m.year AS incident_year, m.incident, m.treatment,
 FROM Medical_History m
 JOIN Users u ON m.user_id = u.userid;
 
+
 CREATE OR REPLACE PROCEDURE CalculateExperience (p_bmdc IN Doctors.BMDC%TYPE) IS
     v_current_year NUMBER;
     v_mbbs_year NUMBER;

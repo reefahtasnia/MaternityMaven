@@ -15,6 +15,8 @@ select * from feedbacks;
 select * from appointment;
 select * from Fetal_Movement;
 select * from calorietracker;
+select * from CALORIETRACKER;
+select * from foodlist;
 
 drop table products;
 drop TRIGGER medicine_trigger;
