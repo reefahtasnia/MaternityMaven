@@ -1759,11 +1759,12 @@ app.post("/calories", async (req, res) => {
 
 app.get("/calorie-data/:date", async (req, res) => {
   let conn;
+  const userId = req.query.userId;
   try {
     conn = await connection();
     const result = await conn.execute(
-      "SELECT food_item, calories FROM Calorietracker WHERE entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD')",
-      { entry_date: req.params.date }
+      "SELECT food_item, calories FROM Calorietracker WHERE entry_date = TO_DATE(:entry_date, 'YYYY-MM-DD') AND user_id = :userId",
+      { entry_date: req.params.date, userId: userId }
     );
     const formattedResult = result.rows.map((row) => ({
       foodItem: row["FOOD_ITEM"], // Assuming the first column is food_item
