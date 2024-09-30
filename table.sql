@@ -189,3 +189,17 @@ SELECT u.userid, u.fullname, u.email, COUNT(*) as appointment_count
           WHERE a.BMDC_no = 'B10078'
           GROUP BY u.userid, u.fullname, u.email
           HAVING COUNT(*) > 1
+
+
+
+CREATE TABLE "C##ZAFIRA"."FEEDBACKS" 
+   (	"FEEDBACK_ID" NUMBER(*,0) DEFAULT "C##ZAFIRA"."FEEDBACK_SEQ"."NEXTVAL", 
+	"DES" CLOB, 
+	"RATE" NUMBER(*,0), 
+	"USER_ID" NUMBER(*,0), 
+	"DOCTOR_ID" VARCHAR2(255), 
+	 FOREIGN KEY ("USER_ID")
+	  REFERENCES "C##ZAFIRA"."USERS" ("USERID") ENABLE, 
+	 FOREIGN KEY ("DOCTOR_ID")
+	  REFERENCES "C##ZAFIRA"."DOCTORS" ("BMDC") ENABLE
+   ) ;

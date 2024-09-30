@@ -1,25 +1,14 @@
 /* General body styling */
-body {
+/* body {
   font-family: Arial, sans-serif;
   background-color: #f8f8f8;
   margin: 0;
   padding: 0;
-}
-
-/* Navbar styling */
-.navbar {
-  background-color: #ff69b4;
-  color: white;
-  padding: 20px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 40px;
-}
+} */
 
 /* Center the entire tracker */
 .medicine-tracker-bg {
-  background-image: url(./assets/medicinetracker.png) ;
+  background-image: url('./assets/medicinetracker.png') ;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -36,7 +25,7 @@ body {
   margin-bottom: 30px;
 }
 
-h1 {
+.medicine-tracker h1 {
   font-size: 36px;
   color: #ff69b4;
   font-weight: 600;
@@ -82,7 +71,7 @@ h1 {
 }
 
 /* Button styling */
-button {
+/*button {
   background-color: #ff69b4;
   color: white;
   border: none;
@@ -97,10 +86,31 @@ button {
 
 button:hover {
   background-color: #ff1493;
-}
+} */
 
 /* Suggestions list */
 .suggestions-list {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.suggestions-list li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestions-list li:hover {
+  background-color: #f0f0f0;
+}
+/* .suggestions-list {
   list-style: none;
   padding: 0;
   margin: 10px 0 0 0;
@@ -119,7 +129,7 @@ button:hover {
 .suggestions-list option:hover {
   background-color: #ff69b4;
   color: white;
-}
+} */
 
 /* Prescription box styling */
 .prescriptions-list {

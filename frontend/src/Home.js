@@ -25,7 +25,7 @@ import calorieTracker from "./CSS/assets/calorietracker.png";
 const Home = () => {
   return (
     <div style={{ backgroundColor: "white" }}>
-      <section className="main">
+      <section className="main3">
         <div className="container py-5">
           <div className="row py-4">
             <div className="col-lg-7 pt-5 text-center">
@@ -33,7 +33,7 @@ const Home = () => {
                 Because you matter the most in motherhood
               </h1>
               <button
-                className="btn1 mt-3"
+                className="btn2 mt-3"
                 id="loginButton"
                 onClick={(e) => (window.location.href = "/signup")}
               >

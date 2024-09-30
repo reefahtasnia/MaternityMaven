@@ -3,7 +3,7 @@
   margin: 0;
   box-sizing: border-box;
 }
-.main {
+.main3 {
   background-image: url("assets/homepagebg.png");
   background-size: cover;
   background-repeat: no-repeat;
@@ -13,16 +13,19 @@
   width: 100%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
-  margin-top: -20px;
+  margin-top: -50px;
+  align-items: center;
+  justify-content: center;
 }
-.main h1 {
+.main3 h1 {
   font-size: 4rem;
   font-weight: 500;
   color: white;
   font-family: 'Dancing Script', cursive; 
   text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+  margin-top:-50px;
 }
-.main .btn1 {
+.main3 .btn2 {
   height: 40px;
   width: 35%;
   border: none;
@@ -34,7 +37,7 @@
   font-size: 25px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.main .btn1:hover {
+.main3 .btn2:hover {
   background-color: rgb(255, 255, 255);
   color: rgb(0, 0, 0);
   transform: scale(1.1);
@@ -42,7 +45,7 @@
   outline: none;
   border: 1px solid hsl(277, 100%, 50%);
 }
-.main .btn1:active {
+.main3 .btn2:active {
   border-color: hsl(277, 100%, 50%);
   color: hsl(277, 100%, 50%);
   transform: translate(2px, 4px);

@@ -71,7 +71,6 @@ function App() {
                 path="/book-appointment/:email"
                 element={<BookAppointment />}
               />
-              <Route path="/shop" element={<Shop />} />
               <Route path="/orderdetails" element={<OrderDetails />} />
               <Route path="/cart" element={<Cart />} />
             </Route>
@@ -80,6 +79,7 @@ function App() {
             <Route path="/Admin" element={<Admin />} />
             <Route path="/add-product" element={<AddProduct />} />
           </Route>
+          <Route path="/shop" element={<Shop />} />
           <Route path="/waiting" element={<WaitingPage />} />
           <Route path="/secret" element={<Secret />} />
           <Route path="/signup" element={<Signup />} />
