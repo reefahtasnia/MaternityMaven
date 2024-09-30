@@ -137,6 +137,23 @@ CREATE TABLE Medical_History (
     treatment VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES Users(userid)
 );
+CREATE TABLE Backup_Medical (
+    user_id INT,
+    year INT,
+    incident VARCHAR(255),
+    treatment VARCHAR(255),
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(userid)
+);
+CREATE TRIGGER tr1
+BEFORE DELETE ON Medical_History
+FOR EACH ROW
+BEGIN
+    
+    INSERT INTO Backup_Medical (user_id, year, incident, treatment)
+    VALUES (:OLD.user_id, :OLD.year, :OLD.incident, :OLD.treatment);
+END;
+
 CREATE TABLE Fetal_Movement (
     user_id INT,
     baby_movement VARCHAR(255),

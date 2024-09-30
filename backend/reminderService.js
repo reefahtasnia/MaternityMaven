@@ -26,7 +26,7 @@ cron.schedule("* * * * *", async () => {
       hourCycle: "h23", // This forces 24-hour format
     });
 
-    console.log("Current time", currentTime);
+    //console.log("Current time", currentTime);
     const prescriptionsByUser = {};
     // Group prescriptions by userId
     rows.forEach((row) => {
@@ -54,7 +54,7 @@ cron.schedule("* * * * *", async () => {
       prescriptions.forEach((prescription) => {
         const { medicine_name, dosage, time } = prescription;
 
-        console.log("Prescription time: ", time);
+        //console.log("Prescription time: ", time);
 
         // Check if the prescription time matches the current time
         if (time === currentTime) {
