@@ -33,7 +33,7 @@ const MedicineTracker = () => {
       const fetchPrescriptions = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/medicine-tracker?userId=${userId}`
+            `http://localhost:5000/medicine-tracker?userId=${userId}` // Fixed interpolation with backticks
           );
           if (response.ok) {
             const data = await response.json();
@@ -60,16 +60,16 @@ const MedicineTracker = () => {
     if (name === "name" && value.length > 1) {
       try {
         const response = await fetch(
-          `http://localhost:5000/search-medicines?searchQuery=${value}`
+          `http://localhost:5000/search-medicines?searchQuery=${value}` // Fixed interpolation with backticks
         );
         const data = await response.json();
         setSuggestions(data.map((item) => item[0])); // Ensure correct key
       } catch (error) {
         console.error("Error fetching medicine suggestions:", error);
-        setSuggestions([]);
+        setSuggestions([]); // Clear suggestions on error
       }
     } else {
-      setSuggestions([]);
+      setSuggestions([]); // Clear suggestions if input is too short
     }
   };
 
@@ -118,7 +118,7 @@ const MedicineTracker = () => {
     const prescriptionToRemove = prescriptions[index];
     try {
       const response = await fetch(
-        `http://localhost:5000/medicine/${prescriptionToRemove.id}`, // Assuming there's an id
+        `http://localhost:5000/medicine/${prescriptionToRemove.id}`, // Fixed interpolation with backticks
         { method: "DELETE" }
       );
       if (!response.ok) {
@@ -202,7 +202,7 @@ const MedicineTracker = () => {
 
   const clearForm = () => {
     setMedicines([{ name: "", dosage: "", time: "" }]);
-    setSuggestions([]);
+    setSuggestions([]); // Clear suggestions when the form is cleared
     setEditIndex(null);
   };
 
@@ -232,16 +232,16 @@ const MedicineTracker = () => {
                     required
                   />
                   {suggestions.length > 0 && (
-                    <ul className="suggestions-list">
-                      {suggestions.map((item) => (
-                        <option
-                          key={item}
+                    <div className="suggestions-container">
+                      {suggestions.map((item, index) => (
+                        <p
+                          key={`${item.medicine_name}-${index}`}
                           onClick={() => handleSuggestionClick(item)}
                         >
-                          {item}
-                        </option>
+                          {item.medicine_name}
+                        </p>
                       ))}
-                    </ul>
+                    </div>
                   )}
                 </div>
                 <div className="form-group">

@@ -312,6 +312,9 @@ const CalorieTracker = () => {
     setServings(1);
     setShowSuggestions(false);
     setMealtype("");
+    // setProtein(0);
+    // setLipids(0);
+    // setCarbs(0);
   };
 
   const handleMealtypeChange = (event) => {
