@@ -177,14 +177,7 @@ const Shop = () => {
           <div className="row pb-3">
             <div className="col-12 pb-1">
               <div className="d-flex align-items-center justify-content-between mb-4">
-                <form className="input-group" style={{ maxWidth: '300px' }}>
-                  <input type="text" className="form-control" placeholder="Search by name" />
-                  <div className="input-group-append">
-                    <button className="btn btn-outline-secondary text-dark" type="button">
-                      Search
-                    </button>
-                  </div>
-                </form>
+                
                 <Link to="/cart">
                   <button className="btn btn-primary ml-3">Cart</button>
                 </Link>

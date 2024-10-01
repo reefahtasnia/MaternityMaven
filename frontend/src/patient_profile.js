@@ -59,20 +59,6 @@ const UserProfile = () => {
           alert(`Failed to load data: ${error.message}`);
         }
       };
-      const fetchMedicineReminders = async () => {
-        try {
-          const response = await fetch(
-            `http://localhost:5000/api/medicine-reminders?userId=${auth.userId}`
-          );
-          if (!response.ok) {
-            throw new Error(`HTTP status ${response.status}`);
-          }
-          const data = await response.json();
-          setMedicineReminders(data);
-        } catch (error) {
-          console.error("Failed to fetch medicine reminders:", error.message);
-        }
-      };
       const fetchMedicalHistory = async () => {
         try {
           const response = await fetch(
@@ -128,10 +114,40 @@ const UserProfile = () => {
       fetchProfileImage();
       fetchAppointments();
       fetchUserData();
-      fetchMedicineReminders();
       fetchMedicalHistory();
+      fetchMedicineReminders();
+
+      const handleVisibilityChange = () => {
+        if (!document.hidden) {
+          fetchMedicineReminders();
+        }
+      };
+
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      return () => {
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange
+        );
+      };
     }
   }, []); // Empty dependency array to run only once on component mount
+  const fetchMedicineReminders = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/medicine-reminders?userId=${auth.userId}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP status ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Fetched medicine reminders:", data);
+      setMedicineReminders(data);
+    } catch (error) {
+      console.error("Failed to fetch medicine reminders:", error.message);
+    }
+  };
 
   const setProfileData = (data) => {
     try {
@@ -462,7 +478,7 @@ const UserProfile = () => {
                 <tbody>
                   {medicineReminders.map((item, index) => (
                     <tr key={index}>
-                      <td>{item.MEDICINE_NAME}</td>
+                      <td>{item.NAME}</td>
                       <td>{item.DOSAGE}</td>
                       <td>{item.TIME.slice(0, 5)}</td> {/* Displays HH:MM */}
                     </tr>

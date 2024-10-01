@@ -402,7 +402,6 @@ const CalorieTracker = () => {
           </select>
 
           <button type="submit">Add</button>
-          <button type="button">Plan a Custom Diet</button>
         </form>
 
         {/* Circular Multi-Progress Bar for Protein, Carbs, Lipids and Calories */}

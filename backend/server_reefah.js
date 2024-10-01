@@ -743,7 +743,7 @@ app.post("/medicine", async (req, res) => {
       });
 
       if (medicineCodeResult.length === 0) {
-        alert(`No medicine code found for ${medicine.name}`);
+        console.log(`No medicine code found for ${medicine.name}`);
         continue; // Skip this iteration if no medicine code is found
       }
       const medicineCode = medicineCodeResult[0].MEDICINE_CODE;
@@ -1508,7 +1508,10 @@ app.post("/api/order", async (req, res) => {
 app.post("/api/add-products", async (req, res) => {
   const { productName, price, stock, productImage, category } = req.body;
   let conn;
-
+  if(category=="Maternity Products") category="maternity";
+  else if(category=="Baby Products & Toys") category="baby";
+  else if(category=="food") category="food";
+  else if(category=="clothes") category="clothes";
   try {
     console.log("Received request to add product:", req.body);
     conn = await connection();
@@ -1913,6 +1916,7 @@ app.get("/api/calorie-data", async (req, res) => {
   }
 });
 app.get("/api/medicine-reminders", async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   const { userId } = req.query;
 
   if (!userId) {
@@ -1923,9 +1927,8 @@ app.get("/api/medicine-reminders", async (req, res) => {
   try {
     conn = await connection();
     const result = await conn.execute(
-      `SELECT m.MEDICINE_NAME, mt.dosage, mt.time
+      `SELECT mt.name, mt.dosage, mt.time
            FROM MEDICINETRACKER mt
-           JOIN MEDICINE m ON mt.medicine_code = m.medicine_code
            WHERE mt.user_id = :userId
            ORDER BY mt.time ASC`,
       { userId },

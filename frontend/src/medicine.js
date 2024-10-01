@@ -60,29 +60,29 @@ const MedicineTracker = () => {
     if (name === "name" && value.length > 1) {
       try {
         const response = await fetch(
-          `http://localhost:5000/search-medicines?searchQuery=${value}` // Fixed interpolation with backticks
+          `http://localhost:5000/search-medicines?searchQuery=${value}`
         );
         const data = await response.json();
-        setSuggestions(data.map((item) => item[0])); // Ensure correct key
+        setSuggestions(data);
+        console.log("Fetched Medicines:", data); // For debugging
       } catch (error) {
         console.error("Error fetching medicine suggestions:", error);
-        setSuggestions([]); // Clear suggestions on error
+        setSuggestions([]);
       }
     } else {
-      setSuggestions([]); // Clear suggestions if input is too short
+      setSuggestions([]);
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setMedicines((prevMedicines) =>
-      prevMedicines.map((medicine, index) => {
-        if (index === editIndex) {
-          return { ...medicine, name: suggestion };
-        }
-        return medicine;
-      })
-    );
-    setSuggestions([]); // Clear suggestions after selection
+  const handleSuggestionClick = (suggestion, index) => {
+    const newMedicines = medicines.map((medicine, i) => {
+      if (i === index) {
+        return { ...medicine, name: suggestion };
+      }
+      return medicine;
+    });
+    setMedicines(newMedicines);
+    setSuggestions([]);
   };
 
   const handleAddMedicine = () => {
@@ -233,12 +233,12 @@ const MedicineTracker = () => {
                   />
                   {suggestions.length > 0 && (
                     <div className="suggestions-container">
-                      {suggestions.map((item, index) => (
+                      {suggestions.map((item, sugIndex) => (
                         <p
-                          key={`${item.medicine_name}-${index}`}
-                          onClick={() => handleSuggestionClick(item)}
+                          key={`${item}-${sugIndex}`}
+                          onClick={() => handleSuggestionClick(item, index)}
                         >
-                          {item.medicine_name}
+                          {item}
                         </p>
                       ))}
                     </div>
