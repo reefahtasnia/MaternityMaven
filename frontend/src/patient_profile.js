@@ -645,9 +645,6 @@ const UserProfile = () => {
           </div>
         </div>
         <div className="profile-actions">
-          <button className="profile-action-button delete-button">
-            Delete Account
-          </button>
           <button
             className="profile-action-button save-button"
             onClick={handleSave}
