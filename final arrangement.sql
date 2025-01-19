@@ -73,6 +73,19 @@ CREATE TABLE ADMIN (
     HASHED_PASSWORD VARCHAR(255),
     PHONE_NO VARCHAR(255)
 );
+INSERT INTO ADMIN (
+    ADMIN_ID,
+    NAME,
+    EMAIL,
+    HASHED_PASSWORD,
+    PHONE_NO
+) VALUES (
+    3,
+    'Maternity Maven',
+    'maternitymaven302@gmail.com',
+    '12345',
+    '098764321'
+);
 CREATE TABLE PASSWORDS (
     USERID NUMBER,
     HASHED_PASSWORD VARCHAR(255),

@@ -17,6 +17,7 @@ select * from Fetal_Movement;
 select * from calorietracker;
 select * from CALORIETRACKER;
 select * from foodlist;
+select * from Backup_Medical;
 
 truncate table products;
 drop table products;
@@ -141,11 +142,22 @@ INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
 INSERT INTO Products (productId, product_name, price, stock, image, ctgr) VALUES
 (12, 'Babys Hanging Toy', 550, 30, '/assets/hanging_toy.jpg', 'Baby products & toys');
 
-INSERT INTO Admin (admin_id, name, email, hashed_password, phone_no)
-VALUES (2, 'JOHN DOE', 'JOHN.DOE@EXAMPLE.COM', 'plaintext', '1234567890');
 
 INSERT INTO Appointment (appointment_id,user_id, BMDC_no, appointment_timestamp, day_of_week)
 VALUES (APPOINTMENT_SEQ.NEXTVAL, 8, 'B10078', TO_TIMESTAMP('2023-09-25 14:30:00', 'YYYY-MM-DD HH24:MI:SS'), 'Monday');
+INSERT INTO ADMIN (
+    ADMIN_ID,
+    NAME,
+    EMAIL,
+    HASHED_PASSWORD,
+    PHONE_NO
+) VALUES (
+    4,
+    'MATERNITY MAVEN',
+    'MATERNITYMAVEN302@GMAIL.COM',
+    '12345',
+    '098764321'
+);
 
 COMMIT;
 
@@ -234,3 +246,12 @@ INSERT INTO Products (productId, product_name, price, stock, image, ctgr)
 VALUES
 
 (11, 'Iron tablets', 650.00, 1, '/assets/medicine1.jpg', 'Maternity');
+
+CREATE TRIGGER tr1
+BEFORE DELETE ON Medical_History
+FOR EACH ROW
+BEGIN
+    
+    INSERT INTO Backup_Medical (user_id, year, incident, treatment)
+    VALUES (:OLD.user_id, :OLD.year, :OLD.incident, :OLD.treatment);
+END;
